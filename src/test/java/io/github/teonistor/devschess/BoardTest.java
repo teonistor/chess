@@ -11,21 +11,21 @@ class BoardTest {
 
     @Test
     void aFewSimpleSteps() {
-        assertj.assertThat(A2.right()).isEqualTo(A3);
-        assertj.assertThat(C1.left()).isEqualTo(OutOfBoard);
-        assertj.assertThat(B7.up()).isEqualTo(C7);
-        assertj.assertThat(H5.down()).isEqualTo(G5);
+        assertj.assertThat(A2.right()).isEqualTo(B2);
+        assertj.assertThat(C1.down()).isEqualTo(OutOfBoard);
+        assertj.assertThat(B7.up()).isEqualTo(B8);
+        assertj.assertThat(H5.down()).isEqualTo(H4);
         assertj.assertThat(OutOfBoard.left()).isEqualTo(OutOfBoard);
-        assertj.assertThat(F8.right()).isEqualTo(OutOfBoard);
+        assertj.assertThat(F8.up()).isEqualTo(OutOfBoard);
         assertj.assertAll();
     }
 
     @Test
     void aFewComplicatedSteps() {
         assertj.assertThat(A2.right().up().up().right()).isEqualTo(C4);
-        assertj.assertThat(H3.right().down().left().down()).isEqualTo(F3);
+        assertj.assertThat(E3.right().down().left().down()).isEqualTo(E1);
         assertj.assertThat(D2.right().right().left().left()).isEqualTo(D2);
-        assertj.assertThat(E7.right().right().left().left()).isEqualTo(OutOfBoard);
+        assertj.assertThat(G7.right().right().left().left()).isEqualTo(OutOfBoard);
         assertj.assertAll();
     }
 
