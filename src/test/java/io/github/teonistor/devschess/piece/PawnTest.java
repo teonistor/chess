@@ -1,6 +1,5 @@
 package io.github.teonistor.devschess.piece;
 
-import io.github.teonistor.devschess.Board;
 import io.github.teonistor.devschess.Board.Position;
 import io.github.teonistor.devschess.Player;
 import io.github.teonistor.devschess.move.Move;
@@ -18,11 +17,6 @@ class PawnTest {
 
     @Test
     void computePossibleMoves() {
-
-        // Touch board for static initialisation...
-        // TODO Fix the necessity of this
-        Board.initialSetup();
-
         assertPawn(White, A2, A3, A4, B3);
         assertPawn(White, C2, B3, C3, C4, D3);
         assertPawn(White, H2, G3, H3, H4);

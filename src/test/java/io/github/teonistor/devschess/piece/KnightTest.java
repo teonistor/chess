@@ -1,6 +1,5 @@
 package io.github.teonistor.devschess.piece;
 
-import io.github.teonistor.devschess.Board;
 import io.github.teonistor.devschess.Board.Position;
 import io.github.teonistor.devschess.Player;
 import io.github.teonistor.devschess.move.CaptureIndependentMove;
@@ -17,11 +16,6 @@ class KnightTest {
     @ParameterizedTest
     @EnumSource(Player.class)
     void computePossibleMoves(Player player) {
-
-        // Touch board for static initialisation...
-        // TODO Fix the necessity of this
-        Board.initialSetup();
-
         assertKnight(player, A8, C7,B6);
         assertKnight(player, D8, B7,C6,E6,F7);
         assertKnight(player, G7, E8,E6,F5,H5);

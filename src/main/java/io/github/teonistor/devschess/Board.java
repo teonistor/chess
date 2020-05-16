@@ -1,10 +1,8 @@
 package io.github.teonistor.devschess;
 
-import com.google.common.collect.ImmutableList;
 import io.github.teonistor.devschess.piece.Piece;
 
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -15,8 +13,7 @@ import static java.util.stream.IntStream.range;
 
 public class Board {
 
-    static {
-        final Position[][] board = new Position[][]{
+    private static final Position[][] board = new Position[][]{
             {A8, B8, C8, D8, E8, F8, G8, H8},
             {A7, B7, C7, D7, E7, F7, G7, H7},
             {A6, B6, C6, D6, E6, F6, G6, H6},
@@ -26,20 +23,6 @@ public class Board {
             {A2, B2, C2, D2, E2, F2, G2, H2},
             {A1, B1, C1, D1, E1, F1, G1, H1}};
 
-        final Predicate<Integer> safe = x -> x >= 0 && x < 8;
-
-        range(0,8).forEach(i -> range(0,8).forEach(j -> {
-            board[i][j].up    = Optional.of(i-1).filter(safe).map(s -> board[s][j]).orElse(OutOfBoard);
-            board[i][j].down  = Optional.of(i+1).filter(safe).map(s -> board[s][j]).orElse(OutOfBoard);
-            board[i][j].left  = Optional.of(j-1).filter(safe).map(s -> board[i][s]).orElse(OutOfBoard);
-            board[i][j].right = Optional.of(j+1).filter(safe).map(s -> board[i][s]).orElse(OutOfBoard);
-        }));
-
-        OutOfBoard.up    = OutOfBoard;
-        OutOfBoard.down  = OutOfBoard;
-        OutOfBoard.left  = OutOfBoard;
-        OutOfBoard.right = OutOfBoard;
-    }
 
     public static Map<Position, Piece> initialSetup() {
         // TODO Do when we have all pieces
@@ -58,6 +41,23 @@ public class Board {
         A3, B3, C3, D3, E3, F3, G3, H3,
         A2, B2, C2, D2, E2, F2, G2, H2,
         A1, B1, C1, D1, E1, F1, G1, H1;
+
+        static {
+            final Predicate<Integer> safe = x -> x >= 0 && x < 8;
+
+            range(0,8).forEach(i -> range(0,8).forEach(j -> {
+                board[i][j].up    = Optional.of(i-1).filter(safe).map(s -> board[s][j]).orElse(OutOfBoard);
+                board[i][j].down  = Optional.of(i+1).filter(safe).map(s -> board[s][j]).orElse(OutOfBoard);
+                board[i][j].left  = Optional.of(j-1).filter(safe).map(s -> board[i][s]).orElse(OutOfBoard);
+                board[i][j].right = Optional.of(j+1).filter(safe).map(s -> board[i][s]).orElse(OutOfBoard);
+            }));
+
+            OutOfBoard.up    = OutOfBoard;
+            OutOfBoard.down  = OutOfBoard;
+            OutOfBoard.left  = OutOfBoard;
+            OutOfBoard.right = OutOfBoard;
+        }
+
 
         // These would love to be final but enum constants can't be referenced in the constructors of other constants of the same enum
         private Position left, right, up, down;
@@ -93,7 +93,6 @@ public class Board {
             });
             System.out.println();
             range(0,8).forEach(i -> {
-                char c = (char) ('H' - i);
                 range(0,8).forEach(j -> {
                     System.out.print((char)('A' + j));
                     System.out.print(8 - i);
