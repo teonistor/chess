@@ -1,6 +1,6 @@
 package io.github.teonistor.devschess.piece;
 
-import io.github.teonistor.devschess.Board.Position;
+import io.github.teonistor.devschess.board.Position;
 import io.github.teonistor.devschess.Player;
 import io.github.teonistor.devschess.move.CaptureIndependentMove;
 import io.github.teonistor.devschess.move.Move;

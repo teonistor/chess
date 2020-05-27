@@ -1,6 +1,6 @@
 package io.github.teonistor.devschess.move;
 
-import io.github.teonistor.devschess.Board.Position;
+import io.github.teonistor.devschess.board.Position;
 import io.github.teonistor.devschess.piece.Piece;
 import java.util.Map;
 

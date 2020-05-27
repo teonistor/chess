@@ -1,12 +1,12 @@
 package io.github.teonistor.devschess.move;
 
-import io.github.teonistor.devschess.Board.Position;
+import io.github.teonistor.devschess.board.Position;
 import io.github.teonistor.devschess.piece.Piece;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import java.util.EnumMap;
-import static io.github.teonistor.devschess.Board.Position.*;
+import static io.github.teonistor.devschess.board.Position.*;
 import static io.github.teonistor.devschess.Player.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;

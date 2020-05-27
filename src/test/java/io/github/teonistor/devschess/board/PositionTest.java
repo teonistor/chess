@@ -1,12 +1,10 @@
-package io.github.teonistor.devschess;
+package io.github.teonistor.devschess.board;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+import static io.github.teonistor.devschess.board.Position.*;
 
-import static io.github.teonistor.devschess.Board.Position.*;
-import static org.assertj.core.api.Assertions.assertThat;
-
-class BoardTest {
+class PositionTest {
     private final SoftAssertions assertj = new SoftAssertions();
 
     @Test
@@ -27,10 +25,5 @@ class BoardTest {
         assertj.assertThat(D2.right().right().left().left()).isEqualTo(D2);
         assertj.assertThat(G7.right().right().left().left()).isEqualTo(OutOfBoard);
         assertj.assertAll();
-    }
-
-    @Test
-    void initialSetupPartial() {
-        assertThat(Board.initialSetup()).hasSize(32);
     }
 }

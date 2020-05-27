@@ -1,13 +1,13 @@
 package io.github.teonistor.devschess.piece;
 
-import io.github.teonistor.devschess.Board.Position;
+import io.github.teonistor.devschess.board.Position;
 import io.github.teonistor.devschess.Player;
 import io.github.teonistor.devschess.move.CaptureIndependentMove;
 import io.github.teonistor.devschess.move.Move;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import static io.github.teonistor.devschess.Board.Position.*;
+import static io.github.teonistor.devschess.board.Position.*;
 
 
 class KnightTest {

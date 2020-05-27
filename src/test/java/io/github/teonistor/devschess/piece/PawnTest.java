@@ -1,12 +1,12 @@
 package io.github.teonistor.devschess.piece;
 
-import io.github.teonistor.devschess.Board.Position;
+import io.github.teonistor.devschess.board.Position;
 import io.github.teonistor.devschess.Player;
 import io.github.teonistor.devschess.move.Move;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-import static io.github.teonistor.devschess.Board.Position.*;
+import static io.github.teonistor.devschess.board.Position.*;
 import static io.github.teonistor.devschess.Player.*;
 import static java.util.stream.Collectors.toList;
 
