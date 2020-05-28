@@ -1,14 +1,16 @@
 package io.github.teonistor.devschess.piece;
 
-import io.github.teonistor.devschess.board.Position;
 import io.github.teonistor.devschess.Player;
+import io.github.teonistor.devschess.board.Position;
 import io.github.teonistor.devschess.move.CapturingMove;
 import io.github.teonistor.devschess.move.EmptyPositionMove;
 import io.github.teonistor.devschess.move.Move;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
+
 import java.util.stream.Stream;
+
 import static io.github.teonistor.devschess.board.Position.OutOfBoard;
 
 
