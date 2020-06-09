@@ -58,7 +58,7 @@ class GameTest {
 
         verify(game, times(2)).isOver(state);
         verify(white, times(2)).takeInput();
-        verify(view, times(2)).refresh(eq(board), any(), eq(HashSet.empty()), any(), any());
+        verify(view, times(3)).refresh(eq(board), any(), eq(HashSet.empty()), any(), any());
         verify(view).announce("White moves: A1 - B3");
         verify(piece).getPlayer();
         verify(piece).computePossibleMoves(A1);
@@ -81,7 +81,7 @@ class GameTest {
 
         verify(game, times(2)).isOver(state);
         verify(white, times(4)).takeInput();
-        verify(view, times(2)).refresh(eq(board), any(), eq(HashSet.empty()), any(), any());
+        verify(view, times(3)).refresh(eq(board), any(), eq(HashSet.empty()), any(), any());
         verify(view).announce("Invalid pickup: A3");
         verify(view).announce("Invalid move: A1 - G7");
         verify(view).announce("White moves: A1 - B3");

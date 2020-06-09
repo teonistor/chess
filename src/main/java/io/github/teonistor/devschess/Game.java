@@ -14,19 +14,9 @@ import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 import io.vavr.control.Option;
 
-import java.util.stream.Stream;
-
 import static io.github.teonistor.devschess.Player.White;
 
 public class Game {
-    private static final Piece NO_PIECE = new Piece(){
-        public Player getPlayer() {
-            return null;
-        }
-        public Stream<Move> computePossibleMoves(Position from) {
-            return Stream.empty();
-        }
-    };
 
     private final Input[] inputs;
     private final View views;
@@ -55,6 +45,7 @@ public class Game {
 
         while (!isOver(state)) {
             state = takeFirstInput(state);
+            views.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), Position.OutOfBoard, HashSet.empty());
         }
     }
 
@@ -87,7 +78,9 @@ public class Game {
             return state.advance(bridgeTheGap(moves.get(target).get(), state.getBoard()));
         }
 
-        if(source == Position.OutOfBoard) {
+        if(target == Position.OutOfBoard) {
+            // You can put a piece back down in computer chess because perhaps the input is bogus
+            views.announce("Cancel.");
             return takeFirstInput(state);
         }
         views.announce(String.format("Invalid move: %s - %s", source, target));
