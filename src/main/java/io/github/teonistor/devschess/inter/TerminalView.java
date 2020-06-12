@@ -3,9 +3,12 @@ package io.github.teonistor.devschess.inter;
 import com.google.common.annotations.VisibleForTesting;
 import io.github.teonistor.devschess.Player;
 import io.github.teonistor.devschess.board.Position;
+import io.github.teonistor.devschess.piece.Bishop;
 import io.github.teonistor.devschess.piece.Knight;
 import io.github.teonistor.devschess.piece.Pawn;
 import io.github.teonistor.devschess.piece.Piece;
+import io.github.teonistor.devschess.piece.Queen;
+import io.github.teonistor.devschess.piece.Rook;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
@@ -37,7 +40,7 @@ public class TerminalView implements View {
         "   ╰──┴──┴──┴──┴──┴──┴──┴──╯\n" +
         "    A  B  C  D  E  F  G  H";
 
-    private static final Map<Class<? extends Piece>, String> pieceLetters = HashMap.of(Pawn.class, "P", Knight.class, "N");
+    private static final Map<Class<? extends Piece>, String> pieceLetters = HashMap.of(Pawn.class, "P", Knight.class, "N", Rook.class, "R", Bishop.class, "B", Queen.class, "Q");
     private static final Map<Player, String> playerLetters = HashMap.of(Player.Black, "B", Player.White, "W");
     private static final Pattern slot = Pattern.compile("[A-H][1-8]");
 

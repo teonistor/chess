@@ -1,8 +1,10 @@
 package io.github.teonistor.devschess.board;
 
+import io.github.teonistor.devschess.piece.Bishop;
 import io.github.teonistor.devschess.piece.Knight;
 import io.github.teonistor.devschess.piece.Pawn;
 import io.github.teonistor.devschess.piece.Piece;
+import io.github.teonistor.devschess.piece.Queen;
 import io.github.teonistor.devschess.piece.Rook;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
@@ -18,6 +20,9 @@ public class Board {
         return HashMap.of(
                      Position.A1, new Rook(White),
                      Position.B1, new Knight(White),
+                     Position.C1, new Bishop(White),
+                     Position.D1, new Queen(White),
+                     Position.F1, new Bishop(White),
                      Position.G1, new Knight(White),
                      Position.H1, new Rook(White))
                 .put(Position.A2, new Pawn(White))
@@ -40,6 +45,9 @@ public class Board {
 
                 .put(Position.A8, new Rook(Black))
                 .put(Position.B8, new Knight(Black))
+                .put(Position.C8, new Bishop(Black))
+                .put(Position.D8, new Queen(Black))
+                .put(Position.F8, new Bishop(Black))
                 .put(Position.G8, new Knight(Black))
                 .put(Position.H8, new Rook(Black));
     }
