@@ -7,10 +7,13 @@ import io.github.teonistor.devschess.move.Move;
 import io.github.teonistor.devschess.piece.Piece;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.HashSet;
+import io.vavr.collection.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.stubbing.Answer;
 
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static io.github.teonistor.devschess.Player.White;
@@ -36,6 +39,14 @@ class GameTest {
     private final HashMap<Position, Piece> board = HashMap.of(A1, piece);
     private final GameState state = spy(new GameState(board, White, HashSet.empty()));
     private final Move move = mock(Move.class);
+
+    // These stubs are a necessary evil if we are to test that the game indeed passes a state::advance method reference (verified on the state mock)
+    @SuppressWarnings("unchecked")
+    private final Answer<GameState> moveStub = invocation -> {
+        ((Function<Map<Position, Piece>, Map<Position, Piece>>) invocation.getArgument(1)).apply(invocation.getArgument(0));
+        return state;
+    };
+
     private Game game;
 
     @BeforeEach
@@ -53,7 +64,7 @@ class GameTest {
         when(piece.computePossibleMoves(A1)).thenReturn(Stream.of(move));
         when(move.validate(any())).thenReturn(true);
         when(move.getTo()).thenReturn(B3);
-//        when(move.) TODO when the gap is bridged, stub the move execution
+        when(move.execute(eq(board), any(), any())).then(moveStub);
         game.play();
 
         verify(game, times(2)).isOver(state);
@@ -62,9 +73,9 @@ class GameTest {
         verify(view).announce("White moves: A1 - B3");
         verify(piece).getPlayer();
         verify(piece).computePossibleMoves(A1);
-        verify(move).validate(any()); // TODO when the gap is bridged, pass map
+        verify(move).validate(board);
         verify(move).getTo();
-        verify(move).execute(any()); // TODO when the gap is bridged, pass map
+        verify(move).execute(eq(board), any(), any());
         verify(state).advance(board);
     }
 
@@ -76,7 +87,7 @@ class GameTest {
         when(piece.computePossibleMoves(A1)).thenReturn(Stream.of(move));
         when(move.validate(any())).thenReturn(true);
         when(move.getTo()).thenReturn(B3);
-//        when(move.) TODO when the gap is bridged, stub the move execution
+        when(move.execute(eq(board), any(), any())).then(moveStub);
         game.play();
 
         verify(game, times(2)).isOver(state);
@@ -87,9 +98,9 @@ class GameTest {
         verify(view).announce("White moves: A1 - B3");
         verify(piece).getPlayer();
         verify(piece).computePossibleMoves(A1);
-        verify(move).validate(any()); // TODO when the gap is bridged, pass map
+        verify(move).validate(board);
         verify(move).getTo();
-        verify(move).execute(any()); // TODO when the gap is bridged, pass map
+        verify(move).execute(eq(board), any(), any());
         verify(state).advance(board);
     }
 

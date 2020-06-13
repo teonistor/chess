@@ -1,12 +1,15 @@
 package io.github.teonistor.devschess.move;
 
-import io.github.teonistor.devschess.board.Position;
 import io.github.teonistor.devschess.Player;
+import io.github.teonistor.devschess.board.Position;
 import io.github.teonistor.devschess.piece.Piece;
+import io.vavr.collection.Map;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
-import java.util.Map;
+
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 
 /**
@@ -22,11 +25,11 @@ public class EmptyPositionMove implements Move {
 
     @Override
     public boolean validate(Map<Position, Piece> board) {
-        return board.get(to) == null;
+        return board.get(to).isEmpty();
     }
 
     @Override
-    public void execute(Map<Position, Piece> board) {
-        board.put(to, board.remove(from));
+    public <T> T execute(Map<Position, Piece> board, Function<Map<Position, Piece>, T> nonCapturingCallback, BiFunction<Map<Position, Piece>, Piece, T> capturingCallback) {
+        return nonCapturingCallback.apply(board.remove(from).put(to, board.get(from).get()));
     }
 }

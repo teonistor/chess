@@ -64,11 +64,11 @@ public class Game {
 
         if (sourcePiece.isDefined()) {
             final Map<Position,Move> moves = sourcePiece.get().computePossibleMoves(source)
-                    .filter(move -> move.validate(state.getBoard().toJavaMap()))
+                    .filter(move -> move.validate(state.getBoard()))
                     .collect(HashMap.collector(Move::getTo));
             views.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), source, moves.keySet());
 
-            return takeSecondInput(state, source, sourcePiece.get(), moves);
+            return takeSecondInput(state, source, moves);
         }
 
         if(source != Position.OutOfBoard) {
@@ -77,14 +77,13 @@ public class Game {
         return takeFirstInput(state);
     }
 
-    private GameState takeSecondInput(GameState state, Position source, Piece sourcePiece, Map<Position, Move> moves) {
+    private GameState takeSecondInput(GameState state, Position source, Map<Position, Move> moves) {
         final Position target = inputs[state.getPlayer().ordinal()].takeInput();
 
         if (moves.containsKey(target)) {
             views.announce(String.format("%s moves: %s - %s", state.getPlayer(), source, target));
 
-            // TODO captures
-            return state.advance(bridgeTheGap(moves.get(target).get(), state.getBoard()));
+            return moves.get(target).get().execute(state.getBoard(), state::advance, state::advance);
         }
 
         if(target == Position.OutOfBoard) {
@@ -93,13 +92,7 @@ public class Game {
             return takeFirstInput(state);
         }
         views.announce(String.format("Invalid move: %s - %s", source, target));
-        return takeSecondInput(state, source, sourcePiece, moves);
-    }
-
-    private HashMap<Position, Piece> bridgeTheGap(Move move, Map<Position, Piece> board) {
-        final java.util.Map<Position, Piece> tmp = board.toJavaMap();
-        move.execute(tmp);
-        return HashMap.ofAll(tmp);
+        return takeSecondInput(state, source, moves);
     }
 
     @VisibleForTesting

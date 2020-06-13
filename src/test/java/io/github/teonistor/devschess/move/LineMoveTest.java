@@ -3,14 +3,13 @@ package io.github.teonistor.devschess.move;
 import io.github.teonistor.devschess.Player;
 import io.github.teonistor.devschess.board.Position;
 import io.github.teonistor.devschess.piece.Piece;
+import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
+import io.vavr.collection.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
-
-import java.util.EnumMap;
-
 import static io.github.teonistor.devschess.board.Position.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -30,10 +29,7 @@ class LineMoveTest {
     @ParameterizedTest
     @EnumSource(Player.class)
     void validateValid(final Player player) {
-        final EnumMap<Position,Piece> board = new EnumMap<>(Position.class);
-        board.put(B3, moving);
-        board.put(D2, obstacle);
-        board.put(D4, obstacle);
+        final Map<Position,Piece> board = HashMap.of(B3, moving, D2, obstacle, D4, obstacle);
         when(obstacle.getPlayer()).thenReturn(player);
 
         assertThat(new LineMove(B3, F3, player, List.of(C3, D3, E3)).validate(board)).isTrue();
@@ -42,9 +38,7 @@ class LineMoveTest {
     @ParameterizedTest
     @EnumSource(Player.class)
     void validateInvalid(final Player player) {
-        final EnumMap<Position,Piece> board = new EnumMap<>(Position.class);
-        board.put(B3, moving);
-        board.put(D3, obstacle);
+        final Map<Position,Piece> board = HashMap.of(B3, moving, D3, obstacle);
         when(obstacle.getPlayer()).thenReturn(player);
 
         assertThat(new LineMove(B3, F3, player, List.of(C3, D3, E3)).validate(board)).isFalse();

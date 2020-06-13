@@ -15,8 +15,8 @@ public class GameState {
     private final Player player;
     private final Set<Piece> capturedPieces;
 
-    public GameState advance(Map<Position, Piece> board) {
-        return new GameState(board, player.next(), capturedPieces);
+    public GameState advance(Map<Position, Piece> newBoard) {
+        return new GameState(newBoard, player.next(), capturedPieces);
     }
 
     public GameState advance(Map<Position, Piece> newBoard, Piece newCapturedPiece) {

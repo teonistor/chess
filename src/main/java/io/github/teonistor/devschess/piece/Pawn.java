@@ -47,12 +47,12 @@ public class Pawn implements Piece {
                     return Stream.of(
                             new EmptyPositionMove(from, from.down(),        player),
                             new EmptyPositionMove(from, from.down().down(), player),
-                            new CapturingMove    (from, from.down().right(), player),
+                            new CapturingMove    (from, from.down().right(),player),
                             new CapturingMove    (from, from.down().left(), player));
                 } else {
                     return Stream.of(
-                            new EmptyPositionMove(from, from.down(), player),
-                            new CapturingMove    (from, from.down().right(), player),
+                            new EmptyPositionMove(from, from.down(),        player),
+                            new CapturingMove    (from, from.down().right(),player),
                             new CapturingMove    (from, from.down().left(), player));
                 }
         }

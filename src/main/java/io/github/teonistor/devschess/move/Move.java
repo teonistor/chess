@@ -2,7 +2,10 @@ package io.github.teonistor.devschess.move;
 
 import io.github.teonistor.devschess.board.Position;
 import io.github.teonistor.devschess.piece.Piece;
-import java.util.Map;
+import io.vavr.collection.Map;
+
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 
 public interface Move {
@@ -19,15 +22,20 @@ public interface Move {
     Position getTo();
 
     /**
-     * @return true if the move can be executed on the given board from the standpoint of necessary positions not being occupied/under attack; false otherwise
+     * Check if the move can be executed on the given board from the standpoint of necessary positions not being occupied/under attack etc
+     * @param board The current game board
+     * @return true if the move can be executed; false otherwise
      */
     boolean validate(Map<Position,Piece> board);
 
     /**
-     * Change the mappings of positions as needed to reflect this move taking place. Side-affects {@code board}. The validity of
-     * the move is not checked during this call.
-     *  <br> TODO if the single source of game state truth is such a {@code Map<Position,Piece>} (and the implicit assumption of {@code Position}
-     *  enum values) information about captured pieces is lost. The total set of pieces cannot be assumed because pawns can promote.
+     * Change the mappings of positions as needed to reflect this move taking place.
+     * The validity of the move is not checked during this call.
+     * @param board The current game board
+     * @param nonCapturingCallback Callback called with the new board when the move doesn't incur capturing
+     * @param capturingCallback Callback called with the new board and the captured piece when capturing occurs
+     * @param <T> A type that the caller needs
+     * @return What the chosen callback returns
      */
-    void execute(Map<Position,Piece> board);
+    <T> T execute(Map<Position,Piece> board, Function<Map<Position,Piece>,T> nonCapturingCallback, BiFunction<Map<Position,Piece>,Piece,T> capturingCallback);
 }

@@ -4,8 +4,8 @@ import io.github.teonistor.devschess.Player;
 import io.github.teonistor.devschess.board.Position;
 import io.github.teonistor.devschess.piece.Piece;
 import io.vavr.collection.List;
+import io.vavr.collection.Map;
 
-import java.util.Map;
 
 public class LineMove extends CaptureIndependentMove {
 
