@@ -26,17 +26,26 @@ public class Game {
         inputs[Player.White.ordinal()] = white;
         inputs[Player.Black.ordinal()] = black;
 
-        this.views = new View() {
-            private Iterable<View> vi = List.of(views);
+        // TODO This view stuff is untested and doesn't really belong here
+        switch (views.length) {
+            case 0:
+                throw new IllegalArgumentException("Dude wtf");
+            case 1:
+                this.views = views[0];
+                break;
+            default:
+                this.views = new View() {
+                    private Iterable<View> vi = List.of(views);
 
-            public void refresh(Map<Position, Piece> board, Player player, Set<Piece> capturedPieces, Position source, Set<Position> targets) {
-                vi.forEach(v -> v.refresh(board, player, capturedPieces, source, targets));
-            }
+                    public void refresh(Map<Position, Piece> board, Player player, Set<Piece> capturedPieces, Position source, Set<Position> targets) {
+                        vi.forEach(v -> v.refresh(board, player, capturedPieces, source, targets));
+                    }
 
-            public void announce(String message) {
-                vi.forEach(v -> v.announce(message));
-            }
-        };
+                    public void announce(String message) {
+                        vi.forEach(v -> v.announce(message));
+                    }
+                };
+        }
     }
 
     public void play() {
