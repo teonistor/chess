@@ -6,7 +6,9 @@ import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 
-
+/**
+ * A move which can land on a position if it's free or occupied by the opponent and can only be performed if certain intermediate positions are free
+ */
 public class LineMove extends CaptureIndependentMove {
 
     private final List<Position> mustBeEmpty;
