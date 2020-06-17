@@ -32,6 +32,8 @@ import static org.mockito.Mockito.when;
 
 class GameTest {
 
+    private final InitialStateProvider provider = mock(InitialStateProvider.class);
+    private final UnderAttackRule rule = mock(UnderAttackRule.class);
     private final Input white = mock(Input.class);
     private final Input black = mock(Input.class);
     private final View view = mock(View.class);
@@ -51,8 +53,8 @@ class GameTest {
 
     @BeforeEach
     void setUp() {
-        game = spy(new Game(white, black, view));
-        when(game.initialState()).thenReturn(state);
+        game = spy(new Game(provider, rule, white, black, view));
+        when(provider.createInitialState()).thenReturn(state);
         when(state.advance(any())).thenReturn(state);
     }
 
@@ -67,6 +69,7 @@ class GameTest {
         when(move.execute(eq(board), any(), any())).then(moveStub);
         game.play();
 
+        verify(provider).createInitialState();
         verify(game, times(2)).isOver(state);
         verify(white, times(2)).takeInput();
         verify(view, times(3)).refresh(eq(board), any(), eq(HashSet.empty()), any(), any());
@@ -90,6 +93,7 @@ class GameTest {
         when(move.execute(eq(board), any(), any())).then(moveStub);
         game.play();
 
+        verify(provider).createInitialState();
         verify(game, times(2)).isOver(state);
         verify(white, times(4)).takeInput();
         verify(view, times(3)).refresh(eq(board), any(), eq(HashSet.empty()), any(), any());
@@ -108,6 +112,6 @@ class GameTest {
 
     @AfterEach
     void tearDown() {
-        verifyNoMoreInteractions(white, black, view, piece, move);
+        verifyNoMoreInteractions(provider, rule, white, black, view, piece, move);
     }
 }

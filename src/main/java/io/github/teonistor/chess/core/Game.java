@@ -1,7 +1,6 @@
 package io.github.teonistor.chess.core;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.github.teonistor.chess.board.Board;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.inter.Input;
 import io.github.teonistor.chess.inter.View;
@@ -14,14 +13,16 @@ import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 import io.vavr.control.Option;
 
-import static io.github.teonistor.chess.core.Player.White;
-
 public class Game {
 
+    private final InitialStateProvider initialStateProvider;
+    private final UnderAttackRule underAttackRule;
     private final Input[] inputs;
     private final View views;
 
-    public Game(Input white, Input black, View...views) {
+    public Game(InitialStateProvider initialStateProvider, UnderAttackRule underAttackRule, Input white, Input black, View... views) {
+        this.initialStateProvider = initialStateProvider;
+        this.underAttackRule = underAttackRule;
         inputs = new Input[2];
         inputs[Player.White.ordinal()] = white;
         inputs[Player.Black.ordinal()] = black;
@@ -49,7 +50,7 @@ public class Game {
     }
 
     public void play() {
-        GameState state = initialState();
+        GameState state = initialStateProvider.createInitialState();
         views.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), Position.OutOfBoard, HashSet.empty());
 
         while (!isOver(state)) {
@@ -94,12 +95,6 @@ public class Game {
         views.announce(String.format("Invalid move: %s - %s", source, target));
         return takeSecondInput(state, source, moves);
     }
-
-    @VisibleForTesting
-    GameState initialState() {
-        return new GameState(Board.initialSetup(), White, HashSet.empty());
-    }
-
 
     @VisibleForTesting
     boolean isOver(final GameState state) {
