@@ -18,7 +18,13 @@ public class King implements Piece {
 
     @Override
     public Stream<Move> computePossibleMoves(Position from) {
-        return Stream.of(
+        return computePossibleTargets(from)
+              .map(to -> (Move) new CaptureIndependentMove(from, to, player))
+              .toJavaStream();
+    }
+
+    protected io.vavr.collection.Stream<Position> computePossibleTargets(Position from) {
+        return io.vavr.collection.Stream.of(
                 from.up(),
                 from.left(),
                 from.right(),
@@ -27,11 +33,6 @@ public class King implements Piece {
                 from.up().right(),
                 from.down().left(),
                 from.down().right())
-            .filter(to -> !Position.OutOfBoard.equals(to))
-            .map(to -> makeMove(from, to));
-    }
-
-    protected CaptureIndependentMove makeMove(Position from, Position to) {
-        return new CaptureIndependentMove(from, to, player);
+            .filter(to -> !Position.OutOfBoard.equals(to));
     }
 }
