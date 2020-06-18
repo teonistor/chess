@@ -1,7 +1,8 @@
 package io.github.teonistor.chess;
 
-import io.github.teonistor.chess.board.Board;
+import io.github.teonistor.chess.board.InitialBoardProvider;
 import io.github.teonistor.chess.core.Game;
+import io.github.teonistor.chess.core.GameOverChecker;
 import io.github.teonistor.chess.core.InitialStateProvider;
 import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.inter.TerminalInput;
@@ -11,9 +12,10 @@ public class Main {
     // Launch a terminal-based game
     public static void main(String[] arg) {
         final UnderAttackRule underAttackRule = new UnderAttackRule();
-        final Board board = new Board(underAttackRule);
-        final InitialStateProvider initialStateProvider = new InitialStateProvider(board);
+        final GameOverChecker gameOverChecker = new GameOverChecker();
+        final InitialBoardProvider initialBoardProvider = new InitialBoardProvider(underAttackRule);
+        final InitialStateProvider initialStateProvider = new InitialStateProvider(initialBoardProvider);
 
-        new Game(initialStateProvider, underAttackRule, new TerminalInput(), new TerminalInput(), new TerminalView()).play();
+        new Game(initialStateProvider, underAttackRule, gameOverChecker, new TerminalInput(), new TerminalInput(), new TerminalView()).play();
     }
 }

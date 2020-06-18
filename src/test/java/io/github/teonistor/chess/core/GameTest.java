@@ -34,6 +34,7 @@ class GameTest {
 
     private final InitialStateProvider provider = mock(InitialStateProvider.class);
     private final UnderAttackRule rule = mock(UnderAttackRule.class);
+    private final GameOverChecker checker = mock(GameOverChecker.class);
     private final Input white = mock(Input.class);
     private final Input black = mock(Input.class);
     private final View view = mock(View.class);
@@ -53,14 +54,14 @@ class GameTest {
 
     @BeforeEach
     void setUp() {
-        game = spy(new Game(provider, rule, white, black, view));
+        game = spy(new Game(provider, rule, checker, white, black, view));
         when(provider.createInitialState()).thenReturn(state);
         when(state.advance(any())).thenReturn(state);
     }
 
     @Test
     void playOneRound() {
-        when(game.isOver(state)).thenReturn(false).thenReturn(true);
+        when(checker.isOver(board, White)).thenReturn(false).thenReturn(true);
         when(white.takeInput()).thenReturn(A1).thenReturn(B3);
         when(piece.getPlayer()).thenReturn(White);
         when(piece.computePossibleMoves(A1)).thenReturn(Stream.of(move));
@@ -70,7 +71,7 @@ class GameTest {
         game.play();
 
         verify(provider).createInitialState();
-        verify(game, times(2)).isOver(state);
+        verify(checker, times(2)).isOver(board, White);
         verify(white, times(2)).takeInput();
         verify(view, times(3)).refresh(eq(board), any(), eq(HashSet.empty()), any(), any());
         verify(view).announce("White moves: A1 - B3");
@@ -84,7 +85,7 @@ class GameTest {
 
     @Test
     void playOneRoundWithBogusInputs() {
-        when(game.isOver(state)).thenReturn(false).thenReturn(true);
+        when(checker.isOver(board, White)).thenReturn(false).thenReturn(true);
         when(white.takeInput()).thenReturn(A3).thenReturn(A1).thenReturn(G7).thenReturn(B3);
         when(piece.getPlayer()).thenReturn(White);
         when(piece.computePossibleMoves(A1)).thenReturn(Stream.of(move));
@@ -94,7 +95,7 @@ class GameTest {
         game.play();
 
         verify(provider).createInitialState();
-        verify(game, times(2)).isOver(state);
+        verify(checker, times(2)).isOver(board, White);
         verify(white, times(4)).takeInput();
         verify(view, times(3)).refresh(eq(board), any(), eq(HashSet.empty()), any(), any());
         verify(view).announce("Invalid pickup: A3");
@@ -112,6 +113,6 @@ class GameTest {
 
     @AfterEach
     void tearDown() {
-        verifyNoMoreInteractions(provider, rule, white, black, view, piece, move);
+        verifyNoMoreInteractions(provider, rule, checker, white, black, view, piece, move);
     }
 }

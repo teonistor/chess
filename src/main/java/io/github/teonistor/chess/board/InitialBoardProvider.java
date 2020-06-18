@@ -18,11 +18,11 @@ import static io.github.teonistor.chess.core.Player.White;
 
 
 @AllArgsConstructor
-public class Board {
+public class InitialBoardProvider {
 
     private final @NonNull UnderAttackRule underAttackRule;
 
-    public Map<Position, Piece> initialSetup() {
+    public Map<Position,Piece> createInitialBoard() {
         return HashMap.of(
                      Position.A1, new Rook(White),
                      Position.B1, new Knight(White),

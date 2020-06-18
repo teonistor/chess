@@ -1,6 +1,5 @@
 package io.github.teonistor.chess.core;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.inter.Input;
 import io.github.teonistor.chess.inter.View;
@@ -8,54 +7,34 @@ import io.github.teonistor.chess.move.Move;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.HashSet;
-import io.vavr.collection.List;
 import io.vavr.collection.Map;
-import io.vavr.collection.Set;
 import io.vavr.control.Option;
 
 public class Game {
 
     private final InitialStateProvider initialStateProvider;
     private final UnderAttackRule underAttackRule;
+    private final GameOverChecker gameOverChecker;
     private final Input[] inputs;
-    private final View views;
+    private final View view;
 
-    public Game(InitialStateProvider initialStateProvider, UnderAttackRule underAttackRule, Input white, Input black, View... views) {
+    public Game(InitialStateProvider initialStateProvider, UnderAttackRule underAttackRule, GameOverChecker gameOverChecker, Input white, Input black, View view) {
         this.initialStateProvider = initialStateProvider;
         this.underAttackRule = underAttackRule;
+        this.gameOverChecker = gameOverChecker;
         inputs = new Input[2];
         inputs[Player.White.ordinal()] = white;
         inputs[Player.Black.ordinal()] = black;
-
-        // TODO This view stuff is untested and doesn't really belong here
-        switch (views.length) {
-            case 0:
-                throw new IllegalArgumentException("Dude wtf");
-            case 1:
-                this.views = views[0];
-                break;
-            default:
-                this.views = new View() {
-                    private Iterable<View> vi = List.of(views);
-
-                    public void refresh(Map<Position, Piece> board, Player player, Set<Piece> capturedPieces, Position source, Set<Position> targets) {
-                        vi.forEach(v -> v.refresh(board, player, capturedPieces, source, targets));
-                    }
-
-                    public void announce(String message) {
-                        vi.forEach(v -> v.announce(message));
-                    }
-                };
-        }
+        this.view = view;
     }
 
     public void play() {
         GameState state = initialStateProvider.createInitialState();
-        views.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), Position.OutOfBoard, HashSet.empty());
+        view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), Position.OutOfBoard, HashSet.empty());
 
-        while (!isOver(state)) {
+        while (!gameOverChecker.isOver(state.getBoard(), state.getPlayer())) {
             state = takeFirstInput(state);
-            views.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), Position.OutOfBoard, HashSet.empty());
+            view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), Position.OutOfBoard, HashSet.empty());
         }
     }
 
@@ -67,13 +46,13 @@ public class Game {
             final Map<Position,Move> moves = sourcePiece.get().computePossibleMoves(source)
                     .filter(move -> move.validate(state.getBoard()))
                     .collect(HashMap.collector(Move::getTo));
-            views.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), source, moves.keySet());
+            view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), source, moves.keySet());
 
             return takeSecondInput(state, source, moves);
         }
 
         if(source != Position.OutOfBoard) {
-            views.announce("Invalid pickup: " + source);
+            view.announce("Invalid pickup: " + source);
         }
         return takeFirstInput(state);
     }
@@ -82,24 +61,17 @@ public class Game {
         final Position target = inputs[state.getPlayer().ordinal()].takeInput();
 
         if (moves.containsKey(target)) {
-            views.announce(String.format("%s moves: %s - %s", state.getPlayer(), source, target));
+            view.announce(String.format("%s moves: %s - %s", state.getPlayer(), source, target));
 
             return moves.get(target).get().execute(state.getBoard(), state::advance, state::advance);
         }
 
         if(target == Position.OutOfBoard) {
             // You can put a piece back down in computer chess because perhaps the input is bogus
-            views.announce("Cancel.");
+            view.announce("Cancel.");
             return takeFirstInput(state);
         }
-        views.announce(String.format("Invalid move: %s - %s", source, target));
+        view.announce(String.format("Invalid move: %s - %s", source, target));
         return takeSecondInput(state, source, moves);
-    }
-
-    @VisibleForTesting
-    boolean isOver(final GameState state) {
-        // TODO The entire state is probably not needed
-        // TODO We need a GameOverChecker :P
-        return false;
     }
 }

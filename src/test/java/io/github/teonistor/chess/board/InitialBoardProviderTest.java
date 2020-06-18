@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-class BoardTest {
+class InitialBoardProviderTest {
 
     @Test
     void initialSetup() {
         // TODO In progress
-        assertThat(new Board(mock(UnderAttackRule.class)).initialSetup()).hasSize(32);
+        assertThat(new InitialBoardProvider(mock(UnderAttackRule.class)).createInitialBoard()).hasSize(32);
     }
 }

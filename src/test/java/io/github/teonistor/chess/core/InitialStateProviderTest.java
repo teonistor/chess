@@ -1,6 +1,6 @@
 package io.github.teonistor.chess.core;
 
-import io.github.teonistor.chess.board.Board;
+import io.github.teonistor.chess.board.InitialBoardProvider;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.HashSet;
 import org.junit.jupiter.api.Test;
@@ -16,15 +16,15 @@ class InitialStateProviderTest {
 
     @Test
     void createInitialState() {
-        final Board board = mock(Board.class);
-        when(board.initialSetup()).thenReturn(HashMap.empty());
+        final InitialBoardProvider provider = mock(InitialBoardProvider.class);
+        when(provider.createInitialBoard()).thenReturn(HashMap.empty());
 
-        final GameState state = new InitialStateProvider(board).createInitialState();
+        final GameState state = new InitialStateProvider(provider).createInitialState();
 
         assertThat(state).hasFieldOrPropertyWithValue("board", HashMap.empty())
                          .hasFieldOrPropertyWithValue("player", White)
                          .hasFieldOrPropertyWithValue("capturedPieces", HashSet.empty());
-        verify(board).initialSetup();
-        verifyNoMoreInteractions(board);
+        verify(provider).createInitialBoard();
+        verifyNoMoreInteractions(provider);
     }
 }
