@@ -22,6 +22,7 @@ import static io.github.teonistor.chess.board.Position.*;
 
 @AllArgsConstructor
 public class Castle implements Move {
+    // TODO Once we implement global check prevention some of these will be redundant
     public static final HashMap<Position,HashSet<Position>> mustNotBeUnderAttackByTarget = HashMap.of(
             G1, HashSet.of(E1, F1, G1), C1, HashSet.of(C1, D1, E1),
             G8, HashSet.of(E8, F8, G8), C8, HashSet.of(C8, D8, E8));
@@ -43,6 +44,7 @@ public class Castle implements Move {
     @Override
     public boolean validate(Map<Position, Piece> board) {
         return mustBeEmptyByTarget.get(to).get().toStream().map(board::get).filter(Option::isDefined).isEmpty()
+            // TODO Insufficient: The rook must have not moved either
             && rookPositionsByTarget.get(to).flatMap(board::get).filter(piece -> piece.getPlayer() == player && piece.getClass().equals(Rook.class)).isDefined()
             && mustNotBeUnderAttackByTarget.get(to).get().toStream().filter(position -> underAttackRule.checkAttack(board, position, player)).isEmpty();
     }

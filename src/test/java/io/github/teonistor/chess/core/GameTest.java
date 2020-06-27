@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 class GameTest {
 
     private final InitialStateProvider provider = mock(InitialStateProvider.class);
-    private final UnderAttackRule rule = mock(UnderAttackRule.class);
+    private final CheckRule rule = mock(CheckRule.class);
     private final GameOverChecker checker = mock(GameOverChecker.class);
     private final Input white = mock(Input.class);
     private final Input black = mock(Input.class);
@@ -56,6 +56,7 @@ class GameTest {
     void setUp() {
         game = spy(new Game(provider, rule, checker, white, black, view));
         when(provider.createInitialState()).thenReturn(state);
+        when(rule.validateMove(any(),any(),any())).thenReturn(true);
         when(state.advance(any())).thenReturn(state);
     }
 
