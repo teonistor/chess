@@ -2,7 +2,7 @@ package io.github.teonistor.chess.core;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.piece.Piece;
-import io.vavr.collection.HashSet;
+import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class GameStateTest {
 
     @Test
     void advanceBoardWhite() {
-        final GameState initialState = new GameState(initialBoard, White, HashSet.empty(), null);
+        final GameState initialState = new GameState(initialBoard, White, List.empty(), null);
         final GameState finalState = initialState.advance(finalBoard);
 
         assertThat(finalState.getBoard()).isEqualTo(finalBoard);
@@ -38,7 +38,7 @@ class GameStateTest {
 
     @Test
     void advanceBoardBlack() {
-        final GameState initialState = new GameState(initialBoard, Black, HashSet.of(aPiece), null);
+        final GameState initialState = new GameState(initialBoard, Black, List.of(aPiece), null);
         final GameState finalState = initialState.advance(finalBoard);
 
         assertThat(finalState.getBoard()).isEqualTo(finalBoard);
@@ -49,7 +49,7 @@ class GameStateTest {
 
     @Test
     void advanceBoardAndCaptureWhite() {
-        final GameState initialState = new GameState(initialBoard, White, HashSet.empty(), null);
+        final GameState initialState = new GameState(initialBoard, White, List.empty(), null);
         final GameState finalState = initialState.advance(finalBoard, aPiece);
 
         assertThat(finalState.getBoard()).isEqualTo(finalBoard);
@@ -60,7 +60,7 @@ class GameStateTest {
 
     @Test
     void advanceBoardAndCaptureBlack() {
-        final GameState initialState = new GameState(initialBoard, Black, HashSet.of(aPiece), null);
+        final GameState initialState = new GameState(initialBoard, Black, List.of(aPiece), null);
         final GameState finalState = initialState.advance(finalBoard, anotherPiece);
 
         assertThat(finalState.getBoard()).isEqualTo(finalBoard);

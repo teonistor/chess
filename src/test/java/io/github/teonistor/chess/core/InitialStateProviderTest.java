@@ -2,7 +2,7 @@ package io.github.teonistor.chess.core;
 
 import io.github.teonistor.chess.board.InitialBoardProvider;
 import io.vavr.collection.HashMap;
-import io.vavr.collection.HashSet;
+import io.vavr.collection.List;
 import org.junit.jupiter.api.Test;
 
 import static io.github.teonistor.chess.core.Player.White;
@@ -23,7 +23,7 @@ class InitialStateProviderTest {
 
         assertThat(state).hasFieldOrPropertyWithValue("board", HashMap.empty())
                          .hasFieldOrPropertyWithValue("player", White)
-                         .hasFieldOrPropertyWithValue("capturedPieces", HashSet.empty());
+                         .hasFieldOrPropertyWithValue("capturedPieces", List.empty());
         verify(provider).createInitialBoard();
         verifyNoMoreInteractions(provider);
     }

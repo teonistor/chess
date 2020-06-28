@@ -19,7 +19,7 @@ public class MultipleViewWrapper implements View {
     }
 
     @Override
-    public void refresh(Map<Position, Piece> board, Player player, Set<Piece> capturedPieces, Position source, Set<Position> targets) {
+    public void refresh(Map<Position, Piece> board, Player player, List<Piece> capturedPieces, Position source, Set<Position> targets) {
         views.forEach(v -> v.refresh(board, player, capturedPieces, source, targets));
     }
 

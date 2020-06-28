@@ -12,6 +12,7 @@ import io.github.teonistor.chess.piece.Queen;
 import io.github.teonistor.chess.piece.Rook;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
+import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 
@@ -53,7 +54,7 @@ public class TerminalView implements View {
 
 
     @Override
-    public void refresh(Map<Position, Piece> board, Player player, Set<Piece> capturedPieces, Position source, Set<Position> targets) {
+    public void refresh(Map<Position, Piece> board, Player player, List<Piece> capturedPieces, Position source, Set<Position> targets) {
         outStream.print(makeOutput(board, player, source, targets));
     }
 

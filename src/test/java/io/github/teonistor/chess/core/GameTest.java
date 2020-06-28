@@ -7,16 +7,14 @@ import io.github.teonistor.chess.move.Move;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.HashSet;
+import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.stubbing.Answer;
 import org.mockito.stubbing.OngoingStubbing;
-
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static io.github.teonistor.chess.board.Position.A1;
@@ -53,7 +51,7 @@ class GameTest {
     private final Piece d8Piece = mock(Piece.class);
     private final Piece h6Piece = mock(Piece.class);
     private final HashMap<Position, Piece> board = HashMap.of(A1, a1Piece, B4, b4Piece, D8, d8Piece, H6, h6Piece);
-    private final GameState state = spy(new GameState(board, White, HashSet.empty(), null));
+    private final GameState state = spy(new GameState(board, White, List.empty(), null));
     private final Move move = mock(Move.class);
 
     private Game game;
@@ -89,7 +87,7 @@ class GameTest {
         game.play();
 
         verify(provider).createInitialState();
-        verify(view, times(howManyLoops)).refresh(board, White, HashSet.empty(), OutOfBoard, HashSet.empty());
+        verify(view, times(howManyLoops)).refresh(board, White, List.empty(), OutOfBoard, HashSet.empty());
         verify(view).announce(endMessage);
         verify(state, times(howManyLoops * 2)).getBoard();
         verify(state, times(howManyLoops * 2)).getPlayer();
@@ -105,8 +103,8 @@ class GameTest {
         final Move ruleFilteredMove = mock(Move.class);
         final HashMap<Position,Piece> outputBoard = HashMap.of(A2, a1Piece);
         final HashMap<Position,Piece> ruleFilteredBoard = HashMap.of(B5, b4Piece);
-        final GameState outputState = new GameState(outputBoard, otherPlayer, HashSet.empty(), null);
-        final GameState ruleFilteredState = new GameState(ruleFilteredBoard, otherPlayer, HashSet.empty(), null);
+        final GameState outputState = new GameState(outputBoard, otherPlayer, List.empty(), null);
+        final GameState ruleFilteredState = new GameState(ruleFilteredBoard, otherPlayer, List.empty(), null);
 
         when(move.validate(state)).thenReturn(true);
         when(ruleFilteredMove.validate(state)).thenReturn(true);

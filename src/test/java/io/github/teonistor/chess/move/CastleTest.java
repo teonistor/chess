@@ -9,7 +9,7 @@ import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.piece.Rook;
 import io.github.teonistor.chess.piece.King;
 import io.vavr.collection.HashMap;
-import io.vavr.collection.HashSet;
+import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -64,7 +64,7 @@ class CastleTest extends MoveTest{
                 "E8,G8,Black,H8", "E8,C8,Black,A8"})
     void validateInvalidBecauseRookHadMoved(Position from, Position to, Player player, Position rookPos) {
         HashMap<Position, Piece> board = HashMap.of(rookPos, new Rook(player));
-        final GameState state = new GameState(board, player, HashSet.empty(), stateWith(HashMap.empty(), player.next()));
+        final GameState state = new GameState(board, player, List.empty(), stateWith(HashMap.empty(), player.next()));
 
         assertThat(new Castle(from, to, rule).validate(state)).isFalse();
         verify(rule, atMost(2)).checkAttack(eq(board), any(), eq(player));
