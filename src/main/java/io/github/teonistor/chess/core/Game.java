@@ -77,24 +77,6 @@ public class Game {
                 return takeFirstInput(state, possibleMoves);
             }
         });
-
-
-//        final Position source = inputs[state.getPlayer().ordinal()].takeInput();
-//        final Option<Piece> sourcePiece = state.getBoard().get(source).filter(p -> state.getPlayer().equals(p.getPlayer()));
-//
-//        if (sourcePiece.isDefined()) {
-//            final Map<Position,Move> moves = sourcePiece.get().computePossibleMoves(source)
-//                    .filter(move -> move.validate(state.getBoard()))
-//                    .collect(HashMap.collector(Move::getTo));
-//            view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), source, moves.keySet());
-//
-//            return takeSecondInput(state, source, moves);
-//        }
-//
-//        if(source != Position.OutOfBoard) {
-//            view.announce("Invalid pickup: " + source);
-//        }
-//        return playOne(state);
     }
 
     private GameState takeSecondInput(GameState state, Map<Position, Map<Position, Move>> possibleMoves, Position source, Map<Position, Move> filteredMoves) {
