@@ -8,10 +8,16 @@ import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.Map;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.stubbing.Answer;
+import org.mockito.stubbing.OngoingStubbing;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -20,9 +26,11 @@ import static io.github.teonistor.chess.board.Position.A1;
 import static io.github.teonistor.chess.board.Position.A3;
 import static io.github.teonistor.chess.board.Position.B3;
 import static io.github.teonistor.chess.board.Position.G7;
+import static io.github.teonistor.chess.board.Position.OutOfBoard;
 import static io.github.teonistor.chess.core.Player.White;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -60,33 +68,34 @@ class GameTest {
         when(state.advance(any())).thenReturn(state);
     }
 
-    @Test
-    void playOneRound() {
-        when(checker.isOver(board, White)).thenReturn(false).thenReturn(true);
-        when(white.takeInput()).thenReturn(A1).thenReturn(B3);
-        when(piece.getPlayer()).thenReturn(White);
-        when(piece.computePossibleMoves(A1)).thenReturn(Stream.of(move));
-        when(move.validate(any())).thenReturn(true);
-        when(move.getTo()).thenReturn(B3);
-        when(move.execute(eq(board), any(), any())).then(moveStub);
+    @ParameterizedTest
+    @ValueSource(ints={1, 2, 7, 25})
+    void loop(int howManyLoops) {
+        when(state.getBoard()).thenReturn(board);
+        when(state.getPlayer()).thenReturn(White);
+        // Bloody hell don't use the when-return notation with actioning spies!
+        doReturn(state).when(game).playOne(state);
+        OngoingStubbing<Boolean> checkerStub = when(checker.isOver(board, White));
+        for (int i = 1; i < howManyLoops; i++) {
+            checkerStub = checkerStub.thenReturn(false);
+        }
+        checkerStub.thenReturn(true);
+
         game.play();
 
         verify(provider).createInitialState();
-        verify(checker, times(2)).isOver(board, White);
-        verify(white, times(2)).takeInput();
-        verify(view, times(3)).refresh(eq(board), any(), eq(HashSet.empty()), any(), any());
-        verify(view).announce("White moves: A1 - B3");
-        verify(piece).getPlayer();
-        verify(piece).computePossibleMoves(A1);
-        verify(move).validate(board);
-        verify(move).getTo();
-        verify(move).execute(eq(board), any(), any());
-        verify(state).advance(board);
+        verify(view, times(howManyLoops)).refresh(board, White, HashSet.empty(), OutOfBoard, HashSet.empty());
+        verify(state, times(howManyLoops * 2)).getBoard();
+        verify(state, times(howManyLoops * 2)).getPlayer();
+        verify(checker, times(howManyLoops)).isOver(board, White);
+        verify(game, times(howManyLoops - 1)).playOne(state);
     }
 
     @Test
-    void playOneRoundWithBogusInputs() {
-        when(checker.isOver(board, White)).thenReturn(false).thenReturn(true);
+    void playOne() {
+
+        org.junit.jupiter.api.Assumptions.assumeTrue(false, "TODO");
+
         when(white.takeInput()).thenReturn(A3).thenReturn(A1).thenReturn(G7).thenReturn(B3);
         when(piece.getPlayer()).thenReturn(White);
         when(piece.computePossibleMoves(A1)).thenReturn(Stream.of(move));
