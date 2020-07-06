@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.inter.Input;
 import io.github.teonistor.chess.inter.View;
-import io.github.teonistor.chess.move.Move;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
@@ -45,41 +44,46 @@ public class Game {
         final Map<Position, Piece> board = state.getBoard();
         final Player player = state.getPlayer();
 
-        final Map<Position, Map<Position, Move>> plausibleMoves = board.filterValues(piece -> piece.getPlayer() == player)
+        final Map<Position, Map<Position, GameState>> plausibleMoves = board.filterValues(piece -> piece.getPlayer() == player)
+                // .mapValues ?
                 .map((from, piece) -> new Tuple2<>(from, piece.computePossibleMoves(from)
                 .filter(move -> move.validate(board))
-                .filter(move -> checkRule.validateMove(board, player, move))
-                .collect(HashMap.collector(Move::getTo))));
+                .map(move -> new Tuple2<>(move.getTo(), move.execute(board, state::advance, state::advance)))
+                .filter(targetAndState -> checkRule.validate(targetAndState._2.getBoard(), player))
+                .collect(HashMap.collector())));
 
         return takeFirstInput(state, plausibleMoves);
     }
 
-    private GameState takeFirstInput(GameState state, Map<Position, Map<Position, Move>> possibleMoves) {
+    private GameState takeFirstInput(GameState state, Map<Position, Map<Position, GameState>> possibleMoves) {
         return inputs[state.getPlayer().ordinal()].takeInput(
                 source -> processFirstInput(state, possibleMoves, source),
                 (source, target) -> processFirstAndSecondInput(state, possibleMoves, source, target));
     }
 
-    private GameState takeSecondInput(GameState state, Map<Position, Map<Position, Move>> possibleMoves, Position source, Map<Position, Move> filteredMoves) {
+    private GameState takeSecondInput(GameState state, Map<Position, Map<Position, GameState>> possibleMoves, Position source, Map<Position, GameState> filteredMoves) {
         return inputs[state.getPlayer().ordinal()].takeInput(target -> processSecondInput(state, possibleMoves, source, filteredMoves, target));
     }
 
-    private GameState processFirstInput(GameState state, Map<Position, Map<Position, Move>> possibleMoves, Position source) {
-        if (possibleMoves.containsKey(source)) {
-            return takeSecondInput(state, possibleMoves, source, possibleMoves.get(source).get());
+    private GameState processFirstInput(GameState state, Map<Position, Map<Position, GameState>> possibleTargetStates, Position source) {
+        if (possibleTargetStates.containsKey(source)) {
+            System.out.println(possibleTargetStates);
+            final Map<Position, GameState> filteredTargetStates = possibleTargetStates.get(source).get();
+            view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), source, filteredTargetStates.keySet());
+            return takeSecondInput(state, possibleTargetStates, source, filteredTargetStates);
         } else {
             if(source != Position.OutOfBoard) {
                 view.announce("Invalid pickup: " + source);
             }
-            return takeFirstInput(state, possibleMoves);
+            return takeFirstInput(state, possibleTargetStates);
         }
     }
 
-    private GameState processFirstAndSecondInput(GameState state, Map<Position, Map<Position, Move>> possibleMoves, Position source, Position target) {
-        final Option<Move> move = possibleMoves.get(source).flatMap(m -> m.get(target));
+    private GameState processFirstAndSecondInput(GameState state, Map<Position, Map<Position, GameState>> possibleMoves, Position source, Position target) {
+        final Option<GameState> move = possibleMoves.get(source).flatMap(m -> m.get(target));
         if (move.isDefined()) {
             view.announce(String.format("%s moves: %s - %s", state.getPlayer(), source, target));
-            return move.get().execute(state.getBoard(), state::advance, state::advance);
+            return move.get();
         } else {
             if(source != Position.OutOfBoard && target != Position.OutOfBoard) {
                 view.announce(String.format("Invalid move: %s - %s", source, target));
@@ -88,10 +92,10 @@ public class Game {
         }
     }
 
-    private GameState processSecondInput(GameState state, Map<Position, Map<Position, Move>> possibleMoves, Position source, Map<Position, Move> filteredMoves, Position target) {
+    private GameState processSecondInput(GameState state, Map<Position, Map<Position, GameState>> possibleMoves, Position source, Map<Position, GameState> filteredMoves, Position target) {
         if (filteredMoves.containsKey(target)) {
             view.announce(String.format("%s moves: %s - %s", state.getPlayer(), source, target));
-            return filteredMoves.get(target).get().execute(state.getBoard(), state::advance, state::advance);
+            return filteredMoves.get(target).get();
 
         } else {
             if(target == Position.OutOfBoard) {

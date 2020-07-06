@@ -8,13 +8,10 @@ import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.Map;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.stubbing.Answer;
 import org.mockito.stubbing.OngoingStubbing;
@@ -64,7 +61,7 @@ class GameTest {
     void setUp() {
         game = spy(new Game(provider, rule, checker, white, black, view));
         when(provider.createInitialState()).thenReturn(state);
-        when(rule.validateMove(any(),any(),any())).thenReturn(true);
+        when(rule.validate(any(),any())).thenReturn(true);
         when(state.advance(any())).thenReturn(state);
     }
 
