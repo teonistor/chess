@@ -33,35 +33,52 @@ public class Game {
         GameState state = initialStateProvider.createInitialState();
         view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), Position.OutOfBoard, HashSet.empty());
 
-        while (!gameOverChecker.isOver(state.getBoard(), state.getPlayer())) {
-            state = playOne(state);
-            view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), Position.OutOfBoard, HashSet.empty());
+        while (true) {
+            final Map<Position, Map<Position,GameState>> possibleMoves = computeAvailableMoves(state);
+            final GameCondition gameCondition = gameOverChecker.check(state.getBoard(), state.getPlayer(), possibleMoves);
+
+            switch (gameCondition) {
+                case Continue:
+                    state = takeFirstInput(state, possibleMoves);
+                    view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), Position.OutOfBoard, HashSet.empty());
+                    continue;
+
+                case WhiteWins:
+                    view.announce("White wins!");
+                    break;
+                case BlackWins:
+                    view.announce("Black wins!");
+                    break;
+                case Stalemate:
+                    view.announce("Stalemate!");
+                    break;
+            }
+            break;
         }
     }
 
     @VisibleForTesting
-    GameState playOne(GameState state) {
-        final Map<Position, Piece> board = state.getBoard();
+    Map<Position, Map<Position, GameState>> computeAvailableMoves(GameState state) {
+        final Map<Position,Piece> board = state.getBoard();
         final Player player = state.getPlayer();
 
-        final Map<Position, Map<Position, GameState>> plausibleMoves = board.filterValues(piece -> piece.getPlayer() == player)
+        return board.filterValues(piece -> piece.getPlayer() == player)
                 // .mapValues ?
                 .map((from, piece) -> new Tuple2<>(from, piece.computePossibleMoves(from)
                 .filter(move -> move.validate(board))
                 .map(move -> new Tuple2<>(move.getTo(), move.execute(board, state::advance, state::advance)))
                 .filter(targetAndState -> checkRule.validate(targetAndState._2.getBoard(), player))
                 .collect(HashMap.collector())));
-
-        return takeFirstInput(state, plausibleMoves);
     }
 
-    private GameState takeFirstInput(GameState state, Map<Position, Map<Position, GameState>> possibleMoves) {
+    @VisibleForTesting
+    GameState takeFirstInput(GameState state, Map<Position, Map<Position,GameState>> possibleMoves) {
         return inputs[state.getPlayer().ordinal()].takeInput(
                 source -> processFirstInput(state, possibleMoves, source),
                 (source, target) -> processFirstAndSecondInput(state, possibleMoves, source, target));
     }
 
-    private GameState takeSecondInput(GameState state, Map<Position, Map<Position, GameState>> possibleMoves, Position source, Map<Position, GameState> filteredMoves) {
+    private GameState takeSecondInput(GameState state, Map<Position, Map<Position,GameState>> possibleMoves, Position source, Map<Position,GameState> filteredMoves) {
         return inputs[state.getPlayer().ordinal()].takeInput(target -> processSecondInput(state, possibleMoves, source, filteredMoves, target));
     }
 

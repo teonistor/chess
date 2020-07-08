@@ -14,7 +14,7 @@ public class Main {
     public static void main(String[] arg) {
         final UnderAttackRule underAttackRule = new UnderAttackRule();
         final CheckRule checkRule = new CheckRule(underAttackRule);
-        final GameOverChecker gameOverChecker = new GameOverChecker();
+        final GameOverChecker gameOverChecker = new GameOverChecker(underAttackRule);
         final InitialBoardProvider initialBoardProvider = new InitialBoardProvider(underAttackRule);
         final InitialStateProvider initialStateProvider = new InitialStateProvider(initialBoardProvider);
 
