@@ -36,7 +36,7 @@ public class StepDef implements En {
         System.out.println("** new StepDef() **");
 
         Given("a game in its initial state", () -> {
-            game = gameFactory.createGame(() -> white, () -> black, view);
+            game = gameFactory.createGame(white, black, view);
         });
 
         When("the following moves take place", (final DataTable dataTable) -> {
@@ -56,13 +56,13 @@ public class StepDef implements En {
 
             game.play();
 
-            for (int i = 0; i < data.size(); i++) {
-                viewOrder.verify(view).announce(String.format("%s moves: %s - %s", data.get(i).get(0), data.get(i).get(1), data.get(i).get(2)));
+            for (List<String> datum : data) {
+                viewOrder.verify(view).announce(String.format("%s moves: %s - %s", datum.get(0), datum.get(1), datum.get(2)));
             }
         });
 
         Then("{} wins", (Player player) -> {
-            viewOrder.verify(view).announce(String.format("%s wins", player));
+            viewOrder.verify(view).announce(String.format("%s wins!", player));
         });
     }
 }

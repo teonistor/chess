@@ -7,8 +7,6 @@ import io.github.teonistor.chess.inter.TerminalInput;
 import io.github.teonistor.chess.inter.TerminalView;
 import io.github.teonistor.chess.inter.View;
 
-import java.util.function.Supplier;
-
 public class GameFactory {
 
     private final UnderAttackRule underAttackRule;
@@ -17,22 +15,26 @@ public class GameFactory {
     private final InitialBoardProvider initialBoardProvider;
     private final InitialStateProvider initialStateProvider;
 
+//    One day...
+//    private final @Default Supplier<UnderAttackRule> underAttackRule = () -> new UnderAttackRule();
+//    private final @Default Supplier<CheckRule> checkRule = () -> new CheckRule(underAttackRule.get());
+//    private final @Default Supplier<GameOverChecker> gameOverChecker = () -> new GameOverChecker(underAttackRule.get());
+//    private final @Default Supplier<InitialBoardProvider> initialBoardProvider = () -> new InitialBoardProvider(underAttackRule.get());
+//    private final @Default Supplier<InitialStateProvider> initialStateProvider = () -> new InitialStateProvider(initialBoardProvider.get());
+
     public GameFactory() {
         underAttackRule = new UnderAttackRule();
         checkRule = new CheckRule(underAttackRule);
-        gameOverChecker = new GameOverChecker();
+        gameOverChecker = new GameOverChecker(underAttackRule);
         initialBoardProvider = new InitialBoardProvider(underAttackRule);
         initialStateProvider = new InitialStateProvider(initialBoardProvider);
     }
 
     public Game createTerminalGame() {
-        return createGame(TerminalInput::new, TerminalInput::new, new TerminalView());
+        return createGame(new TerminalInput(), new TerminalInput(), new TerminalView());
     }
 
-    // TODO Suppliers or directs?
-    public Game createGame(Supplier<Input> white, Supplier<Input> black, View...views) {
-        return new Game(initialStateProvider, checkRule, gameOverChecker,
-                white.get(), black.get(),
-                MultipleViewWrapper.wrapIfNeeded(views));
+    public Game createGame(Input white, Input black, View... views) {
+        return new Game(initialStateProvider, checkRule, gameOverChecker, white, black, MultipleViewWrapper.wrapIfNeeded(views));
     }
 }
