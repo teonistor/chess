@@ -12,15 +12,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.stubbing.Answer;
 import org.mockito.stubbing.OngoingStubbing;
 
 import java.util.function.Function;
+import java.util.stream.Stream;
 
-import static io.github.teonistor.chess.board.Position.A1;
-import static io.github.teonistor.chess.board.Position.OutOfBoard;
+import static io.github.teonistor.chess.board.Position.*;
 import static io.github.teonistor.chess.core.GameCondition.*;
-import static io.github.teonistor.chess.core.Player.White;
+import static io.github.teonistor.chess.core.Player.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -39,8 +41,11 @@ class GameTest {
     private final Input white = mock(Input.class);
     private final Input black = mock(Input.class);
     private final View view = mock(View.class);
-    private final Piece piece = mock(Piece.class);
-    private final HashMap<Position, Piece> board = HashMap.of(A1, piece);
+    private final Piece a1Piece = mock(Piece.class);
+    private final Piece b4Piece = mock(Piece.class);
+    private final Piece d8Piece = mock(Piece.class);
+    private final Piece h6Piece = mock(Piece.class);
+    private final HashMap<Position, Piece> board = HashMap.of(A1, a1Piece, B4, b4Piece, D8, d8Piece, H6, h6Piece);
     private final GameState state = spy(new GameState(board, White, HashSet.empty()));
     private final Move move = mock(Move.class);
 
@@ -69,9 +74,7 @@ class GameTest {
                 "15,BlackWins,Black wins!",
                 "25,Stalemate,Stalemate!"})
     void loop(int howManyLoops, GameCondition endGame, String endMessage) {
-        final Map<Position, Map<Position,GameState>> possibleMoves = HashMap.empty();
-        when(state.getBoard()).thenReturn(board);
-        when(state.getPlayer()).thenReturn(White);
+        final Map<Position, Map<Position,GameState>> possibleMoves = mock(Map.class);
 
         // Bloody hell don't use the when-return notation with actioning spies!
         doReturn(possibleMoves).when(game).computeAvailableMoves(state);
@@ -94,8 +97,52 @@ class GameTest {
         verify(game, times(howManyLoops - 1)).takeFirstInput(state, possibleMoves);
     }
 
-    void computeAvailableMoves() {
-        // Tough test goes here
+    @ParameterizedTest(name="{0}")
+    @EnumSource(Player.class)
+    void computeAvailableMoves(Player currentPlayer) {
+        final Player otherPlayer = currentPlayer.next();
+        final Move selfFilteredMove = mock(Move.class);
+        final Move ruleFilteredMove = mock(Move.class);
+        final HashMap<Position,Piece> outputBoard = HashMap.of(A2, a1Piece);
+        final HashMap<Position,Piece> ruleFilteredBoard = HashMap.of(B5, b4Piece);
+        final GameState outputState = new GameState(outputBoard, otherPlayer, HashSet.empty());
+        final GameState ruleFilteredState = new GameState(ruleFilteredBoard, otherPlayer, HashSet.empty());
+
+        when(move.validate(board)).thenReturn(true);
+        when(ruleFilteredMove.validate(board)).thenReturn(true);
+
+        when(state.getPlayer()).thenReturn(currentPlayer);
+        when(a1Piece.getPlayer()).thenReturn(currentPlayer);
+        when(b4Piece.getPlayer()).thenReturn(otherPlayer);
+        when(d8Piece.getPlayer()).thenReturn(currentPlayer);
+        when(h6Piece.getPlayer()).thenReturn(otherPlayer);
+        when(a1Piece.computePossibleMoves(A1)).thenReturn(Stream.of(move, selfFilteredMove));
+        when(d8Piece.computePossibleMoves(D8)).thenReturn(Stream.of(selfFilteredMove, ruleFilteredMove));
+        when(move.getTo()).thenReturn(A3);
+        when(ruleFilteredMove.getTo()).thenReturn(E5);
+        when(move.execute(eq(board), any(), any())).thenReturn(outputState);
+        when(ruleFilteredMove.execute(eq(board), any(), any())).thenReturn(ruleFilteredState);
+        when(rule.validate(outputBoard, currentPlayer)).thenReturn(true);
+        when(rule.validate(ruleFilteredBoard, currentPlayer)).thenReturn(false);
+
+        // n.b. We are including pieces of the current user which have nowhere to move
+        assertThat(game.computeAvailableMoves(state)).isEqualTo(HashMap.of(A1, HashMap.of(A3, outputState), D8, HashMap.empty()));
+
+        verify(move).validate(board);
+        verify(ruleFilteredMove).validate(board);
+        verify(state).getPlayer();
+        verify(a1Piece).getPlayer();
+        verify(b4Piece).getPlayer();
+        verify(d8Piece).getPlayer();
+        verify(h6Piece).getPlayer();
+        verify(a1Piece).computePossibleMoves(A1);
+        verify(d8Piece).computePossibleMoves(D8);
+        verify(move).getTo();
+        verify(ruleFilteredMove).getTo();
+        verify(move).execute(eq(board), any(), any());
+        verify(ruleFilteredMove).execute(eq(board), any(), any());
+        verify(rule).validate(outputBoard, currentPlayer);
+        verify(rule).validate(ruleFilteredBoard, currentPlayer);
     }
 
 //    @Test
@@ -130,6 +177,6 @@ class GameTest {
 
     @AfterEach
     void tearDown() {
-        verifyNoMoreInteractions(provider, rule, checker, white, black, view, piece, move);
+        verifyNoMoreInteractions(provider, rule, checker, white, black, view, a1Piece, b4Piece, d8Piece, h6Piece, move);
     }
 }
