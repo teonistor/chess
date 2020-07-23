@@ -1,7 +1,8 @@
 package io.github.teonistor.chess.move;
 
-import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.core.GameState;
+import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.Map;
 import io.vavr.control.Option;
@@ -25,8 +26,8 @@ public class CaptureIndependentMove implements Move {
     private final @NonNull Player player;
 
     @Override
-    public boolean validate(Map<Position, Piece> board) {
-        return !board.get(to)
+    public boolean validate(GameState state) {
+        return !state.getBoard().get(to)
                 .map(Piece::getPlayer)
                 .filter(player::equals)
                 .isDefined();

@@ -9,12 +9,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
-import static io.github.teonistor.chess.core.Player.Black;
-import static io.github.teonistor.chess.core.Player.White;
 import static io.github.teonistor.chess.board.Position.A1;
 import static io.github.teonistor.chess.board.Position.B5;
 import static io.github.teonistor.chess.board.Position.C6;
 import static io.github.teonistor.chess.board.Position.E2;
+import static io.github.teonistor.chess.core.Player.Black;
+import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -35,14 +35,14 @@ class CapturingMoveTest extends MoveTest {
         final Map<Position,Piece> board = HashMap.of(A1, moving, C6, victim);
         when(victim.getPlayer()).thenReturn(Black);
 
-        assertThat(new CapturingMove(A1,C6,White).validate(board)).isTrue();
+        assertThat(new CapturingMove(A1,C6,White).validate(stateWith(board))).isTrue();
     }
 
     @Test
     void validateInvalidNotOccupied() {
         final Map<Position,Piece> board = HashMap.of(A1, moving);
 
-        assertThat(new CapturingMove(A1,C6,White).validate(board)).isFalse();
+        assertThat(new CapturingMove(A1,C6,White).validate(stateWith(board))).isFalse();
     }
 
     @Test
@@ -50,7 +50,7 @@ class CapturingMoveTest extends MoveTest {
         final Map<Position,Piece> board = HashMap.of(A1, moving, C6, victim);
         when(victim.getPlayer()).thenReturn(White);
 
-        assertThat(new CapturingMove(A1,C6,White).validate(board)).isFalse();
+        assertThat(new CapturingMove(A1,C6,White).validate(stateWith(board))).isFalse();
     }
 
     @Test

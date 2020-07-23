@@ -12,7 +12,6 @@ import io.vavr.collection.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,7 +45,7 @@ class CastleTest extends MoveTest{
         HashMap<Position, Piece> board = HashMap.of(rookPos, new Rook(player));
         when(rule.checkAttack(board, underAttack, player)).thenReturn(true);
 
-        assertThat(new Castle(from, to, player, rule).validate(board)).isFalse();
+        assertThat(new Castle(from, to, player, rule).validate(stateWith(board))).isFalse();
         verify(rule, atMost(3)).checkAttack(eq(board), any(), eq(player));
     }
 
@@ -56,7 +55,7 @@ class CastleTest extends MoveTest{
     void validateInvalidBecauseNoRook(Position from, Position to, Player player) {
         HashMap<Position, Piece> board = HashMap.empty();
 
-        assertThat(new Castle(from, to, player, rule).validate(board)).isFalse();
+        assertThat(new Castle(from, to, player, rule).validate(stateWith(board))).isFalse();
         verify(rule, atMost(3)).checkAttack(eq(board), any(), eq(player));
     }
 
@@ -74,7 +73,7 @@ class CastleTest extends MoveTest{
     void validateInvalidBecauseOccupied(Position from, Position to, Player player, Position rookPos, Position occupied) {
         HashMap<Position, Piece> board = HashMap.of(rookPos, new Rook(player), occupied, new Knight(player));
 
-        assertThat(new Castle(from, to, player, rule).validate(board)).isFalse();
+        assertThat(new Castle(from, to, player, rule).validate(stateWith(board))).isFalse();
         verify(rule, atMost(3)).checkAttack(eq(board), any(), eq(player));
     }
 
@@ -84,7 +83,7 @@ class CastleTest extends MoveTest{
     void validateValid(Position from, Position to, Player player, Position rookPos) {
         HashMap<Position, Piece> board = HashMap.of(rookPos, new Rook(player));
 
-        assertThat(new Castle(from, to, player, rule).validate(board)).isTrue();
+        assertThat(new Castle(from, to, player, rule).validate(stateWith(board))).isTrue();
         verify(rule, times(3)).checkAttack(eq(board), any(), eq(player));
     }
 

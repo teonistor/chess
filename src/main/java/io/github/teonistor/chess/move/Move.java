@@ -1,6 +1,7 @@
 package io.github.teonistor.chess.move;
 
 import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.core.GameState;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.Map;
 
@@ -22,11 +23,11 @@ public interface Move {
     Position getTo();
 
     /**
-     * Check if the move can be executed on the given board from the standpoint of necessary positions not being occupied/under attack etc
-     * @param board The current game board
+     * Check if the move can be executed on the current board from the standpoint of necessary positions not being occupied/under attack etc
+     * @param state The current game state
      * @return true if the move can be executed; false otherwise
      */
-    boolean validate(Map<Position,Piece> board);
+    boolean validate(GameState state);
 
     /**
      * Change the mappings of positions as needed to reflect this move taking place.

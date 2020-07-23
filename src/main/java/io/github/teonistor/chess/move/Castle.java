@@ -1,6 +1,7 @@
 package io.github.teonistor.chess.move;
 
 import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.core.GameState;
 import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.piece.King;
@@ -17,7 +18,22 @@ import lombok.NonNull;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static io.github.teonistor.chess.board.Position.*;
+import static io.github.teonistor.chess.board.Position.A1;
+import static io.github.teonistor.chess.board.Position.A8;
+import static io.github.teonistor.chess.board.Position.B1;
+import static io.github.teonistor.chess.board.Position.B8;
+import static io.github.teonistor.chess.board.Position.C1;
+import static io.github.teonistor.chess.board.Position.C8;
+import static io.github.teonistor.chess.board.Position.D1;
+import static io.github.teonistor.chess.board.Position.D8;
+import static io.github.teonistor.chess.board.Position.E1;
+import static io.github.teonistor.chess.board.Position.E8;
+import static io.github.teonistor.chess.board.Position.F1;
+import static io.github.teonistor.chess.board.Position.F8;
+import static io.github.teonistor.chess.board.Position.G1;
+import static io.github.teonistor.chess.board.Position.G8;
+import static io.github.teonistor.chess.board.Position.H1;
+import static io.github.teonistor.chess.board.Position.H8;
 
 
 @AllArgsConstructor
@@ -40,9 +56,10 @@ public class Castle implements Move {
     private final @NonNull @Getter Position to;
     private final @NonNull Player player;
     private final @NonNull UnderAttackRule underAttackRule;
-    
+
     @Override
-    public boolean validate(Map<Position, Piece> board) {
+    public boolean validate(GameState state) {
+        Map<Position, Piece> board = state.getBoard();
         return mustBeEmptyByTarget.get(to).get().toStream().map(board::get).filter(Option::isDefined).isEmpty()
             // TODO Insufficient: The rook must have not moved either
             && rookPositionsByTarget.get(to).flatMap(board::get).filter(piece -> piece.getPlayer() == player && piece.getClass().equals(Rook.class)).isDefined()

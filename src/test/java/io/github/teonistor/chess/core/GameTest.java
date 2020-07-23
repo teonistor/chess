@@ -19,9 +19,17 @@ import org.mockito.stubbing.OngoingStubbing;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static io.github.teonistor.chess.board.Position.*;
-import static io.github.teonistor.chess.core.GameCondition.*;
-import static io.github.teonistor.chess.core.Player.*;
+import static io.github.teonistor.chess.board.Position.A1;
+import static io.github.teonistor.chess.board.Position.A2;
+import static io.github.teonistor.chess.board.Position.A3;
+import static io.github.teonistor.chess.board.Position.B4;
+import static io.github.teonistor.chess.board.Position.B5;
+import static io.github.teonistor.chess.board.Position.D8;
+import static io.github.teonistor.chess.board.Position.E5;
+import static io.github.teonistor.chess.board.Position.H6;
+import static io.github.teonistor.chess.board.Position.OutOfBoard;
+import static io.github.teonistor.chess.core.GameCondition.Continue;
+import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -108,8 +116,8 @@ class GameTest {
         final GameState outputState = new GameState(outputBoard, otherPlayer, HashSet.empty());
         final GameState ruleFilteredState = new GameState(ruleFilteredBoard, otherPlayer, HashSet.empty());
 
-        when(move.validate(board)).thenReturn(true);
-        when(ruleFilteredMove.validate(board)).thenReturn(true);
+        when(move.validate(state)).thenReturn(true);
+        when(ruleFilteredMove.validate(state)).thenReturn(true);
 
         when(state.getPlayer()).thenReturn(currentPlayer);
         when(a1Piece.getPlayer()).thenReturn(currentPlayer);
@@ -128,8 +136,8 @@ class GameTest {
         // n.b. We are including pieces of the current user which have nowhere to move
         assertThat(game.computeAvailableMoves(state)).isEqualTo(HashMap.of(A1, HashMap.of(A3, outputState), D8, HashMap.empty()));
 
-        verify(move).validate(board);
-        verify(ruleFilteredMove).validate(board);
+        verify(move).validate(state);
+        verify(ruleFilteredMove).validate(state);
         verify(state).getPlayer();
         verify(a1Piece).getPlayer();
         verify(b4Piece).getPlayer();
@@ -167,7 +175,7 @@ class GameTest {
 //        verify(view).announce("White moves: A1 - B3");
 //        verify(piece).getPlayer();
 //        verify(piece).computePossibleMoves(A1);
-//        verify(move).validate(board);
+//        verify(move).validate(state);
 //        verify(move).getTo();
 //        verify(move).execute(eq(board), any(), any());
 //        verify(state).advance(board);
