@@ -2,7 +2,6 @@ package io.github.teonistor.chess.move;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.GameState;
-import io.github.teonistor.chess.core.Player;
 import io.vavr.collection.List;
 
 /**
@@ -12,8 +11,8 @@ public class LineMove extends CaptureIndependentMove {
 
     private final List<Position> mustBeEmpty;
 
-    public LineMove(Position from, Position to, Player player, List<Position> mustBeEmpty) {
-        super(from, to, player);
+    public LineMove(Position from, Position to, List<Position> mustBeEmpty) {
+        super(from, to);
         this.mustBeEmpty = mustBeEmpty;
     }
 

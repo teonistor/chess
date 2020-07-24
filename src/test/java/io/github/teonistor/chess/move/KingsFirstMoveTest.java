@@ -9,8 +9,9 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import org.junit.jupiter.api.Test;
 
-import static io.github.teonistor.chess.board.Position.*;
-import static io.github.teonistor.chess.core.Player.*;
+import static io.github.teonistor.chess.board.Position.D2;
+import static io.github.teonistor.chess.board.Position.E1;
+import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -21,7 +22,7 @@ class KingsFirstMoveTest extends MoveTest {
     void execute() {
         final Map<Position, Piece> boardIn = HashMap.of(E1, new UnmovedKing(White, mock(UnderAttackRule.class)));
 
-        final Map<Position, Piece> boardOut = new KingsFirstMove(E1, D2, White).execute(boardIn, nonCapturingReturnBoard, captureNotExpected);
+        final Map<Position, Piece> boardOut = new KingsFirstMove(E1, D2).execute(boardIn, nonCapturingReturnBoard, captureNotExpected);
 
         assertThat(boardOut).hasSize(1);
         assertThat(boardOut.get(D2).get()).isExactlyInstanceOf(King.class);

@@ -45,7 +45,7 @@ class CastleTest extends MoveTest{
         HashMap<Position, Piece> board = HashMap.of(rookPos, new Rook(player));
         when(rule.checkAttack(board, underAttack, player)).thenReturn(true);
 
-        assertThat(new Castle(from, to, player, rule).validate(stateWith(board))).isFalse();
+        assertThat(new Castle(from, to, rule).validate(stateWith(board))).isFalse();
         verify(rule, atMost(3)).checkAttack(eq(board), any(), eq(player));
     }
 
@@ -55,7 +55,7 @@ class CastleTest extends MoveTest{
     void validateInvalidBecauseNoRook(Position from, Position to, Player player) {
         HashMap<Position, Piece> board = HashMap.empty();
 
-        assertThat(new Castle(from, to, player, rule).validate(stateWith(board))).isFalse();
+        assertThat(new Castle(from, to, rule).validate(stateWith(board))).isFalse();
         verify(rule, atMost(3)).checkAttack(eq(board), any(), eq(player));
     }
 
@@ -73,7 +73,7 @@ class CastleTest extends MoveTest{
     void validateInvalidBecauseOccupied(Position from, Position to, Player player, Position rookPos, Position occupied) {
         HashMap<Position, Piece> board = HashMap.of(rookPos, new Rook(player), occupied, new Knight(player));
 
-        assertThat(new Castle(from, to, player, rule).validate(stateWith(board))).isFalse();
+        assertThat(new Castle(from, to, rule).validate(stateWith(board))).isFalse();
         verify(rule, atMost(3)).checkAttack(eq(board), any(), eq(player));
     }
 
@@ -83,7 +83,7 @@ class CastleTest extends MoveTest{
     void validateValid(Position from, Position to, Player player, Position rookPos) {
         HashMap<Position, Piece> board = HashMap.of(rookPos, new Rook(player));
 
-        assertThat(new Castle(from, to, player, rule).validate(stateWith(board))).isTrue();
+        assertThat(new Castle(from, to, rule).validate(stateWith(board, player))).isTrue();
         verify(rule, times(3)).checkAttack(eq(board), any(), eq(player));
     }
 
@@ -93,7 +93,7 @@ class CastleTest extends MoveTest{
     void execute(Position from, Position to, Player player, Position rookFrom, Position rookTo) {
         HashMap<Position, Piece> board = HashMap.of(from, new King(player), rookFrom, new Rook(player));
 
-        Map<Position, Piece> output = new Castle(from, to, player, rule).execute(board, nonCapturingReturnBoard, captureNotExpected);
+        Map<Position, Piece> output = new Castle(from, to, rule).execute(board, nonCapturingReturnBoard, captureNotExpected);
 
         assertThat(output.get(to).get()).isExactlyInstanceOf(King.class);
         assertThat(output.get(to).get().getPlayer()).isEqualTo(player);

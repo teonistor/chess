@@ -1,10 +1,10 @@
 package io.github.teonistor.chess.move;
 
 import io.github.teonistor.chess.board.Position;
-import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.piece.King;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.Map;
+
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -14,8 +14,8 @@ import java.util.function.Function;
  */
 public class KingsFirstMove extends CaptureIndependentMove {
 
-    public KingsFirstMove(final Position from, final Position to, final Player player) {
-        super(from, to, player);
+    public KingsFirstMove(final Position from, final Position to) {
+        super(from, to);
     }
 
     @Override
@@ -26,6 +26,6 @@ public class KingsFirstMove extends CaptureIndependentMove {
     }
 
     private Map<Position,Piece> replaceTargetWithKing(Map<Position, Piece> board) {
-        return board.put(getTo(), new King(getPlayer()));
+        return board.put(getTo(), new King(board.get(getTo()).get().getPlayer()));
     }
 }

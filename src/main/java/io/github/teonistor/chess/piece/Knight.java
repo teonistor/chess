@@ -7,6 +7,7 @@ import io.github.teonistor.chess.move.Move;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
+
 import java.util.stream.Stream;
 
 
@@ -28,6 +29,6 @@ public class Knight implements Piece {
                 from.right().right().up(),
                 from.right().right().down())
             .filter(to -> !Position.OutOfBoard.equals(to))
-            .map(to -> new CaptureIndependentMove(from, to, player));
+            .map(to -> new CaptureIndependentMove(from, to));
     }
 }

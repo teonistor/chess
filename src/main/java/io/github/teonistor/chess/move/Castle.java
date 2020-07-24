@@ -54,12 +54,12 @@ public class Castle implements Move {
 
     private final @NonNull @Getter Position from;
     private final @NonNull @Getter Position to;
-    private final @NonNull Player player;
     private final @NonNull UnderAttackRule underAttackRule;
 
     @Override
     public boolean validate(GameState state) {
         Map<Position, Piece> board = state.getBoard();
+        Player player = state.getPlayer();
         return mustBeEmptyByTarget.get(to).get().toStream().map(board::get).filter(Option::isDefined).isEmpty()
             // TODO Insufficient: The rook must have not moved either
             && rookPositionsByTarget.get(to).flatMap(board::get).filter(piece -> piece.getPlayer() == player && piece.getClass().equals(Rook.class)).isDefined()
@@ -70,9 +70,10 @@ public class Castle implements Move {
     public <T> T execute(Map<Position, Piece> board, Function<Map<Position, Piece>, T> nonCapturingCallback, BiFunction<Map<Position, Piece>, Piece, T> capturingCallback) {
         final Position rookFrom = rookPositionsByTarget.get(to).get();
         final Position rookTo = rookTargetsByTarget.get(to).get();
+        final Piece oldKing = board.get(from).get();
 
         return nonCapturingCallback.apply(board.remove(from).remove(rookFrom)
-              .put(to, new King(player))
+              .put(to, new King(oldKing.getPlayer()))
               .put(rookTo, board.get(rookFrom).get()));
     }
 }

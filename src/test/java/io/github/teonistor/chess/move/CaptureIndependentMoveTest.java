@@ -36,14 +36,14 @@ class CaptureIndependentMoveTest extends MoveTest {
         final Map<Position,Piece> board = HashMap.of(A1, moving, C6, victim);
         when(victim.getPlayer()).thenReturn(Black);
 
-        assertThat(new CaptureIndependentMove(A1,C6,White).validate(stateWith(board))).isTrue();
+        assertThat(new CaptureIndependentMove(A1,C6).validate(stateWith(board))).isTrue();
     }
 
     @Test
     void validateNonCapture() {
         final Map<Position,Piece> board = HashMap.of(A1, moving);
 
-        assertThat(new CaptureIndependentMove(A1,C6,White).validate(stateWith(board))).isTrue();
+        assertThat(new CaptureIndependentMove(A1,C6).validate(stateWith(board))).isTrue();
     }
 
     @Test
@@ -51,15 +51,15 @@ class CaptureIndependentMoveTest extends MoveTest {
         final Map<Position,Piece> board = HashMap.of(A1, moving, C6, victim);
         when(victim.getPlayer()).thenReturn(White);
 
-        assertThat(new CaptureIndependentMove(A1,C6,White).validate(stateWith(board))).isFalse();
+        assertThat(new CaptureIndependentMove(A1,C6).validate(stateWith(board))).isFalse();
     }
 
     @Test
     void executeCapture() {
         final Map<Position,Piece> boardIn = HashMap.of(B5, moving, E2, victim);
 
-        Map<Position,Piece> boardOut = new CaptureIndependentMove(B5, E2, Black).execute(boardIn, captureExpectedBoard, capturingReturnBoard);
-        Piece piece = new CaptureIndependentMove(B5, E2, Black).execute(boardIn, captureExpectedPiece, capturingReturnPiece);
+        Map<Position,Piece> boardOut = new CaptureIndependentMove(B5, E2).execute(boardIn, captureExpectedBoard, capturingReturnBoard);
+        Piece piece = new CaptureIndependentMove(B5, E2).execute(boardIn, captureExpectedPiece, capturingReturnPiece);
 
         assertThat(boardOut).containsExactly(new Tuple2<>(E2, moving));
         assertThat(piece).isEqualTo(victim);
@@ -69,7 +69,7 @@ class CaptureIndependentMoveTest extends MoveTest {
     void executeNonCapture() {
         final Map<Position,Piece> boardIn = HashMap.of(B5, moving);
 
-        Map<Position,Piece> boardOut = new CaptureIndependentMove(B5, F1, Black).execute(boardIn, nonCapturingReturnBoard, captureNotExpected);
+        Map<Position,Piece> boardOut = new CaptureIndependentMove(B5, F1).execute(boardIn, nonCapturingReturnBoard, captureNotExpected);
 
         assertThat(boardOut).containsExactly(new Tuple2<>(F1, moving));
     }

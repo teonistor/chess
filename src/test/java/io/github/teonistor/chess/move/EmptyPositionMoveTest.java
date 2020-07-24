@@ -16,8 +16,6 @@ import static io.github.teonistor.chess.board.Position.A1;
 import static io.github.teonistor.chess.board.Position.C6;
 import static io.github.teonistor.chess.board.Position.G1;
 import static io.github.teonistor.chess.board.Position.H6;
-import static io.github.teonistor.chess.core.Player.Black;
-import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -37,7 +35,7 @@ class EmptyPositionMoveTest extends MoveTest {
     void validateValid() {
         final Map<Position,Piece> board = HashMap.of(A1, moving);
 
-        assertThat(new EmptyPositionMove(A1,C6,Black).validate(stateWith(board))).isTrue();
+        assertThat(new EmptyPositionMove(A1,C6).validate(stateWith(board))).isTrue();
     }
 
     @ParameterizedTest
@@ -47,14 +45,14 @@ class EmptyPositionMoveTest extends MoveTest {
         when(obstacle.getPlayer()).thenReturn(player);
 
         // One player stays fixed to prove that the move cannot be done irrespective of who owns the obstacle
-        assertThat(new EmptyPositionMove(A1,C6,White).validate(stateWith(board))).isFalse();
+        assertThat(new EmptyPositionMove(A1,C6).validate(stateWith(board))).isFalse();
     }
 
     @Test
     void execute() {
         final Map<Position,Piece> boardIn = HashMap.of(H6, moving);
 
-        Map<Position,Piece> boardOut = new EmptyPositionMove(H6, G1, Black).execute(boardIn, nonCapturingReturnBoard, captureNotExpected);
+        Map<Position,Piece> boardOut = new EmptyPositionMove(H6, G1).execute(boardIn, nonCapturingReturnBoard, captureNotExpected);
 
         assertThat(boardOut).containsExactly(new Tuple2<>(G1, moving));
     }

@@ -13,8 +13,12 @@ import io.vavr.collection.Set;
 
 import java.util.stream.Stream;
 
-import static io.github.teonistor.chess.board.Position.*;
-import static io.github.teonistor.chess.core.Player.*;
+import static io.github.teonistor.chess.board.Position.C1;
+import static io.github.teonistor.chess.board.Position.C8;
+import static io.github.teonistor.chess.board.Position.G1;
+import static io.github.teonistor.chess.board.Position.G8;
+import static io.github.teonistor.chess.core.Player.Black;
+import static io.github.teonistor.chess.core.Player.White;
 
 public class UnmovedKing extends King {
 
@@ -32,9 +36,9 @@ public class UnmovedKing extends King {
     @Override
     public Stream<Move> computePossibleMoves(Position from) {
         return computePossibleTargets(from)
-              .map(to -> (Move) new KingsFirstMove(from, to, getPlayer()))
+              .map(to -> (Move) new KingsFirstMove(from, to))
               .appendAll(castleTargetsByPlayer.get(getPlayer()).get().toStream()
-                    .map(to -> new Castle(from, to, getPlayer(), underAttackRule)))
+              .map(to -> new Castle(from, to, underAttackRule)))
               .toJavaStream();
     }
 }

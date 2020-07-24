@@ -1,7 +1,7 @@
 package io.github.teonistor.chess.piece;
 
-import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.move.CapturingMove;
 import io.github.teonistor.chess.move.EmptyPositionMove;
 import io.github.teonistor.chess.move.Move;
@@ -31,29 +31,29 @@ public class Pawn implements Piece {
 
                 if (from.toString().charAt(1) == '2') {
                     return Stream.of(
-                            new EmptyPositionMove(from, from.up(),        player),
-                            new EmptyPositionMove(from, from.up().up(),   player),
-                            new CapturingMove    (from, from.up().right(),player),
-                            new CapturingMove    (from, from.up().left(), player));
+                            new EmptyPositionMove(from, from.up()),
+                            new EmptyPositionMove(from, from.up().up()),
+                            new CapturingMove    (from, from.up().right()),
+                            new CapturingMove    (from, from.up().left()));
                 } else {
                     return Stream.of(
-                            new EmptyPositionMove(from, from.up(),        player),
-                            new CapturingMove    (from, from.up().right(),player),
-                            new CapturingMove    (from, from.up().left(), player));
+                            new EmptyPositionMove(from, from.up()),
+                            new CapturingMove    (from, from.up().right()),
+                            new CapturingMove    (from, from.up().left()));
                 }
 
             case Black:
                 if (from.toString().charAt(1) == '7') {
                     return Stream.of(
-                            new EmptyPositionMove(from, from.down(),        player),
-                            new EmptyPositionMove(from, from.down().down(), player),
-                            new CapturingMove    (from, from.down().right(),player),
-                            new CapturingMove    (from, from.down().left(), player));
+                            new EmptyPositionMove(from, from.down()),
+                            new EmptyPositionMove(from, from.down().down()),
+                            new CapturingMove    (from, from.down().right()),
+                            new CapturingMove    (from, from.down().left()));
                 } else {
                     return Stream.of(
-                            new EmptyPositionMove(from, from.down(),        player),
-                            new CapturingMove    (from, from.down().right(),player),
-                            new CapturingMove    (from, from.down().left(), player));
+                            new EmptyPositionMove(from, from.down()),
+                            new CapturingMove    (from, from.down().right()),
+                            new CapturingMove    (from, from.down().left()));
                 }
         }
         throw new IllegalStateException("Should never happen");

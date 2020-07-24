@@ -35,14 +35,14 @@ class CapturingMoveTest extends MoveTest {
         final Map<Position,Piece> board = HashMap.of(A1, moving, C6, victim);
         when(victim.getPlayer()).thenReturn(Black);
 
-        assertThat(new CapturingMove(A1,C6,White).validate(stateWith(board))).isTrue();
+        assertThat(new CapturingMove(A1,C6).validate(stateWith(board))).isTrue();
     }
 
     @Test
     void validateInvalidNotOccupied() {
         final Map<Position,Piece> board = HashMap.of(A1, moving);
 
-        assertThat(new CapturingMove(A1,C6,White).validate(stateWith(board))).isFalse();
+        assertThat(new CapturingMove(A1,C6).validate(stateWith(board))).isFalse();
     }
 
     @Test
@@ -50,15 +50,15 @@ class CapturingMoveTest extends MoveTest {
         final Map<Position,Piece> board = HashMap.of(A1, moving, C6, victim);
         when(victim.getPlayer()).thenReturn(White);
 
-        assertThat(new CapturingMove(A1,C6,White).validate(stateWith(board))).isFalse();
+        assertThat(new CapturingMove(A1,C6).validate(stateWith(board))).isFalse();
     }
 
     @Test
     void execute() {
         final Map<Position,Piece> boardIn = HashMap.of(B5, moving, E2, victim);
 
-        Map<Position,Piece> boardOut = new CapturingMove(B5, E2, Black).execute(boardIn, captureExpectedBoard, capturingReturnBoard);
-        Piece piece = new CapturingMove(B5, E2, Black).execute(boardIn, captureExpectedPiece, capturingReturnPiece);
+        Map<Position,Piece> boardOut = new CapturingMove(B5, E2).execute(boardIn, captureExpectedBoard, capturingReturnBoard);
+        Piece piece = new CapturingMove(B5, E2).execute(boardIn, captureExpectedPiece, capturingReturnPiece);
 
         assertThat(boardOut).containsExactly(new Tuple2<>(E2, moving));
         assertThat(piece).isEqualTo(victim);

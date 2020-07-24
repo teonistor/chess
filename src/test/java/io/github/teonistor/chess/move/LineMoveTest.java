@@ -39,7 +39,7 @@ class LineMoveTest extends MoveTest {
         final Map<Position,Piece> board = HashMap.of(B3, moving, D2, obstacle, D4, obstacle);
         when(obstacle.getPlayer()).thenReturn(player);
 
-        assertThat(new LineMove(B3, F3, player, List.of(C3, D3, E3)).validate(stateWith(board))).isTrue();
+        assertThat(new LineMove(B3, F3, List.of(C3, D3, E3)).validate(stateWith(board))).isTrue();
     }
 
     @ParameterizedTest
@@ -48,6 +48,6 @@ class LineMoveTest extends MoveTest {
         final Map<Position,Piece> board = HashMap.of(B3, moving, D3, obstacle);
         when(obstacle.getPlayer()).thenReturn(player);
 
-        assertThat(new LineMove(B3, F3, player, List.of(C3, D3, E3)).validate(stateWith(board))).isFalse();
+        assertThat(new LineMove(B3, F3, List.of(C3, D3, E3)).validate(stateWith(board))).isFalse();
     }
 }

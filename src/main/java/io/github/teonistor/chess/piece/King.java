@@ -19,7 +19,7 @@ public class King implements Piece {
     @Override
     public Stream<Move> computePossibleMoves(Position from) {
         return computePossibleTargets(from)
-              .map(to -> (Move) new CaptureIndependentMove(from, to, player))
+              .map(to -> (Move) new CaptureIndependentMove(from, to))
               .toJavaStream();
     }
 

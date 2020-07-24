@@ -2,7 +2,6 @@ package io.github.teonistor.chess.move;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.GameState;
-import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.Map;
 import lombok.AllArgsConstructor;
@@ -11,6 +10,8 @@ import lombok.NonNull;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import static io.vavr.Predicates.not;
 
 
 /**
@@ -22,13 +23,12 @@ public class CapturingMove implements Move {
 
     private final @NonNull Position from;
     private final @NonNull Position to;
-    private final @NonNull Player player;
 
     @Override
     public boolean validate(GameState state) {
         return state.getBoard().get(to)
                 .map(Piece::getPlayer)
-                .filter(p -> !player.equals(p))
+                .filter(not(state.getPlayer()::equals))
                 .isDefined();
     }
 

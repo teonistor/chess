@@ -1,7 +1,7 @@
 package io.github.teonistor.chess.piece;
 
-import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.move.CaptureIndependentMove;
 import io.github.teonistor.chess.move.LineMove;
 import io.github.teonistor.chess.move.Move;
@@ -9,6 +9,7 @@ import io.vavr.collection.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
+
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
@@ -28,7 +29,7 @@ public abstract class LineMovingPiece implements Piece {
                 return Stream.empty();
             }
 
-            return addTilEdge(List.of(new CaptureIndependentMove(from, to, player)),
+            return addTilEdge(List.of(new CaptureIndependentMove(from, to)),
                     List.of(to),
                     from,
                     step.apply(to),
@@ -42,7 +43,7 @@ public abstract class LineMovingPiece implements Piece {
             return moves;
         }
         return addTilEdge(
-                moves.prepend(new LineMove(from, to, player, mustBeEmpty)),
+                moves.prepend(new LineMove(from, to, mustBeEmpty)),
                 mustBeEmpty.prepend(to),
                 from,
                 step.apply(to),
