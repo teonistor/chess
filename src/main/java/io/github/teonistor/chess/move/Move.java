@@ -2,11 +2,6 @@ package io.github.teonistor.chess.move;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.GameState;
-import io.github.teonistor.chess.piece.Piece;
-import io.vavr.collection.Map;
-
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 
 public interface Move {
@@ -30,13 +25,10 @@ public interface Move {
     boolean validate(GameState state);
 
     /**
-     * Change the mappings of positions as needed to reflect this move taking place.
+     * Change the mappings of positions, and other game state attributes, as needed to reflect this move taking place.
      * The validity of the move is not checked during this call.
-     * @param board The current game board
-     * @param nonCapturingCallback Callback called with the new board when the move doesn't incur capturing
-     * @param capturingCallback Callback called with the new board and the captured piece when capturing occurs
-     * @param <T> A type that the caller needs
+     * @param state The current game state
      * @return What the chosen callback returns
      */
-    <T> T execute(Map<Position,Piece> board, Function<Map<Position,Piece>,T> nonCapturingCallback, BiFunction<Map<Position,Piece>,Piece,T> capturingCallback);
+    GameState execute(GameState state);
 }

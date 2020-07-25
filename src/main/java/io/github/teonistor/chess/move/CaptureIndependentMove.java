@@ -9,9 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 
 /**
  * A move which can land on a position if it's free or occupied by the opponent
@@ -32,13 +29,19 @@ public class CaptureIndependentMove implements Move {
     }
 
     @Override
-    public <T> T execute(Map<Position, Piece> board, Function<Map<Position, Piece>, T> nonCapturingCallback, BiFunction<Map<Position, Piece>, Piece, T> capturingCallback) {
+    public GameState execute(GameState state) {
+        Map<Position, Piece> board = state.getBoard();
         Piece fromPiece = board.get(from).get();
         Option<Piece> toPiece = board.get(to);
         if (toPiece.isDefined()) {
-            return capturingCallback.apply(board.remove(from).put(to, fromPiece), toPiece.get());
+            return state.advance(tinker(board.remove(from).put(to, fromPiece)), toPiece.get());
         } else {
-            return nonCapturingCallback.apply(board.remove(from).put(to, fromPiece));
+            return state.advance(tinker(board.remove(from).put(to, fromPiece)));
         }
+    }
+
+    // Easing implementation of KingsFirstMove. To be likely removed in future
+    protected Map<Position,Piece> tinker(Map<Position,Piece> board) {
+        return board;
     }
 }

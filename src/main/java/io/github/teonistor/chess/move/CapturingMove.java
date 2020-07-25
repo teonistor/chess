@@ -8,9 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 import static io.vavr.Predicates.not;
 
 
@@ -33,9 +30,10 @@ public class CapturingMove implements Move {
     }
 
     @Override
-    public <T> T execute(Map<Position, Piece> board, Function<Map<Position, Piece>, T> nonCapturingCallback, BiFunction<Map<Position, Piece>, Piece, T> capturingCallback) {
+    public GameState execute(GameState state) {
+        Map<Position, Piece> board = state.getBoard();
         Piece fromPiece = board.get(from).get();
         Piece toPiece = board.get(to).get();
-        return capturingCallback.apply(board.remove(from).put(to, fromPiece), toPiece);
+        return state.advance(board.remove(from).put(to, fromPiece), toPiece);
     }
 }

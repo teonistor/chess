@@ -2,14 +2,9 @@ package io.github.teonistor.chess.move;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.GameState;
-import io.github.teonistor.chess.piece.Piece;
-import io.vavr.collection.Map;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
-
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 
 /**
@@ -28,7 +23,7 @@ public class EmptyPositionMove implements Move {
     }
 
     @Override
-    public <T> T execute(Map<Position, Piece> board, Function<Map<Position, Piece>, T> nonCapturingCallback, BiFunction<Map<Position, Piece>, Piece, T> capturingCallback) {
-        return nonCapturingCallback.apply(board.remove(from).put(to, board.get(from).get()));
+    public GameState execute(GameState state) {
+        return state.advance(state.getBoard().remove(from).put(to, state.getBoard().get(from).get()));
     }
 }

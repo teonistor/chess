@@ -32,7 +32,6 @@ import static io.github.teonistor.chess.core.GameCondition.Continue;
 import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -128,8 +127,8 @@ class GameTest {
         when(d8Piece.computePossibleMoves(D8)).thenReturn(Stream.of(selfFilteredMove, ruleFilteredMove));
         when(move.getTo()).thenReturn(A3);
         when(ruleFilteredMove.getTo()).thenReturn(E5);
-        when(move.execute(eq(board), any(), any())).thenReturn(outputState);
-        when(ruleFilteredMove.execute(eq(board), any(), any())).thenReturn(ruleFilteredState);
+        when(move.execute(state)).thenReturn(outputState);
+        when(ruleFilteredMove.execute(state)).thenReturn(ruleFilteredState);
         when(rule.validate(outputBoard, currentPlayer)).thenReturn(true);
         when(rule.validate(ruleFilteredBoard, currentPlayer)).thenReturn(false);
 
@@ -147,8 +146,8 @@ class GameTest {
         verify(d8Piece).computePossibleMoves(D8);
         verify(move).getTo();
         verify(ruleFilteredMove).getTo();
-        verify(move).execute(eq(board), any(), any());
-        verify(ruleFilteredMove).execute(eq(board), any(), any());
+        verify(move).execute(state);
+        verify(ruleFilteredMove).execute(state);
         verify(rule).validate(outputBoard, currentPlayer);
         verify(rule).validate(ruleFilteredBoard, currentPlayer);
     }

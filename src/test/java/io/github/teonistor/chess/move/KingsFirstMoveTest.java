@@ -22,7 +22,7 @@ class KingsFirstMoveTest extends MoveTest {
     void execute() {
         final Map<Position, Piece> boardIn = HashMap.of(E1, new UnmovedKing(White, mock(UnderAttackRule.class)));
 
-        final Map<Position, Piece> boardOut = new KingsFirstMove(E1, D2).execute(boardIn, nonCapturingReturnBoard, captureNotExpected);
+        final Map<Position, Piece> boardOut = new KingsFirstMove(E1, D2).execute(stateWith(boardIn)).getBoard();
 
         assertThat(boardOut).hasSize(1);
         assertThat(boardOut.get(D2).get()).isExactlyInstanceOf(King.class);

@@ -52,7 +52,7 @@ class EmptyPositionMoveTest extends MoveTest {
     void execute() {
         final Map<Position,Piece> boardIn = HashMap.of(H6, moving);
 
-        Map<Position,Piece> boardOut = new EmptyPositionMove(H6, G1).execute(boardIn, nonCapturingReturnBoard, captureNotExpected);
+        Map<Position,Piece> boardOut = new EmptyPositionMove(H6, G1).execute(stateWith(boardIn)).getBoard();
 
         assertThat(boardOut).containsExactly(new Tuple2<>(G1, moving));
     }

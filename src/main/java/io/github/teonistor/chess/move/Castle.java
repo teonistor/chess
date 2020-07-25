@@ -15,9 +15,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 import static io.github.teonistor.chess.board.Position.A1;
 import static io.github.teonistor.chess.board.Position.A8;
 import static io.github.teonistor.chess.board.Position.B1;
@@ -67,12 +64,13 @@ public class Castle implements Move {
     }
 
     @Override
-    public <T> T execute(Map<Position, Piece> board, Function<Map<Position, Piece>, T> nonCapturingCallback, BiFunction<Map<Position, Piece>, Piece, T> capturingCallback) {
+    public GameState execute(GameState state) {
+        final Map<Position, Piece> board = state.getBoard();
         final Position rookFrom = rookPositionsByTarget.get(to).get();
         final Position rookTo = rookTargetsByTarget.get(to).get();
         final Piece oldKing = board.get(from).get();
 
-        return nonCapturingCallback.apply(board.remove(from).remove(rookFrom)
+        return state.advance(board.remove(from).remove(rookFrom)
               .put(to, new King(oldKing.getPlayer()))
               .put(rookTo, board.get(rookFrom).get()));
     }

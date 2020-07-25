@@ -33,26 +33,29 @@ class GameStateTest {
         assertThat(finalState.getBoard()).isEqualTo(finalBoard);
         assertThat(finalState.getPlayer()).isEqualTo(Black);
         assertThat(finalState.getCapturedPieces()).isEmpty();
+        assertThat(finalState.getPawnTrail()).isNull();
     }
 
     @Test
     void advanceBoardBlack() {
-        final GameState initialState = new GameState(initialBoard, Black, HashSet.of(aPiece));
+        final GameState initialState = new GameState(initialBoard, Black, HashSet.of(aPiece), Position.C3);
         final GameState finalState = initialState.advance(finalBoard);
 
         assertThat(finalState.getBoard()).isEqualTo(finalBoard);
         assertThat(finalState.getPlayer()).isEqualTo(White);
         assertThat(finalState.getCapturedPieces()).containsExactly(aPiece);
+        assertThat(finalState.getPawnTrail()).isNull();
     }
 
     @Test
     void advanceBoardAndCaptureWhite() {
-        final GameState initialState = new GameState(initialBoard, White, HashSet.empty());
+        final GameState initialState = new GameState(initialBoard, White, HashSet.empty(), Position.C3);
         final GameState finalState = initialState.advance(finalBoard, aPiece);
 
         assertThat(finalState.getBoard()).isEqualTo(finalBoard);
         assertThat(finalState.getPlayer()).isEqualTo(Black);
         assertThat(finalState.getCapturedPieces()).containsExactly(aPiece);
+        assertThat(finalState.getPawnTrail()).isNull();
     }
 
     @Test
@@ -63,5 +66,17 @@ class GameStateTest {
         assertThat(finalState.getBoard()).isEqualTo(finalBoard);
         assertThat(finalState.getPlayer()).isEqualTo(White);
         assertThat(finalState.getCapturedPieces()).containsExactlyInAnyOrder(aPiece, anotherPiece);
+        assertThat(finalState.getPawnTrail()).isNull();
+    }
+
+    @Test
+    void advanceBoardAndLeaveTrail() {
+        final GameState initialState = new GameState(initialBoard, Black, HashSet.of(anotherPiece));
+        final GameState finalState = initialState.advance(finalBoard, Position.C3);
+
+        assertThat(finalState.getBoard()).isEqualTo(finalBoard);
+        assertThat(finalState.getPlayer()).isEqualTo(White);
+        assertThat(finalState.getCapturedPieces()).containsExactlyInAnyOrder(anotherPiece);
+        assertThat(finalState.getPawnTrail()).isSameAs(Position.C3);
     }
 }

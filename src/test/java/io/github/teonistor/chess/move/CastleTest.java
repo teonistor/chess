@@ -93,7 +93,7 @@ class CastleTest extends MoveTest{
     void execute(Position from, Position to, Player player, Position rookFrom, Position rookTo) {
         HashMap<Position, Piece> board = HashMap.of(from, new King(player), rookFrom, new Rook(player));
 
-        Map<Position, Piece> output = new Castle(from, to, rule).execute(board, nonCapturingReturnBoard, captureNotExpected);
+        Map<Position,Piece> output = new Castle(from, to, rule).execute(stateWith(board)).getBoard();
 
         assertThat(output.get(to).get()).isExactlyInstanceOf(King.class);
         assertThat(output.get(to).get().getPlayer()).isEqualTo(player);

@@ -66,7 +66,7 @@ public class Game {
                 // .mapValues ?
                 .map((from, piece) -> new Tuple2<>(from, piece.computePossibleMoves(from)
                 .filter(move -> move.validate(state))
-                .map(move -> new Tuple2<>(move.getTo(), move.execute(board, state::advance, state::advance)))
+                .map(move -> new Tuple2<>(move.getTo(), move.execute(state)))
                 .filter(targetAndState -> checkRule.validate(targetAndState._2.getBoard(), player))
                 .collect(HashMap.collector())));
     }
