@@ -12,7 +12,7 @@ import static org.apache.commons.lang3.Validate.isTrue;
 
 public class MultipleViewWrapper implements View {
 
-    private final Iterable<View> views;// = List.of(views);
+    private final Iterable<View> views;
 
     private MultipleViewWrapper(Iterable<View> views) {
         this.views = views;
