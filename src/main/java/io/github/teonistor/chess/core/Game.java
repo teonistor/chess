@@ -84,6 +84,7 @@ public class Game {
 
     private GameState processFirstInput(GameState state, Map<Position, Map<Position, GameState>> possibleTargetStates, Position source) {
         if (possibleTargetStates.containsKey(source)) {
+            // TODO What's with this print here
             System.out.println(possibleTargetStates);
             final Map<Position, GameState> filteredTargetStates = possibleTargetStates.get(source).get();
             view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), source, filteredTargetStates.keySet());

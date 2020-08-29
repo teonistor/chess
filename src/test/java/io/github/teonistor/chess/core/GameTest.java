@@ -53,7 +53,7 @@ class GameTest {
     private final Piece d8Piece = mock(Piece.class);
     private final Piece h6Piece = mock(Piece.class);
     private final HashMap<Position, Piece> board = HashMap.of(A1, a1Piece, B4, b4Piece, D8, d8Piece, H6, h6Piece);
-    private final GameState state = spy(new GameState(board, White, HashSet.empty()));
+    private final GameState state = spy(new GameState(board, White, HashSet.empty(), null));
     private final Move move = mock(Move.class);
 
     // These stubs are a necessary evil if we are to test that the game indeed passes a state::advance method reference (verified on the state mock)
@@ -112,8 +112,8 @@ class GameTest {
         final Move ruleFilteredMove = mock(Move.class);
         final HashMap<Position,Piece> outputBoard = HashMap.of(A2, a1Piece);
         final HashMap<Position,Piece> ruleFilteredBoard = HashMap.of(B5, b4Piece);
-        final GameState outputState = new GameState(outputBoard, otherPlayer, HashSet.empty());
-        final GameState ruleFilteredState = new GameState(ruleFilteredBoard, otherPlayer, HashSet.empty());
+        final GameState outputState = new GameState(outputBoard, otherPlayer, HashSet.empty(), null);
+        final GameState ruleFilteredState = new GameState(ruleFilteredBoard, otherPlayer, HashSet.empty(), null);
 
         when(move.validate(state)).thenReturn(true);
         when(ruleFilteredMove.validate(state)).thenReturn(true);

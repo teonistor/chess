@@ -27,6 +27,6 @@ public abstract class MoveTest {
     }
 
     protected GameState stateWith(Map<Position, Piece> board, Player player) {
-        return new GameState(board, player, HashSet.empty());
+        return new GameState(board, player, HashSet.empty(), null);
     }
 }

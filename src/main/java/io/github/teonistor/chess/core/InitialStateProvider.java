@@ -13,6 +13,6 @@ public class InitialStateProvider {
     private final @NonNull InitialBoardProvider initialBoardProvider;
 
     public GameState createInitialState() {
-        return new GameState(initialBoardProvider.createInitialBoard(), White, HashSet.empty());
+        return new GameState(initialBoardProvider.createInitialBoard(), White, HashSet.empty(), null);
     }
 }

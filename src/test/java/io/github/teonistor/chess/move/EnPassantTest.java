@@ -31,7 +31,7 @@ class EnPassantTest extends MoveTest{
 
     @Test
     void validateValid() {
-        assertThat(new EnPassant(G4, F3, F4).validate(new GameState(HashMap.empty(), White, HashSet.empty(), F3))).isTrue();
+        assertThat(new EnPassant(G4, F3, F4).validate(new GameState(HashMap.empty(), White, HashSet.empty(), null, F3))).isTrue();
     }
 
     @Test
@@ -43,7 +43,7 @@ class EnPassantTest extends MoveTest{
     void execute() {
         final HashMap<Position, Piece> board = HashMap.of(Position.E4, moving, Position.D4, victim);
 
-        final GameState state = new EnPassant(Position.E4, Position.D3, Position.D4).execute(new GameState(board, Black, HashSet.empty(), Position.D3));
+        final GameState state = new EnPassant(Position.E4, Position.D3, Position.D4).execute(new GameState(board, Black, HashSet.empty(), null, Position.D3));
 
         assertThat(state.getBoard()).containsExactly(new Tuple2<>(Position.D3, moving));
         assertThat(state.getPlayer()).isEqualTo(White);
