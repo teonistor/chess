@@ -4,18 +4,14 @@ import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.move.CaptureIndependentMove;
 import io.github.teonistor.chess.move.Move;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
-
 import java.util.stream.Stream;
 
 
-@AllArgsConstructor
-@Getter
-public class Knight implements Piece {
+public class Knight extends Piece {
 
-    private final @NonNull Player player;
+    public Knight(Player player) {
+        super(player);
+    }
 
     @Override
     public Stream<Move> computePossibleMoves(Position from) {

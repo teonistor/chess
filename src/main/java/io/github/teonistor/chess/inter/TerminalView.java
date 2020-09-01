@@ -10,7 +10,6 @@ import io.github.teonistor.chess.piece.Pawn;
 import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.piece.Queen;
 import io.github.teonistor.chess.piece.Rook;
-import io.github.teonistor.chess.piece.UnmovedKing;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
@@ -42,7 +41,7 @@ public class TerminalView implements View {
         "   ╰──┴──┴──┴──┴──┴──┴──┴──╯\n" +
         "    A  B  C  D  E  F  G  H";
 
-    private static final Map<Class<? extends Piece>, String> pieceLetters = HashMap.of(Pawn.class, "P", Knight.class, "N", Rook.class, "R", Bishop.class, "B", Queen.class, "Q", King.class, "K", UnmovedKing.class, "K");
+    private static final Map<Class<? extends Piece>, String> pieceLetters = HashMap.of(Pawn.class, "P", Knight.class, "N", Rook.class, "R", Bishop.class, "B", Queen.class, "Q", King.class, "K");
     private static final Map<Player, String> playerLetters = HashMap.of(Player.Black, "B", Player.White, "W");
     private static final Pattern slot = Pattern.compile("[A-H][1-8]");
 

@@ -7,20 +7,16 @@ import io.github.teonistor.chess.move.EmptyPositionMove;
 import io.github.teonistor.chess.move.EnPassant;
 import io.github.teonistor.chess.move.Move;
 import io.github.teonistor.chess.move.TrailLeavingMove;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
-
 import java.util.stream.Stream;
 
 import static io.github.teonistor.chess.board.Position.OutOfBoard;
 
 
-@AllArgsConstructor
-@Getter
-public class Pawn implements Piece {
+public class Pawn extends Piece {
 
-    private final @NonNull Player player;
+    public Pawn(Player player) {
+        super(player);
+    }
 
     @Override
     public Stream<Move> computePossibleMoves(final Position from) {
@@ -28,7 +24,7 @@ public class Pawn implements Piece {
     }
 
     private Stream<Move> computePossibleMoves0(final Position from) {
-        switch (player) {
+        switch (getPlayer()) {
             case White:
 
                 if (from.toString().charAt(1) == '2') {

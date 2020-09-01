@@ -69,19 +69,5 @@ class GameStateTest {
         assertThat(finalState.getBoard()).isEqualTo(finalBoard);
         assertThat(finalState.getPlayer()).isEqualTo(White);
         assertThat(finalState.getCapturedPieces()).containsExactlyInAnyOrder(aPiece, anotherPiece);
-        assertThat(finalState.getPrevious()).isSameAs(initialState);
-        assertThat(finalState.getPawnTrail()).isNull();
-    }
-
-    @Test
-    void advanceBoardAndLeaveTrail() {
-        final GameState initialState = new GameState(initialBoard, Black, HashSet.of(anotherPiece), null);
-        final GameState finalState = initialState.advance(finalBoard, Position.C3);
-
-        assertThat(finalState.getBoard()).isEqualTo(finalBoard);
-        assertThat(finalState.getPlayer()).isEqualTo(White);
-        assertThat(finalState.getCapturedPieces()).containsExactlyInAnyOrder(anotherPiece);
-        assertThat(finalState.getPrevious()).isSameAs(initialState);
-        assertThat(finalState.getPawnTrail()).isSameAs(Position.C3);
     }
 }

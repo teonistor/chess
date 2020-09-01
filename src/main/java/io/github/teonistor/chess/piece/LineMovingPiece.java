@@ -6,19 +6,19 @@ import io.github.teonistor.chess.move.CaptureIndependentMove;
 import io.github.teonistor.chess.move.LineMove;
 import io.github.teonistor.chess.move.Move;
 import io.vavr.collection.List;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
-
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
+import static java.util.Objects.requireNonNull;
 
 
-@AllArgsConstructor
-public abstract class LineMovingPiece implements Piece {
+public abstract class LineMovingPiece extends Piece {
 
-    private final @NonNull @Getter Player player;
-    private final @NonNull List<UnaryOperator<Position>> steps;
+    private final List<UnaryOperator<Position>> steps;
+
+    public LineMovingPiece(Player player, List<UnaryOperator<Position>> steps) {
+        super(player);
+        this.steps = requireNonNull(steps);
+    }
 
     @Override
     public Stream<Move> computePossibleMoves(Position from) {

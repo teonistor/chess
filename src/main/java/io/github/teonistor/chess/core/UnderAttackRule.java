@@ -54,7 +54,7 @@ public class UnderAttackRule {
            .put(upRight,           HashSet.of(King.class))
            .put(downLeft,          HashSet.of(King.class))
            .put(downRight,         HashSet.of(King.class));
-        
+
         // n.b. These are named based on the player who is under attack and defined such that we proceed from the checked position to the (potential) attacking piece
         whiteSteps = nonRecursiveSteps
                 .put(upLeft,  HashSet.of(Pawn.class, King.class))
@@ -82,17 +82,15 @@ public class UnderAttackRule {
     }
 
     private boolean checkAttack(Map<Position, Piece> board, Position position, Player enemy, Map<UnaryOperator<Position>, HashSet<Class<? extends Piece>>> nonRecursiveSteps) {
-        return nonRecursiveSteps.toStream().map(stepAndTypes -> {
-            return board.get(stepAndTypes._1.apply(position))
-                    .filter(piece -> piece.getPlayer() == enemy)
-                    .map(Piece::getClass)
-                    .filter(stepAndTypes._2::contains)
-                    .isDefined();
-        }).reduce(Boolean::logicalOr)
-
+        return nonRecursiveSteps.toStream().map(stepAndTypes -> board.get(stepAndTypes._1.apply(position))
+                .filter(piece -> piece.getPlayer() == enemy)
+                .map(Piece::getClass)
+                .filter(stepAndTypes._2::contains)
+                .isDefined())
+                .reduce(Boolean::logicalOr)
                 ||
-
-                recursiveSteps.toStream().map(stepAndTypes -> recurseStep(board, stepAndTypes._1.apply(position), enemy, stepAndTypes._1, stepAndTypes._2)).reduce(Boolean::logicalOr);
+               recursiveSteps.toStream().map(stepAndTypes -> recurseStep(board, stepAndTypes._1.apply(position), enemy, stepAndTypes._1, stepAndTypes._2))
+                .reduce(Boolean::logicalOr);
     }
 
     private boolean recurseStep (Map<Position, Piece> board, Position currentPosition, Player enemy, UnaryOperator<Position> step, HashSet<Class<? extends Piece>> types) {

@@ -56,13 +56,6 @@ class GameTest {
     private final GameState state = spy(new GameState(board, White, HashSet.empty(), null));
     private final Move move = mock(Move.class);
 
-    // These stubs are a necessary evil if we are to test that the game indeed passes a state::advance method reference (verified on the state mock)
-    @SuppressWarnings("unchecked")
-    private final Answer<GameState> moveStub = invocation -> {
-        ((Function<Map<Position, Piece>, Map<Position, Piece>>) invocation.getArgument(1)).apply(invocation.getArgument(0));
-        return state;
-    };
-
     private Game game;
 
     @BeforeEach

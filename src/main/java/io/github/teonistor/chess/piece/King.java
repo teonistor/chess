@@ -2,37 +2,56 @@ package io.github.teonistor.chess.piece;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
+import io.github.teonistor.chess.core.UnderAttackRule;
+import io.github.teonistor.chess.move.Castle;
 import io.github.teonistor.chess.move.CaptureIndependentMove;
 import io.github.teonistor.chess.move.Move;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
+import io.vavr.Tuple2;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.HashSet;
+import io.vavr.collection.Map;
+import io.vavr.collection.Set;
 
 import java.util.stream.Stream;
 
-@AllArgsConstructor
-@Getter
-public class King implements Piece {
+import static io.github.teonistor.chess.board.Position.*;
+import static io.github.teonistor.chess.core.Player.Black;
+import static io.github.teonistor.chess.core.Player.White;
+import static java.util.function.Predicate.not;
 
-    private final @NonNull Player player;
+
+public class King extends Piece {
+
+    private static final Map<Tuple2<Player,Position>, Set<Position>> castleTargetsByPlayerAndFrom = HashMap.of(
+            new Tuple2<>(White,E1), HashSet.of(C1, G1),
+            new Tuple2<>(Black,E8), HashSet.of(C8, G8));
+
+    private final UnderAttackRule underAttackRule;
+
+    public King(Player player, UnderAttackRule underAttackRule) {
+        super(player);
+        this.underAttackRule = underAttackRule;
+    }
 
     @Override
     public Stream<Move> computePossibleMoves(Position from) {
-        return computePossibleTargets(from)
-              .map(to -> (Move) new CaptureIndependentMove(from, to))
-              .toJavaStream();
-    }
+        return Stream.concat(
+               Stream.of(
+                       from.up(),
+                       from.left(),
+                       from.right(),
+                       from.down(),
+                       from.up().left(),
+                       from.up().right(),
+                       from.down().left(),
+                       from.down().right())
+                   .filter(not(OutOfBoard::equals))
+                   .map(to -> (Move) new CaptureIndependentMove(from, to)),
 
-    protected io.vavr.collection.Stream<Position> computePossibleTargets(Position from) {
-        return io.vavr.collection.Stream.of(
-                from.up(),
-                from.left(),
-                from.right(),
-                from.down(),
-                from.up().left(),
-                from.up().right(),
-                from.down().left(),
-                from.down().right())
-            .filter(to -> !Position.OutOfBoard.equals(to));
+               castleTargetsByPlayerAndFrom.get(new Tuple2<>(getPlayer(), from))
+                   .getOrElse(HashSet::empty)
+                   .toJavaStream()
+                   .map(to -> new Castle(from, to, underAttackRule))
+        );
     }
 }

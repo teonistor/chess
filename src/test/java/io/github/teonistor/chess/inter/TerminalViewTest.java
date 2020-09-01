@@ -2,12 +2,11 @@ package io.github.teonistor.chess.inter;
 
 import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.piece.Bishop;
-import io.github.teonistor.chess.piece.King;
 import io.github.teonistor.chess.piece.Knight;
 import io.github.teonistor.chess.piece.Pawn;
 import io.github.teonistor.chess.piece.Queen;
 import io.github.teonistor.chess.piece.Rook;
-import io.github.teonistor.chess.piece.UnmovedKing;
+import io.github.teonistor.chess.piece.King;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.HashSet;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ class TerminalViewTest {
                 B7, new Bishop(Black),
                 E2, new Queen(White),
                 F4, new Knight(White),
-                B5, new King(Black),
+                B5, new King(Black, mock(UnderAttackRule.class)),
                 D8, new Knight(Black)), White, OutOfBoard, HashSet.empty());
 
         assertThat(output).contains(
@@ -63,7 +62,7 @@ class TerminalViewTest {
                 B3, new Knight(Black),
                 F6, new Pawn(White),
                 C6, new Rook(White),
-                E8, new UnmovedKing(Black, mock(UnderAttackRule.class))), Black, C3, HashSet.of(C5, D4, D2));
+                E8, new King(Black, mock(UnderAttackRule.class))), Black, C3, HashSet.of(C5, D4, D2));
 
         assertThat(output).contains(
             "    A  B  C  D  E  F  G  H\n" +
