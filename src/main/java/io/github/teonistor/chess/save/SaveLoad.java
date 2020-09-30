@@ -1,0 +1,153 @@
+package io.github.teonistor.chess.save;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.core.GameState;
+import io.github.teonistor.chess.core.Player;
+import io.github.teonistor.chess.piece.Bishop;
+import io.github.teonistor.chess.piece.King;
+import io.github.teonistor.chess.piece.Knight;
+import io.github.teonistor.chess.piece.Pawn;
+import io.github.teonistor.chess.piece.Piece;
+import io.github.teonistor.chess.piece.Queen;
+import io.github.teonistor.chess.piece.Rook;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
+import io.vavr.collection.Stream;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.zip.GZIPOutputStream;
+
+import static lombok.AccessLevel.PRIVATE;
+
+public class SaveLoad {
+    private static SaveLoad instance;
+
+    private final ObjectMapper objectMapper;
+    private final Map<Player, String> deconsPlayer;
+    private final Map<Class<? extends Piece>, String> deconsPiece;
+    private final Map<String, Player> reconsPlayer;
+    private final Map<String, Function<Player,Piece>> reconsPiece;
+
+    private SaveLoad() {
+        objectMapper = new ObjectMapper();
+
+//        final SimpleModule module = new SimpleModule();
+//        module.addSerializer(new JsonSerializer<Piece>() {
+//            @Override
+//            public void serialize(final Piece piece, final JsonGenerator jsonGenerator, final SerializerProvider serializerProvider) throws IOException {
+//                jsonGenerator.writeob
+//            }
+//        });
+//
+//        objectMapper.registerModule(module);
+
+        deconsPlayer = HashMap.of(Player.White, "W", Player.Black, "B");
+        deconsPiece = HashMap.of(Pawn.class, "P", Knight.class, "N", Rook.class, "R", Bishop.class, "B", Queen.class, "Q", King.class, "K");
+        reconsPlayer = HashMap.of("W", Player.White, "B", Player.Black);
+        // TODO Figure out the underAttackRule
+        reconsPiece = HashMap.of("P", Pawn::new, "N", Knight::new, "R", Rook::new, "B", Bishop::new, "Q", Queen::new, "K", p -> new King(p, null));
+    }
+
+    private static void init() {
+        if (instance == null) {
+            instance = new SaveLoad();
+        }
+    }
+
+    public static void main(String[] args) {
+        SaveLoad.saveState(new GameState(
+                HashMap.of(Position.A2, new Pawn(Player.White), Position.B2, new Pawn(Player.White)),
+                Player.Black,
+                List.of(new Rook(Player.Black)),
+                new GameState(
+                        HashMap.of(Position.A2, new Pawn(Player.White), Position.B2, new Pawn(Player.White), Position.C6, new Rook(Player.Black)),
+                        Player.Black,
+                        List.empty(),
+                        null)));
+    }
+
+    public static void saveState(final GameState state) {
+        init();
+        instance.doSaveState(state);
+    }
+
+
+    public void doSaveState(final GameState state) {
+        final java.util.List<SerializableState> serializableStates = Stream.iterate(state, GameState::getPrevious)
+                .takeUntil(Objects::isNull)
+                .map(this::deconstructState)
+                .toJavaList();
+
+        try {
+
+            objectMapper.writeValue(new GZIPOutputStream(new FileOutputStream("game.js.gz")),serializableStates);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+//        try (final FileOutputStream fos = new FileOutputStream("savegame.json")) {
+//
+//            new ObjectMapper().writeValue(fos, new SerializableState(
+//                    state.getBoard().mapValues(this::serializablise).toJavaMap(),
+//                    state.getPlayer(),
+//                    state.getCapturedPieces().map(this::serializablise).toJavaList())
+//
+//            );
+//        } catch (final IOException e) {
+//            e.printStackTrace();
+//        }
+    }
+
+    private SerializablePiece serializablise(final Piece piece) {
+        return new SerializablePiece(piece.getPlayer(), piece.getClass().getSimpleName());
+    }
+
+    private SerializableState deconstructState(final GameState state) {
+        return new SerializableState(
+            state.getBoard().mapValues(this::deconstructPiece).toJavaMap(),
+            state.getPlayer(),
+            state.getCapturedPieces().map(this::deconstructPiece).toJavaList());
+    }
+
+    private String deconstructPiece(final Piece piece) {
+        return deconsPlayer.get(piece.getPlayer()).get() + deconsPiece.get(piece.getClass()).get();
+    }
+
+    private GameState reconstructState(final SerializableState serializableState, final GameState previousState) {
+        return new GameState(
+            HashMap.ofAll(serializableState.board).mapValues(this::reconstructPiece),
+            serializableState.player,
+            List.ofAll(serializableState.capturedPieces).map(this::reconstructPiece),
+            previousState);
+    }
+
+    private Piece reconstructPiece(final String pieceStr) {
+        return reconsPiece.get(pieceStr.substring(1,2)).get().apply(reconsPlayer.get(pieceStr.substring(0,1)).get());
+    }
+
+    @AllArgsConstructor
+    @Getter
+    @NoArgsConstructor(access=PRIVATE)
+    private static class SerializableState {
+        java.util.Map<Position,String> board;
+        Player player;
+        java.util.List<String> capturedPieces;
+    }
+
+    @AllArgsConstructor
+    private static class SerializablePiece {
+        Player p;
+        String t;
+    }
+}
