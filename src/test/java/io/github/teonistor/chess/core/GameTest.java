@@ -62,8 +62,8 @@ class GameTest {
     void setUp() {
         game = spy(new Game(provider, rule, checker, white, black, view));
         when(provider.createInitialState()).thenReturn(state);
-        when(rule.validate(any(),any())).thenReturn(true);
-        when(state.advance(any())).thenReturn(state);
+        when(rule.validate(any(), any())).thenReturn(true);
+        doReturn(state).when(state).advance(any());
     }
 
     @ParameterizedTest(name="{0} - {1}")
