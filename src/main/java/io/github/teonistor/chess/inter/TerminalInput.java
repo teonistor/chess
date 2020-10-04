@@ -2,7 +2,9 @@ package io.github.teonistor.chess.inter;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.github.teonistor.chess.board.Position;
-
+import io.github.teonistor.chess.core.StateProvision;
+import io.vavr.collection.Stream;
+import io.vavr.control.Option;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,11 +13,12 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import static org.apache.commons.lang3.exception.ExceptionUtils.rethrow;
 import static org.apache.commons.lang3.StringUtils.strip;
 
 public class TerminalInput implements Input {
-    static final byte[] prompt = " > ".getBytes();
+    static final byte[] gamePrompt = " > ".getBytes();
+    static final byte[] provisionPrompt = "new/load > ".getBytes();
     static final Pattern twoInputs = Pattern.compile("\\s*([a-hA-H][0-9])[\\s-]*([a-hA-H][0-9])\\s*");
 
     private final OutputStream outputStream;
@@ -32,20 +35,9 @@ public class TerminalInput implements Input {
     }
 
     @Override
-    public Position takeInput() {
-        try {
-            outputStream.write(prompt);
-            return Position.valueOf(strip(reader.readLine()).toUpperCase());
-        } catch (IOException | IllegalArgumentException e) {
-            // Deliberately so
-        }
-        return Position.OutOfBoard;
-    }
-
-    @Override
     public <T> T takeInput(Function<Position, T> callbackOne, BiFunction<Position, Position, T> callbackTwo) {
         try {
-            outputStream.write(prompt);
+            outputStream.write(gamePrompt);
             final String line = reader.readLine();
             final Matcher match = twoInputs.matcher(line);
 
@@ -62,10 +54,24 @@ public class TerminalInput implements Input {
     @Override
     public <T> T takeInput(Function<Position, T> callback) {
         try {
-            outputStream.write(prompt);
+            outputStream.write(gamePrompt);
             return callback.apply(Position.valueOf(strip(reader.readLine()).toUpperCase()));
         } catch (final IOException | IllegalArgumentException e) {
             return callback.apply(Position.OutOfBoard);
+        }
+    }
+
+    @Override
+    public Option<StateProvision> stateProvision() {
+        try {
+            outputStream.write(provisionPrompt);
+            final String s = strip(reader.readLine()).toLowerCase();
+            return Stream.of(StateProvision.values())
+                    .filter(p -> s.equals(p.name().toLowerCase()))
+                    .headOption();
+
+        } catch (final IOException e) {
+            return rethrow(e);
         }
     }
 }

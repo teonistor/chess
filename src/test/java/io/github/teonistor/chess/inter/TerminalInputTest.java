@@ -1,7 +1,9 @@
 package io.github.teonistor.chess.inter;
 
 import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.core.StateProvision;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -40,7 +42,7 @@ class TerminalInputTest {
         assertThat(new TerminalInput(outputStream, reader).takeInput(assertPosition(position))).isSameAs(sentinel);
 
         verify(reader).readLine();
-        verify(outputStream).write(TerminalInput.prompt);
+        verify(outputStream).write(TerminalInput.gamePrompt);
     }
 
     @ParameterizedTest
@@ -52,7 +54,7 @@ class TerminalInputTest {
 
 
         verify(reader).readLine();
-        verify(outputStream).write(TerminalInput.prompt);
+        verify(outputStream).write(TerminalInput.gamePrompt);
     }
 
     @ParameterizedTest
@@ -63,7 +65,7 @@ class TerminalInputTest {
         assertThat(new TerminalInput(outputStream, reader).takeInput(assertPosition(position), expectedOne)).isSameAs(sentinel);
 
         verify(reader).readLine();
-        verify(outputStream).write(TerminalInput.prompt);
+        verify(outputStream).write(TerminalInput.gamePrompt);
     }
 
     @ParameterizedTest
@@ -74,7 +76,7 @@ class TerminalInputTest {
         assertThat(new TerminalInput(outputStream, reader).takeInput(assertPosition("OutOfBoard"), expectedOne)).isSameAs(sentinel);
 
         verify(reader).readLine();
-        verify(outputStream).write(TerminalInput.prompt);
+        verify(outputStream).write(TerminalInput.gamePrompt);
     }
 
     @ParameterizedTest(name="{0}")
@@ -85,7 +87,7 @@ class TerminalInputTest {
         assertThat(new TerminalInput(outputStream, reader).takeInput(expectedTwo, assertPositions(a,b))).isSameAs(sentinel);
 
         verify(reader).readLine();
-        verify(outputStream).write(TerminalInput.prompt);
+        verify(outputStream).write(TerminalInput.gamePrompt);
     }
 
     private static Stream<Object[]> takeTwoInputsArgs() {
@@ -123,6 +125,16 @@ class TerminalInputTest {
             assertThat(y).isEqualTo(b);
             return sentinel;
         };
+    }
+
+    @Test
+    void stateProvision() throws IOException {
+        when(reader.readLine()).thenReturn(StateProvision.New.name().toLowerCase() + " ");
+
+        assertThat(new TerminalInput(outputStream, reader).stateProvision()).contains(StateProvision.New);
+
+        verify(reader).readLine();
+        verify(outputStream).write(TerminalInput.provisionPrompt);
     }
 
     @AfterEach
