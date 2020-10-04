@@ -40,7 +40,7 @@ import static org.mockito.Mockito.when;
 
 class GameTest {
 
-    private final InitialStateProvider provider = mock(InitialStateProvider.class);
+    private final GameStateProvider provider = mock(InitialStateProvider.class);
     private final CheckRule rule = mock(CheckRule.class);
     private final GameOverChecker checker = mock(GameOverChecker.class);
     private final Input white = mock(Input.class);
@@ -59,7 +59,7 @@ class GameTest {
     @BeforeEach
     void setUp() {
         game = spy(new Game(provider, rule, checker, white, black, view));
-        when(provider.createInitialState()).thenReturn(state);
+        when(provider.createState()).thenReturn(state);
         when(rule.validate(any(), any())).thenReturn(true);
         doReturn(state).when(state).advance(any());
     }
@@ -71,7 +71,7 @@ class GameTest {
                 "11,WhiteWins,White wins!",
                 "15,BlackWins,Black wins!",
                 "25,Stalemate,Stalemate!"})
-    void loop(int howManyLoops, GameCondition endGame, String endMessage) {
+    void loop(final int howManyLoops, final GameCondition endGame, final String endMessage) {
         final Map<Position, Map<Position,GameState>> possibleMoves = mock(Map.class);
 
         // Bloody hell don't use the when-return notation with actioning spies!
@@ -86,7 +86,7 @@ class GameTest {
 
         game.play();
 
-        verify(provider).createInitialState();
+        verify(provider).createState();
         verify(view, times(howManyLoops)).refresh(board, White, List.empty(), OutOfBoard, HashSet.empty());
         verify(view).announce(endMessage);
         verify(state, times(howManyLoops * 2)).getBoard();
@@ -97,7 +97,7 @@ class GameTest {
 
     @ParameterizedTest(name="{0}")
     @EnumSource(Player.class)
-    void computeAvailableMoves(Player currentPlayer) {
+    void computeAvailableMoves(final Player currentPlayer) {
         final Player otherPlayer = currentPlayer.next();
         final Move selfFilteredMove = mock(Move.class);
         final Move ruleFilteredMove = mock(Move.class);
@@ -156,7 +156,7 @@ class GameTest {
 //        when(move.execute(eq(board), any(), any())).then(moveStub);
 //        game.play();
 //
-//        verify(provider).createInitialState();
+//        verify(provider).createState();
 //        verify(checker, times(2)).isOver(board, White, possibleMoves);
 //        verify(white, times(4)).takeInput();
 //        verify(view, times(3)).refresh(eq(board), any(), eq(HashSet.empty()), any(), any());

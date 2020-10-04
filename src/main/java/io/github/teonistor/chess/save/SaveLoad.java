@@ -1,10 +1,12 @@
 package io.github.teonistor.chess.save;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.GameState;
+import io.github.teonistor.chess.core.GameStateProvider;
 import io.github.teonistor.chess.core.Player;
+import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.piece.Bishop;
 import io.github.teonistor.chess.piece.King;
 import io.github.teonistor.chess.piece.Knight;
@@ -19,11 +21,12 @@ import io.vavr.collection.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -32,6 +35,7 @@ public class SaveLoad {
     private static SaveLoad instance;
 
     private final ObjectMapper objectMapper;
+    private final TypeReference<java.util.List<SerializableState>> serializableStateListType;
     private final Map<Player, String> deconsPlayer;
     private final Map<Class<? extends Piece>, String> deconsPiece;
     private final Map<String, Player> reconsPlayer;
@@ -39,22 +43,13 @@ public class SaveLoad {
 
     private SaveLoad() {
         objectMapper = new ObjectMapper();
-
-//        final SimpleModule module = new SimpleModule();
-//        module.addSerializer(new JsonSerializer<Piece>() {
-//            @Override
-//            public void serialize(final Piece piece, final JsonGenerator jsonGenerator, final SerializerProvider serializerProvider) throws IOException {
-//                jsonGenerator.writeob
-//            }
-//        });
-//
-//        objectMapper.registerModule(module);
+        serializableStateListType = new TypeReference<>() {};
 
         deconsPlayer = HashMap.of(Player.White, "W", Player.Black, "B");
         deconsPiece = HashMap.of(Pawn.class, "P", Knight.class, "N", Rook.class, "R", Bishop.class, "B", Queen.class, "Q", King.class, "K");
         reconsPlayer = HashMap.of("W", Player.White, "B", Player.Black);
         // TODO Figure out the underAttackRule
-        reconsPiece = HashMap.of("P", Pawn::new, "N", Knight::new, "R", Rook::new, "B", Bishop::new, "Q", Queen::new, "K", p -> new King(p, null));
+        reconsPiece = HashMap.of("P", Pawn::new, "N", Knight::new, "R", Rook::new, "B", Bishop::new, "Q", Queen::new, "K", p -> new King(p, new UnderAttackRule()));
     }
 
     private static void init() {
@@ -63,54 +58,31 @@ public class SaveLoad {
         }
     }
 
-    public static void main(String[] args) {
-        SaveLoad.saveState(new GameState(
-                HashMap.of(Position.A2, new Pawn(Player.White), Position.B2, new Pawn(Player.White)),
-                Player.Black,
-                List.of(new Rook(Player.Black)),
-                new GameState(
-                        HashMap.of(Position.A2, new Pawn(Player.White), Position.B2, new Pawn(Player.White), Position.C6, new Rook(Player.Black)),
-                        Player.Black,
-                        List.empty(),
-                        null)));
-    }
-
-    public static void saveState(final GameState state) {
+    public static void saveState(final GameState state) throws IOException {
         init();
-        instance.doSaveState(state);
+        instance.doSaveState(state, "game.js.gz");
     }
 
+    public static GameStateProvider loadState() throws IOException {
+        init();
+        return instance.doLoadState("bbb.json.gz");
+    }
 
-    public void doSaveState(final GameState state) {
+    public void doSaveState(final GameState state, final String fileName) throws IOException {
         final java.util.List<SerializableState> serializableStates = Stream.iterate(state, GameState::getPrevious)
                 .takeUntil(Objects::isNull)
                 .map(this::deconstructState)
                 .toJavaList();
-
-        try {
-
-            objectMapper.writeValue(new GZIPOutputStream(new FileOutputStream("game.js.gz")),serializableStates);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        try (final GZIPOutputStream outputStream = new GZIPOutputStream(new FileOutputStream(fileName))) {
+            objectMapper.writeValue(outputStream, serializableStates);
         }
-
-//        try (final FileOutputStream fos = new FileOutputStream("savegame.json")) {
-//
-//            new ObjectMapper().writeValue(fos, new SerializableState(
-//                    state.getBoard().mapValues(this::serializablise).toJavaMap(),
-//                    state.getPlayer(),
-//                    state.getCapturedPieces().map(this::serializablise).toJavaList())
-//
-//            );
-//        } catch (final IOException e) {
-//            e.printStackTrace();
-//        }
     }
 
-    private SerializablePiece serializablise(final Piece piece) {
-        return new SerializablePiece(piece.getPlayer(), piece.getClass().getSimpleName());
+    public  GameStateProvider doLoadState(final String fileName) throws IOException {
+        try (final GZIPInputStream inputStream = new GZIPInputStream(new FileInputStream(fileName))) {
+            final GameState state = reconstructStatesRecursively(objectMapper.readValue(inputStream, serializableStateListType), 0);
+            return () -> state;
+        }
     }
 
     private SerializableState deconstructState(final GameState state) {
@@ -122,6 +94,13 @@ public class SaveLoad {
 
     private String deconstructPiece(final Piece piece) {
         return deconsPlayer.get(piece.getPlayer()).get() + deconsPiece.get(piece.getClass()).get();
+    }
+
+    private GameState reconstructStatesRecursively(final java.util.List<SerializableState> ss, final int index) {
+        if (index >= ss.size())
+            return null;
+
+        return reconstructState(ss.get(index), reconstructStatesRecursively(ss, index + 1));
     }
 
     private GameState reconstructState(final SerializableState serializableState, final GameState previousState) {
@@ -143,11 +122,5 @@ public class SaveLoad {
         java.util.Map<Position,String> board;
         Player player;
         java.util.List<String> capturedPieces;
-    }
-
-    @AllArgsConstructor
-    private static class SerializablePiece {
-        Player p;
-        String t;
     }
 }

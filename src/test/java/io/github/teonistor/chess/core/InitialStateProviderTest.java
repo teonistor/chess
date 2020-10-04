@@ -19,7 +19,7 @@ class InitialStateProviderTest {
         final InitialBoardProvider provider = mock(InitialBoardProvider.class);
         when(provider.createInitialBoard()).thenReturn(HashMap.empty());
 
-        final GameState state = new InitialStateProvider(provider).createInitialState();
+        final GameState state = new InitialStateProvider(provider).createState();
 
         assertThat(state).hasFieldOrPropertyWithValue("board", HashMap.empty())
                          .hasFieldOrPropertyWithValue("player", White)
