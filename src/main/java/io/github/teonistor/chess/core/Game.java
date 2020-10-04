@@ -13,14 +13,14 @@ import io.vavr.control.Option;
 
 public class Game {
 
-    private final InitialStateProvider initialStateProvider;
+    private final GameStateProvider gameStateProvider;
     private final CheckRule checkRule;
     private final GameOverChecker gameOverChecker;
     private final Input[] inputs;
     private final View view;
 
-    public Game(InitialStateProvider initialStateProvider, CheckRule checkRule, GameOverChecker gameOverChecker, Input white, Input black, View view) {
-        this.initialStateProvider = initialStateProvider;
+    public Game(final GameStateProvider gameStateProvider, final CheckRule checkRule, final GameOverChecker gameOverChecker, final Input white, final Input black, final View view) {
+        this.gameStateProvider = gameStateProvider;
         this.checkRule = checkRule;
         this.gameOverChecker = gameOverChecker;
         inputs = new Input[2];
@@ -30,7 +30,7 @@ public class Game {
     }
 
     public void play() {
-        GameState state = initialStateProvider.createInitialState();
+        GameState state = gameStateProvider.createState();
         view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), Position.OutOfBoard, HashSet.empty());
 
         while (true) {
@@ -58,7 +58,7 @@ public class Game {
     }
 
     @VisibleForTesting
-    Map<Position, Map<Position, GameState>> computeAvailableMoves(GameState state) {
+    Map<Position, Map<Position, GameState>> computeAvailableMoves(final GameState state) {
         final Map<Position,Piece> board = state.getBoard();
         final Player player = state.getPlayer();
 
@@ -72,17 +72,17 @@ public class Game {
     }
 
     @VisibleForTesting
-    GameState takeFirstInput(GameState state, Map<Position, Map<Position,GameState>> possibleMoves) {
+    GameState takeFirstInput(final GameState state, final Map<Position, Map<Position,GameState>> possibleMoves) {
         return inputs[state.getPlayer().ordinal()].takeInput(
                 source -> processFirstInput(state, possibleMoves, source),
                 (source, target) -> processFirstAndSecondInput(state, possibleMoves, source, target));
     }
 
-    private GameState takeSecondInput(GameState state, Map<Position, Map<Position,GameState>> possibleMoves, Position source, Map<Position,GameState> filteredMoves) {
+    private GameState takeSecondInput(final GameState state, final Map<Position, Map<Position,GameState>> possibleMoves, final Position source, final Map<Position,GameState> filteredMoves) {
         return inputs[state.getPlayer().ordinal()].takeInput(target -> processSecondInput(state, possibleMoves, source, filteredMoves, target));
     }
 
-    private GameState processFirstInput(GameState state, Map<Position, Map<Position, GameState>> possibleTargetStates, Position source) {
+    private GameState processFirstInput(final GameState state, final Map<Position, Map<Position, GameState>> possibleTargetStates, final Position source) {
         if (possibleTargetStates.containsKey(source)) {
             // TODO What's with this print here
             System.out.println(possibleTargetStates);
@@ -97,7 +97,7 @@ public class Game {
         }
     }
 
-    private GameState processFirstAndSecondInput(GameState state, Map<Position, Map<Position, GameState>> possibleMoves, Position source, Position target) {
+    private GameState processFirstAndSecondInput(final GameState state, final Map<Position, Map<Position, GameState>> possibleMoves, final Position source, final Position target) {
         final Option<GameState> move = possibleMoves.get(source).flatMap(m -> m.get(target));
         if (move.isDefined()) {
             view.announce(String.format("%s moves: %s - %s", state.getPlayer(), source, target));
@@ -110,7 +110,7 @@ public class Game {
         }
     }
 
-    private GameState processSecondInput(GameState state, Map<Position, Map<Position, GameState>> possibleMoves, Position source, Map<Position, GameState> filteredMoves, Position target) {
+    private GameState processSecondInput(final GameState state, final Map<Position, Map<Position, GameState>> possibleMoves, final Position source, final Map<Position, GameState> filteredMoves, final Position target) {
         if (filteredMoves.containsKey(target)) {
             view.announce(String.format("%s moves: %s - %s", state.getPlayer(), source, target));
             return filteredMoves.get(target).get();
