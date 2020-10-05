@@ -11,15 +11,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 class InitialStateProviderTest {
 
     @Test
     void createInitialState() {
         final InitialBoardProvider provider = mock(InitialBoardProvider.class);
+        setField(World.class, "initialBoardProvider", provider);
         when(provider.createInitialBoard()).thenReturn(HashMap.empty());
 
-        final GameState state = new InitialStateProvider(provider).createState();
+        final GameState state = new InitialStateProvider().createState();
 
         assertThat(state).hasFieldOrPropertyWithValue("board", HashMap.empty())
                          .hasFieldOrPropertyWithValue("player", White)

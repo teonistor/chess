@@ -2,9 +2,11 @@ package io.github.teonistor.chess.inter;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.core.GameStateProvider;
 import io.github.teonistor.chess.core.StateProvision;
+import io.vavr.PartialFunction;
 import io.vavr.collection.Stream;
-import io.vavr.control.Option;
+import org.apache.commons.lang3.Functions.FailableFunction;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -62,15 +64,20 @@ public class TerminalInput implements Input {
     }
 
     @Override
-    public Option<StateProvision> stateProvision() {
+    // TODO This method is ugly
+    public GameStateProvider stateProvision(PartialFunction<StateProvision, FailableFunction<String,GameStateProvider,Exception>> stateProvision) {
         try {
             outputStream.write(provisionPrompt);
-            final String s = strip(reader.readLine()).toLowerCase();
-            return Stream.of(StateProvision.values())
-                    .filter(p -> s.equals(p.name().toLowerCase()))
-                    .headOption();
+            final String[] s = strip(reader.readLine()).split(" ", 2);
 
-        } catch (final IOException e) {
+            return Stream.of(StateProvision.values())
+                    .filter(p -> s[0].toLowerCase().equals(p.name().toLowerCase()))
+                    .map(t -> stateProvision.apply(t))
+                    .head()
+                    // TODO This broke "new" because it assumes arguments. Regex time...
+                    .apply(s[1]);
+
+        } catch (final Exception e) {
             return rethrow(e);
         }
     }
