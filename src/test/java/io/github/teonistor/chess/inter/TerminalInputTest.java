@@ -1,9 +1,7 @@
 package io.github.teonistor.chess.inter;
 
 import io.github.teonistor.chess.board.Position;
-import io.github.teonistor.chess.core.StateProvision;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -127,15 +125,15 @@ class TerminalInputTest {
         };
     }
 
-    @Test
-    void stateProvision() throws IOException {
-        when(reader.readLine()).thenReturn(StateProvision.New.name().toLowerCase() + " ");
-
-        assertThat(new TerminalInput(outputStream, reader).stateProvision()).contains(StateProvision.New);
-
-        verify(reader).readLine();
-        verify(outputStream).write(TerminalInput.provisionPrompt);
-    }
+//    @Test
+//    void stateProvision() throws IOException {
+//        when(reader.readLine()).thenReturn(StateProvision.New.name().toLowerCase() + " ");
+//
+//        assertThat(new TerminalInput(outputStream, reader).stateProvision()).contains(StateProvision.New);
+//
+//        verify(reader).readLine();
+//        verify(outputStream).write(TerminalInput.provisionPrompt);
+//    }
 
     @AfterEach
     void tearDown() {

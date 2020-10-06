@@ -10,6 +10,7 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.Map;
 import io.vavr.control.Option;
+import lombok.Getter;
 
 public class Game {
 
@@ -19,6 +20,11 @@ public class Game {
     private final Input[] inputs;
     private final View view;
 
+    // Mutable state!
+    private @Getter GameState state;
+    private Map<Position, Map<Position, GameState>> possibleMoves;
+    private @Getter GameCondition condition;
+
     public Game(final GameStateProvider gameStateProvider, final CheckRule checkRule, final GameOverChecker gameOverChecker, final Input white, final Input black, final View view) {
         this.gameStateProvider = gameStateProvider;
         this.checkRule = checkRule;
@@ -27,34 +33,45 @@ public class Game {
         inputs[Player.White.ordinal()] = white;
         inputs[Player.Black.ordinal()] = black;
         this.view = view;
+
+        this.state = gameStateProvider.createState();
+        recomputeMovesAndCondition();
     }
 
+    @Deprecated
     public void play() {
-        GameState state = gameStateProvider.createState();
+
+    }
+
+    public void playRound(final Position source, final Position target, final View view) {
+        executeMove(source, target);
+        recomputeMovesAndCondition();
         view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), Position.OutOfBoard, HashSet.empty());
 
-        while (true) {
-            final Map<Position, Map<Position,GameState>> possibleMoves = computeAvailableMoves(state);
-            final GameCondition gameCondition = gameOverChecker.check(state.getBoard(), state.getPlayer(), possibleMoves);
+        switch (condition) {
+            case Continue:
+                break;
 
-            switch (gameCondition) {
-                case Continue:
-                    state = takeFirstInput(state, possibleMoves);
-                    view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), Position.OutOfBoard, HashSet.empty());
-                    continue;
+            case WhiteWins:
+                view.announce("White wins!");
+                break;
 
-                case WhiteWins:
-                    view.announce("White wins!");
-                    break;
-                case BlackWins:
-                    view.announce("Black wins!");
-                    break;
-                case Stalemate:
-                    view.announce("Stalemate!");
-                    break;
-            }
-            break;
+            case BlackWins:
+                view.announce("Black wins!");
+                break;
+
+            case Stalemate:
+                view.announce("Stalemate!");
+                break;
+
+            default:
+                throw new IllegalStateException("Unexpected value for GameCondition: " + condition);
         }
+    }
+
+    private void recomputeMovesAndCondition() {
+        possibleMoves = computeAvailableMoves(state);
+        condition = gameOverChecker.check(state.getBoard(), state.getPlayer(), possibleMoves);
     }
 
     @VisibleForTesting
@@ -124,6 +141,16 @@ public class Game {
                 view.announce(String.format("Invalid move: %s - %s", source, target));
                 return takeSecondInput(state, possibleMoves, source, filteredMoves);
             }
+        }
+    }
+
+    private void executeMove(final Position source, final Position target) {
+        final Option<GameState> move = possibleMoves.get(source).flatMap(m -> m.get(target));
+        if (move.isDefined()) {
+            view.announce(String.format("%s moves: %s - %s", state.getPlayer(), source, target));
+            state = move.get();
+        } else {
+            view.announce(String.format("Invalid move: %s - %s", source, target));
         }
     }
 }
