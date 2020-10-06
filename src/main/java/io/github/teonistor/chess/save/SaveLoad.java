@@ -30,6 +30,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import static lombok.AccessLevel.PRIVATE;
+import static org.apache.commons.lang3.exception.ExceptionUtils.rethrow;
 
 public class SaveLoad {
     private static SaveLoad instance;
@@ -58,31 +59,26 @@ public class SaveLoad {
         }
     }
 
-    public static void saveState(final GameState state) throws IOException {
-        init();
-        instance.doSaveState(state, "game.js.gz");
-    }
-
-    public static GameStateProvider loadState() throws IOException {
-        init();
-        return instance.doLoadState("bbb.json.gz");
-    }
-
-    public void doSaveState(final GameState state, final String fileName) throws IOException {
+    public void doSaveState(final GameState state, final String fileName) {
         final java.util.List<SerializableState> serializableStates = Stream.iterate(state, GameState::getPrevious)
                 .takeUntil(Objects::isNull)
                 .map(this::deconstructState)
                 .toJavaList();
         try (final GZIPOutputStream outputStream = new GZIPOutputStream(new FileOutputStream(fileName))) {
             objectMapper.writeValue(outputStream, serializableStates);
+        } catch (final IOException e) {
+            rethrow(e);
         }
     }
 
-    public  GameStateProvider doLoadState(final String fileName) throws IOException {
-        try (final GZIPInputStream inputStream = new GZIPInputStream(new FileInputStream(fileName))) {
-            final GameState state = reconstructStatesRecursively(objectMapper.readValue(inputStream, serializableStateListType), 0);
-            return () -> state;
-        }
+    public GameStateProvider doLoadState(final String fileName) {
+        return () -> {
+            try (final GZIPInputStream inputStream = new GZIPInputStream(new FileInputStream(fileName))) {
+                return reconstructStatesRecursively(objectMapper.readValue(inputStream, serializableStateListType), 0);
+            } catch (final IOException e) {
+                return rethrow(e);
+            }
+        };
     }
 
     private SerializableState deconstructState(final GameState state) {
