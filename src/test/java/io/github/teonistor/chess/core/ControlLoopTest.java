@@ -5,6 +5,7 @@ import io.github.teonistor.chess.ctrl.InputAction;
 import io.github.teonistor.chess.inter.Input;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.save.SaveLoad;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -16,6 +17,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
@@ -80,7 +82,7 @@ class ControlLoopTest {
     void loadSaveAndExit() {
         setField(World.class, "gameFactory", gameFactory);
         setField(World.class, "saveLoad", saveLoad);
-        when(saveLoad.doLoadState("file to load from")).thenReturn(provider);
+        when(saveLoad.load("file to load from")).thenReturn(provider);
         when(white.takeCommonInput())
                 .thenReturn(InputAction.loadGame("file to load from"))
                 .thenReturn(InputAction.saveGame("file to save to"))
@@ -91,9 +93,9 @@ class ControlLoopTest {
         controlLoop.run();
 
         verify(white, times(3)).takeCommonInput();
-        verify(saveLoad, atLeastOnce()).doLoadState("file to load from"); // TODO We could eagerly create the relevant InputAction fields to have exactly once in this kind of place
+        verify(saveLoad, atLeastOnce()).load("file to load from"); // TODO We could eagerly create the relevant InputAction fields to have exactly once in this kind of place
         verify(gameFactory).createGame(provider, white, black, view);
-        verify(saveLoad).doSaveState(gameState, "file to save to");
+        verify(saveLoad).save(gameState, "file to save to");
         verify(game).getState();
     }
 
@@ -136,5 +138,10 @@ class ControlLoopTest {
         verify(gameFactory).createGame(provider, white, black, view);
         verify(game, times(3)).playRound(any(), any(), eq(view));
         verify(game, times(3)).getCondition();
+    }
+
+    @AfterEach
+    void tearDown() {
+        verifyNoMoreInteractions(white, black, view, provider, gameFactory, saveLoad, game, gameState);
     }
 }

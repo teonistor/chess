@@ -64,7 +64,7 @@ public class ControlLoop {
             }
 
             if (action.savePath().isPresent()) {
-                World.saveLoad().doSaveState(game.getState(), action.savePath().get());
+                World.saveLoad().save(game.getState(), action.savePath().get());
                 System.err.println("[DEBUG] Game saved");
                 continue;
             }

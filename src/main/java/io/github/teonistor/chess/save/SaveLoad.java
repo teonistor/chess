@@ -33,7 +33,6 @@ import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang3.exception.ExceptionUtils.rethrow;
 
 public class SaveLoad {
-    private static SaveLoad instance;
 
     private final ObjectMapper objectMapper;
     private final TypeReference<java.util.List<SerializableState>> serializableStateListType;
@@ -52,23 +51,7 @@ public class SaveLoad {
         reconsPiece = HashMap.of("P", Pawn::new, "N", Knight::new, "R", Rook::new, "B", Bishop::new, "Q", Queen::new, "K", King::new);
     }
 
-    private static void init() {
-        if (instance == null) {
-            instance = new SaveLoad();
-        }
-    }
-
-    public static void saveState(final GameState state) {
-        init();
-        instance.doSaveState(state, "game.js.gz");
-    }
-
-    public static GameStateProvider loadState() {
-        init();
-        return instance.doLoadState("bbb.json.gz");
-    }
-
-    public void doSaveState(final GameState state, final String fileName) {
+    public void save(final GameState state, final String fileName) {
         final java.util.List<SerializableState> serializableStates = Stream.iterate(state, GameState::getPrevious)
                 .takeUntil(Objects::isNull)
                 .map(this::deconstructState)
@@ -80,7 +63,7 @@ public class SaveLoad {
         }
     }
 
-    public GameStateProvider doLoadState(final String fileName) {
+    public GameStateProvider load(final String fileName) {
         return () -> {
             try (final GZIPInputStream inputStream = new GZIPInputStream(new FileInputStream(fileName))) {
                 return reconstructStatesRecursively(objectMapper.readValue(inputStream, serializableStateListType), 0);

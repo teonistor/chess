@@ -38,7 +38,7 @@ public interface InputAction {
         return new InputAction() {
             @Override
             public Optional<GameStateProvider> gameStateProvider() {
-                return Optional.of(World.saveLoad().doLoadState(fileName));
+                return Optional.of(World.saveLoad().load(fileName));
             }
         };
     }

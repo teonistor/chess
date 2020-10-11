@@ -31,7 +31,7 @@ class InputActionTest {
     void loadGame() {
         final GameStateProvider provider = mock(GameStateProvider.class);
         final SaveLoad saveLoad = mock(SaveLoad.class);
-        when(saveLoad.doLoadState("file name")).thenReturn(provider);
+        when(saveLoad.load("file name")).thenReturn(provider);
         setField(World.class, "saveLoad", saveLoad);
 
         final InputAction action = InputAction.loadGame("file name");
