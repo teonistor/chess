@@ -3,7 +3,7 @@ package io.github.teonistor.chess.move;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.GameState;
 import io.github.teonistor.chess.core.Player;
-import io.github.teonistor.chess.core.UnderAttackRule;
+import io.github.teonistor.chess.core.World;
 import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.piece.Rook;
 import io.vavr.collection.HashMap;
@@ -18,6 +18,7 @@ import static io.github.teonistor.chess.board.Position.*;
 
 
 @AllArgsConstructor
+@Getter
 public class Castle implements Move {
     public static final HashMap<Position,HashSet<Position>> mustNotBeUnderAttackByTarget = HashMap.of(
             G1, HashSet.of(E1, F1), C1, HashSet.of(D1, E1),
@@ -32,9 +33,8 @@ public class Castle implements Move {
             G1, F1, C1, D1,
             G8, F8, C8, D8);
 
-    private final @NonNull @Getter Position from;
-    private final @NonNull @Getter Position to;
-    private final @NonNull UnderAttackRule underAttackRule;
+    private final @NonNull Position from;
+    private final @NonNull Position to;
 
     @Override
     public boolean validate(GameState state) {
@@ -46,7 +46,7 @@ public class Castle implements Move {
 
         return mustBeEmptyByTarget.get(to).get().toStream().map(board::get).filter(Option::isDefined).isEmpty()
             && possiblyRook.filter(new Rook(player)::equals).isDefined()
-            && mustNotBeUnderAttackByTarget.get(to).get().toStream().filter(position -> underAttackRule.checkAttack(board, position, player)).isEmpty()
+            && mustNotBeUnderAttackByTarget.get(to).get().toStream().filter(position -> World.underAttackRule().checkAttack(board, position, player)).isEmpty()
             && neverMoved(state.getPrevious(), rookPositionsByTarget.get(to).get(), possiblyRook.get())
             && neverMoved(state.getPrevious(), from, hopefullyKing.get());
     }

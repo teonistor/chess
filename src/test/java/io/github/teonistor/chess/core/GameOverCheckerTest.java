@@ -29,7 +29,7 @@ class GameOverCheckerTest {
 
     @Test
     void blackWins() {
-        final HashMap<Position, Piece> board = HashMap.of(Position.A1, new King(White, rule), Position.H8, new King(Black, rule), Position.D4, new Rook(White));
+        final HashMap<Position, Piece> board = HashMap.of(Position.A1, new King(White), Position.H8, new King(Black), Position.D4, new Rook(White));
         when(rule.checkAttack(board, Position.A1, White)).thenReturn(true);
 
         assertThat(new GameOverChecker(rule).check(board, White, HashMap.of(Position.A1, HashMap.empty()))).isEqualTo(BlackWins);
@@ -37,7 +37,7 @@ class GameOverCheckerTest {
 
     @Test
     void whiteWins() {
-        final HashMap<Position, Piece> board = HashMap.of(Position.A1, new King(White, rule), Position.H8, new King(Black, rule), Position.F3, new Rook(Black));
+        final HashMap<Position, Piece> board = HashMap.of(Position.A1, new King(White), Position.H8, new King(Black), Position.F3, new Rook(Black));
         when(rule.checkAttack(board, Position.H8, Black)).thenReturn(true);
 
         assertThat(new GameOverChecker(rule).check(board, Black, HashMap.of(Position.H8, HashMap.empty()))).isEqualTo(WhiteWins);
@@ -46,21 +46,21 @@ class GameOverCheckerTest {
     @ParameterizedTest
     @CsvSource({"White,A1", "Black,H8"})
     void stalemateByNoMovesLeft(Player player, Position position) {
-        final HashMap<Position, Piece> board = HashMap.of(Position.A1, new King(White, rule), Position.H8, new King(Black, rule));
+        final HashMap<Position, Piece> board = HashMap.of(Position.A1, new King(White), Position.H8, new King(Black));
         assertThat(new GameOverChecker(rule).check(board, player, HashMap.of(position, HashMap.empty()))).isEqualTo(Stalemate);
     }
 
     @ParameterizedTest
     @CsvSource({"White,A1", "Black,H8"})
     void stalemateByOnlyKingsLeft(Player player, Position position) {
-        final HashMap<Position, Piece> board = HashMap.of(Position.A1, new King(White, rule), Position.H8, new King(Black, rule));
+        final HashMap<Position, Piece> board = HashMap.of(Position.A1, new King(White), Position.H8, new King(Black));
         assertThat(new GameOverChecker(rule).check(board, player, HashMap.of(position, HashMap.of(position, mock(GameState.class))))).isEqualTo(Stalemate);
     }
 
     @ParameterizedTest
     @CsvSource({"White,A1", "Black,H8"})
     void gameContinues(Player player, Position position) {
-        final HashMap<Position, Piece> board = HashMap.of(Position.A1, new King(White, rule), Position.H8, new King(Black, rule), Position.C6, new Rook(player));
+        final HashMap<Position, Piece> board = HashMap.of(Position.A1, new King(White), Position.H8, new King(Black), Position.C6, new Rook(player));
         assertThat(new GameOverChecker(rule).check(board, player, HashMap.of(position, HashMap.of(position, mock(GameState.class))))).isEqualTo(Continue);
     }
 }

@@ -6,7 +6,6 @@ import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.GameState;
 import io.github.teonistor.chess.core.GameStateProvider;
 import io.github.teonistor.chess.core.Player;
-import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.piece.Bishop;
 import io.github.teonistor.chess.piece.King;
 import io.github.teonistor.chess.piece.Knight;
@@ -50,8 +49,7 @@ public class SaveLoad {
         deconsPlayer = HashMap.of(Player.White, "W", Player.Black, "B");
         deconsPiece = HashMap.of(Pawn.class, "P", Knight.class, "N", Rook.class, "R", Bishop.class, "B", Queen.class, "Q", King.class, "K");
         reconsPlayer = HashMap.of("W", Player.White, "B", Player.Black);
-        // TODO Figure out the underAttackRule
-        reconsPiece = HashMap.of("P", Pawn::new, "N", Knight::new, "R", Rook::new, "B", Bishop::new, "Q", Queen::new, "K", p -> new King(p, new UnderAttackRule()));
+        reconsPiece = HashMap.of("P", Pawn::new, "N", Knight::new, "R", Rook::new, "B", Bishop::new, "Q", Queen::new, "K", King::new);
     }
 
     private static void init() {
@@ -60,12 +58,12 @@ public class SaveLoad {
         }
     }
 
-    public static void saveState(final GameState state) throws IOException {
+    public static void saveState(final GameState state) {
         init();
         instance.doSaveState(state, "game.js.gz");
     }
 
-    public static GameStateProvider loadState() throws IOException {
+    public static GameStateProvider loadState() {
         init();
         return instance.doLoadState("bbb.json.gz");
     }

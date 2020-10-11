@@ -22,10 +22,10 @@ public class UnderAttackRule {
 
     public UnderAttackRule() {
         // These are extracted so that we can replace them as keys into the color-specialised maps (different lambdas of the same expression don't compare equal)
-        UnaryOperator<Position> upLeft    = p -> p.up().left();
-        UnaryOperator<Position> upRight   = p -> p.up().right();
-        UnaryOperator<Position> downLeft  = p -> p.down().left();
-        UnaryOperator<Position> downRight = p -> p.down().right();
+        final UnaryOperator<Position> upLeft    = p -> p.up().left();
+        final UnaryOperator<Position> upRight   = p -> p.up().right();
+        final UnaryOperator<Position> downLeft  = p -> p.down().left();
+        final UnaryOperator<Position> downRight = p -> p.down().right();
 
         recursiveSteps = HashMap.of(
             Position::left, HashSet.of(Queen.class, Rook.class),
@@ -37,7 +37,7 @@ public class UnderAttackRule {
             downLeft,       HashSet.of(Queen.class, Bishop.class),
             downRight,      HashSet.of(Queen.class, Bishop.class));
 
-        Map<UnaryOperator<Position>, HashSet<Class<? extends Piece>>> nonRecursiveSteps = HashMap.<UnaryOperator<Position>, HashSet<Class<? extends Piece>>>of(
+        final Map<UnaryOperator<Position>, HashSet<Class<? extends Piece>>> nonRecursiveSteps = HashMap.<UnaryOperator<Position>, HashSet<Class<? extends Piece>>>of(
             p -> p.up().up().left(),       HashSet.of(Knight.class),
             p -> p.up().up().right(),      HashSet.of(Knight.class),
             p -> p.left().left().up(),     HashSet.of(Knight.class),
@@ -99,14 +99,4 @@ public class UnderAttackRule {
                     .map(piece -> piece.getPlayer() == enemy && types.contains(piece.getClass()))
                     .getOrElse(() -> recurseStep(board, step.apply(currentPosition), enemy, step, types));
     }
-
-    /*
-    A set of methods like this may be too complicated?
-
-    isKnight() -> Knight
-    isPawnOrDiagonallyAttacking() -> Pawn,
-    isDiagonallyAttacking()
-    isOrthogonallyAttacking()
-
-     */
 }

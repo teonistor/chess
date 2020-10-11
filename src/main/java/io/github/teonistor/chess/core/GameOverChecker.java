@@ -21,8 +21,7 @@ public class GameOverChecker {
     public GameCondition check(Map<Position, Piece> board, Player player, Traversable<? extends Tuple2<?,? extends Traversable<?>>> possibleMoves) {
         if (possibleMoves.map(t -> t._2.size()).reduce(Integer::sum) == 0) {
             // TODO Dedup this line and/or store in redundant state
-            // TODO Change this combo to .equals() in Piece after trimming King
-            final Set<Position> kingPosition = board.filterValues(piece -> piece instanceof King && piece.getPlayer() == player).keySet();
+            final Set<Position> kingPosition = board.filterValues(new King(player)::equals).keySet();
             isTrue(kingPosition.size() == 1, "There should be exactly one %s King but found %d", player, kingPosition.size());
             if (underAttackRule.checkAttack(board, kingPosition.get(), player)) {
                 switch (player) {

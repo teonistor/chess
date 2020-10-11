@@ -2,7 +2,6 @@ package io.github.teonistor.chess.piece;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
-import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.move.Castle;
 import io.github.teonistor.chess.move.CaptureIndependentMove;
 import io.github.teonistor.chess.move.Move;
@@ -26,11 +25,8 @@ public class King extends Piece {
             new Tuple2<>(White,E1), HashSet.of(C1, G1),
             new Tuple2<>(Black,E8), HashSet.of(C8, G8));
 
-    private final UnderAttackRule underAttackRule;
-
-    public King(Player player, UnderAttackRule underAttackRule) {
+    public King(Player player) {
         super(player);
-        this.underAttackRule = underAttackRule;
     }
 
     @Override
@@ -51,7 +47,7 @@ public class King extends Piece {
                castleTargetsByPlayerAndFrom.get(new Tuple2<>(getPlayer(), from))
                    .getOrElse(HashSet::empty)
                    .toJavaStream()
-                   .map(to -> new Castle(from, to, underAttackRule))
+                   .map(to -> new Castle(from, to))
         );
     }
 }
