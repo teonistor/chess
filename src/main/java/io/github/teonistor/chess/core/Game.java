@@ -7,8 +7,8 @@ import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
-import io.vavr.collection.HashSet;
 import io.vavr.collection.Map;
+import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import lombok.Getter;
 
@@ -36,6 +36,7 @@ public class Game {
 
         this.state = gameStateProvider.createState();
         recomputeMovesAndCondition();
+        view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), turnMovesIntoPairs(possibleMoves));
     }
 
     @Deprecated
@@ -46,7 +47,7 @@ public class Game {
     public void playRound(final Position source, final Position target, final View view) {
         executeMove(source, target);
         recomputeMovesAndCondition();
-        view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), Position.OutOfBoard, HashSet.empty());
+        view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), turnMovesIntoPairs(possibleMoves));
 
         switch (condition) {
             case Continue:
@@ -104,7 +105,7 @@ public class Game {
             // TODO What's with this print here
             System.out.println(possibleTargetStates);
             final Map<Position, GameState> filteredTargetStates = possibleTargetStates.get(source).get();
-            view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), source, filteredTargetStates.keySet());
+            view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), turnMovesIntoPairs(possibleMoves));
             return takeSecondInput(state, possibleTargetStates, source, filteredTargetStates);
         } else {
             if(source != Position.OutOfBoard) {
@@ -142,6 +143,10 @@ public class Game {
                 return takeSecondInput(state, possibleMoves, source, filteredMoves);
             }
         }
+    }
+
+    private Stream<Tuple2<Position, Position>> turnMovesIntoPairs(Map<Position, Map<Position, GameState>> possibleMoves) {
+        return possibleMoves.toStream().flatMap(m -> Stream.continually(m._1).zip(m._2.keySet()));
     }
 
     private void executeMove(final Position source, final Position target) {

@@ -41,10 +41,10 @@ class MultipleViewWrapperTest {
     @EnumSource(Player.class)
     void wrapManyAndRefresh(Player player) {
         final View view = MultipleViewWrapper.wrapIfNeeded(aView, anotherView);
-        view.refresh(HashMap.empty(), player, List.empty(), Position.E1, HashSet.of(Position.C2));
+        view.refresh(HashMap.empty(), player, List.empty(), HashSet.of(Position.C2);
 
-        verify(aView).refresh(HashMap.empty(), player, List.empty(), Position.E1, HashSet.of(Position.C2));
-        verify(anotherView).refresh(HashMap.empty(), player, List.empty(), Position.E1, HashSet.of(Position.C2));
+        verify(aView).refresh(HashMap.empty(), player, List.empty(), HashSet.of(Position.C2));
+        verify(anotherView).refresh(HashMap.empty(), player, List.empty(), HashSet.of(Position.C2));
     }
 
     @ParameterizedTest

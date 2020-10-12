@@ -6,7 +6,6 @@ import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.move.Move;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.HashMap;
-import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import org.junit.jupiter.api.AfterEach;
@@ -25,7 +24,6 @@ import static io.github.teonistor.chess.board.Position.B5;
 import static io.github.teonistor.chess.board.Position.D8;
 import static io.github.teonistor.chess.board.Position.E5;
 import static io.github.teonistor.chess.board.Position.H6;
-import static io.github.teonistor.chess.board.Position.OutOfBoard;
 import static io.github.teonistor.chess.core.GameCondition.Continue;
 import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -87,7 +85,7 @@ class GameTest {
         game.play();
 
         verify(provider).createState();
-        verify(view, times(howManyLoops)).refresh(board, White, List.empty(), OutOfBoard, HashSet.empty());
+        verify(view, times(howManyLoops)).refresh(board, White, List.empty(), possibleMoves);
         verify(view).announce(endMessage);
         verify(state, times(howManyLoops * 2)).getBoard();
         verify(state, times(howManyLoops * 2)).getPlayer();

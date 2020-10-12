@@ -27,7 +27,7 @@ public class TerminalInput implements Input {
     static final byte[] gamePrompt = " > ".getBytes();
     static final byte[] provisionPrompt = "new/load > ".getBytes();
     static final Pattern twoInputs = Pattern.compile("\\s*([a-hA-H][0-9])[\\s-]*([a-hA-H][0-9])\\s*");
-    static final Pattern global = Pattern.compile("\\s*((NEW|LOAD|SAVE|EXIT)(.*)|([A-H][0-9])[\\s-]*([A-H][0-9])?)\\s*");
+    static final Pattern global = Pattern.compile("\\s*((NEW|LOAD|SAVE|EXIT)(.*)|([A-H][0-9])[\\s-]*([A-H][0-9]))\\s*");
 
     private final OutputStream outputStream;
     private final BufferedReader reader;
