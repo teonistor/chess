@@ -4,6 +4,7 @@ import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.piece.Bishop;
 import io.github.teonistor.chess.piece.Knight;
 import io.github.teonistor.chess.piece.Pawn;
+import io.github.teonistor.chess.piece.PieceBox;
 import io.github.teonistor.chess.piece.Queen;
 import io.github.teonistor.chess.piece.Rook;
 import io.github.teonistor.chess.piece.King;
@@ -22,16 +23,18 @@ import static org.mockito.Mockito.mock;
 
 class TerminalViewTest {
 
+    private final PieceBox box = new PieceBox(mock(UnderAttackRule.class));
+
     @Test
     void makeOutputWithoutSelection() {
         final String output = new TerminalView().makeOutput(HashMap.of(
-                A1, new Pawn(White),
-                G7, new Rook(Black),
-                B7, new Bishop(Black),
-                E2, new Queen(White),
-                F4, new Knight(White),
-                B5, new King(Black, mock(UnderAttackRule.class)),
-                D8, new Knight(Black)), White, OutOfBoard, HashSet.empty());
+                A1, box.whitePawn,
+                G7, box.blackRook,
+                B7, box.blackBishop,
+                E2, box.whiteQueen,
+                F4, box.whiteKnight,
+                B5, box.blackKing,
+                D8, box.blackKnight), White, OutOfBoard, HashSet.empty());
 
         assertThat(output).contains(
             "    A  B  C  D  E  F  G  H\n" +
@@ -59,10 +62,10 @@ class TerminalViewTest {
     @Test
     void makeOutputWithSelection() {
         final String output = new TerminalView().makeOutput(HashMap.of(
-                B3, new Knight(Black),
-                F6, new Pawn(White),
-                C6, new Rook(White),
-                E8, new King(Black, mock(UnderAttackRule.class))), Black, C3, HashSet.of(C5, D4, D2));
+                B3, box.blackKnight,
+                F6, box.whitePawn,
+                C6, box.whiteRook,
+                E8, box.blackKing), Black, C3, HashSet.of(C5, D4, D2));
 
         assertThat(output).contains(
             "    A  B  C  D  E  F  G  H\n" +

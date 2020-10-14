@@ -1,5 +1,6 @@
 package io.github.teonistor.chess.piece;
 
+import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.move.CapturingMove;
 import io.github.teonistor.chess.move.EmptyPositionMove;
 import io.github.teonistor.chess.move.EnPassant;
@@ -7,13 +8,15 @@ import org.junit.jupiter.api.Test;
 
 import static io.github.teonistor.chess.core.Player.*;
 import static io.github.teonistor.chess.board.Position.*;
+import static org.mockito.Mockito.mock;
 
 
 class PawnTest extends PieceTest {
+    private final PieceBox box = new PieceBox(mock(UnderAttackRule.class));
 
     @Test
     void computePossibleMovesWhite() {
-        init(new Pawn(White));
+        init(box.whitePawn);
 
         assertMove(A2, EmptyPositionMove.class,A3,A4, CapturingMove.class,B3);
         assertMove(B5, EmptyPositionMove.class,B6,    CapturingMove.class,A6,C6, EnPassant.class, A6,C6);
@@ -26,7 +29,7 @@ class PawnTest extends PieceTest {
 
     @Test
     void computePossibleMovesBlack() {
-        init(new Pawn(Black));
+        init(box.blackPawn);
 
         assertMove(A7, EmptyPositionMove.class,A5,A6, CapturingMove.class,B6);
         assertMove(D7, EmptyPositionMove.class,D5,D6, CapturingMove.class,C6,E6);

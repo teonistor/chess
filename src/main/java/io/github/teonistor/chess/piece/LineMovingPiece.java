@@ -15,7 +15,7 @@ public abstract class LineMovingPiece extends Piece {
 
     private final List<UnaryOperator<Position>> steps;
 
-    public LineMovingPiece(Player player, List<UnaryOperator<Position>> steps) {
+    protected LineMovingPiece(Player player, List<UnaryOperator<Position>> steps) {
         super(player);
         this.steps = requireNonNull(steps);
     }
