@@ -70,12 +70,12 @@ class ControlLoopTest {
                         return Optional.of(provider);
                     }})
                 .thenReturn(InputAction.exit());
-        when(gameFactory.createGame(provider, white, black, view)).thenReturn(game);
+        when(gameFactory.createGame(provider)).thenReturn(game);
 
         controlLoop.run();
 
         verify(white, times(2)).takeCommonInput();
-        verify(gameFactory).createGame(provider, white, black, view);
+        verify(gameFactory).createGame(provider);
     }
 
     @Test
@@ -87,14 +87,14 @@ class ControlLoopTest {
                 .thenReturn(InputAction.loadGame("file to load from"))
                 .thenReturn(InputAction.saveGame("file to save to"))
                 .thenReturn(InputAction.exit());
-        when(gameFactory.createGame(provider, white, black, view)).thenReturn(game);
+        when(gameFactory.createGame(provider)).thenReturn(game);
         when(game.getState()).thenReturn(gameState);
 
         controlLoop.run();
 
         verify(white, times(3)).takeCommonInput();
         verify(saveLoad, atLeastOnce()).load("file to load from"); // TODO We could eagerly create the relevant InputAction fields to have exactly once in this kind of place
-        verify(gameFactory).createGame(provider, white, black, view);
+        verify(gameFactory).createGame(provider);
         verify(saveLoad).save(gameState, "file to save to");
         verify(game).getState();
     }
@@ -109,12 +109,12 @@ class ControlLoopTest {
                         return Optional.of(provider);
                     }})
                 .thenReturn(InputAction.exit());
-        when(gameFactory.createGame(provider, white, black, view)).thenReturn(game);
+        when(gameFactory.createGame(provider)).thenReturn(game);
 
         controlLoop.run();
 
         verify(white, times(2)).takeCommonInput();
-        verify(gameFactory).createGame(provider, white, black, view);
+        verify(gameFactory).createGame(provider);
     }
 
     @Test
@@ -129,13 +129,13 @@ class ControlLoopTest {
                 .thenReturn(InputAction.gameInput(Position.A2, Position.B2))
                 .thenReturn(InputAction.gameInput(Position.A4, Position.C4))
                 .thenReturn(InputAction.gameInput(Position.D6, Position.F6));
-        when(gameFactory.createGame(provider, white, black, view)).thenReturn(game);
+        when(gameFactory.createGame(provider)).thenReturn(game);
         when(game.getCondition()).thenReturn(GameCondition.Continue).thenReturn(GameCondition.Continue).thenReturn(GameCondition.Stalemate);
 
         controlLoop.run();
 
         verify(white, times(4)).takeCommonInput();
-        verify(gameFactory).createGame(provider, white, black, view);
+        verify(gameFactory).createGame(provider);
         verify(game, times(3)).playRound(any(), any(), eq(view));
         verify(game, times(3)).getCondition();
     }

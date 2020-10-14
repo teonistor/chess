@@ -8,14 +8,17 @@ import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import io.vavr.control.Option;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.stubbing.OngoingStubbing;
 import java.util.stream.Stream;
 
+import static io.github.teonistor.chess.board.Position.*;
 import static io.github.teonistor.chess.board.Position.A1;
 import static io.github.teonistor.chess.board.Position.A2;
 import static io.github.teonistor.chess.board.Position.A3;
@@ -54,9 +57,14 @@ class GameTest {
 
     private Game game;
 
+    @Nested
+    class FancyGetters {
+        // TODO
+    }
+
     @BeforeEach
     void setUp() {
-        game = spy(new Game(provider, rule, checker, white, black, view));
+        game = spy(new Game(provider));
         when(provider.createState()).thenReturn(state);
         when(rule.validate(any(), any())).thenReturn(true);
         doReturn(state).when(state).advance(any());
@@ -69,28 +77,27 @@ class GameTest {
                 "11,WhiteWins,White wins!",
                 "15,BlackWins,Black wins!",
                 "25,Stalemate,Stalemate!"})
-    void loop(final int howManyLoops, final GameCondition endGame, final String endMessage) {
-        final Map<Position, Map<Position,GameState>> possibleMoves = mock(Map.class);
+    void playRound(final int howManyLoops, final GameCondition endGame, final String endMessage) {
+        final HashMap<Position, HashMap<Position, GameState>> possibleMoves = HashMap.of(A7, HashMap.of(B4, state));
 
         // Bloody hell don't use the when-return notation with actioning spies!
         doReturn(possibleMoves).when(game).computeAvailableMoves(state);
-        doReturn(state).when(game).takeFirstInput(state, possibleMoves);
 
         OngoingStubbing<GameCondition> checkerStub = when(checker.check(board, White, possibleMoves));
-        for (int i = 1; i < howManyLoops; i++) {
-            checkerStub = checkerStub.thenReturn(Continue);
-        }
+//        for (int i = 1; i < howManyLoops; i++) {
+//            checkerStub = checkerStub.thenReturn(Continue);
+//        }
         checkerStub.thenReturn(endGame);
 
-        game.play();
+        game.playRound(A7, B4, view);
 
         verify(provider).createState();
-        verify(view, times(howManyLoops)).refresh(board, White, List.empty(), possibleMoves);
+//        verify(view, times(howManyLoops)).refresh(board, White, List.empty(), possibleMoves);
         verify(view).announce(endMessage);
-        verify(state, times(howManyLoops * 2)).getBoard();
-        verify(state, times(howManyLoops * 2)).getPlayer();
-        verify(checker, times(howManyLoops)).check(board, White, possibleMoves);
-        verify(game, times(howManyLoops - 1)).takeFirstInput(state, possibleMoves);
+//        verify(state, times(howManyLoops * 2)).getBoard();
+//        verify(state, times(howManyLoops * 2)).getPlayer();
+        verify(checker/*, times(howManyLoops)*/).check(board, White, possibleMoves);
+//        verify(game, times(howManyLoops - 1)).takeFirstInput(state, possibleMoves);
     }
 
     @ParameterizedTest(name="{0}")

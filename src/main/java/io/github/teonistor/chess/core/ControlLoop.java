@@ -18,7 +18,7 @@ public class ControlLoop {
     }
 
     @VisibleForTesting
-    ControlLoop(Input white, Input black, View view) {
+    ControlLoop(final Input white, final Input black, final View view) {
         this.white = white;
         this.black = black;
         this.view = view;
@@ -41,7 +41,7 @@ public class ControlLoop {
     }
 
     private void loop(final GameStateProvider provider) {
-        final Game game = World.gameFactory().createGame(provider, white, black, view);
+        final Game game = World.gameFactory().createGame(provider);
 
         while (true) {
             final InputAction action = white.takeCommonInput();
