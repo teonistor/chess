@@ -5,8 +5,6 @@ import io.github.teonistor.chess.move.CapturingMove;
 import io.github.teonistor.chess.move.EmptyPositionMove;
 import io.github.teonistor.chess.move.EnPassant;
 import org.junit.jupiter.api.Test;
-
-import static io.github.teonistor.chess.core.Player.*;
 import static io.github.teonistor.chess.board.Position.*;
 import static org.mockito.Mockito.mock;
 

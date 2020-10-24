@@ -14,7 +14,9 @@ import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
-import io.vavr.collection.Set;
+import io.vavr.collection.Traversable;
+import io.vavr.control.Option;
+import lombok.val;
 
 import java.io.PrintStream;
 import java.util.regex.Pattern;
@@ -30,9 +32,9 @@ public class TerminalView implements View {
         "   ├──┼──┼──┼──┼──┼──┼──┼──┤\n" +
         " 6 │A6│B6│C6│D6│E6│F6│G6│H6│ 6\n" +
         "   ├──┼──┼──┼──┼──┼──┼──┼──┤\n" +
-        " 5 │A5│B5│C5│D5│E5│F5│G5│H5│ 5\n" +
-        "   ├──┼──┼──┼──┼──┼──┼──┼──┤\n" +
-        " 4 │A4│B4│C4│D4│E4│F4│G4│H4│ 4\n" +
+        " 5 │A5│B5│C5│D5│E5│F5│G5│H5│ 5     Captured:\n" +
+        "   ├──┼──┼──┼──┼──┼──┼──┼──┤       %s\n" +
+        " 4 │A4│B4│C4│D4│E4│F4│G4│H4│ 4     %s\n" +
         "   ├──┼──┼──┼──┼──┼──┼──┼──┤\n" +
         " 3 │A3│B3│C3│D3│E3│F3│G3│H3│ 3\n" +
         "   ├──┼──┼──┼──┼──┼──┼──┼──┤\n" +
@@ -40,7 +42,8 @@ public class TerminalView implements View {
         "   ├──┼──┼──┼──┼──┼──┼──┼──┤\n" +
         " 1 │A1│B1│C1│D1│E1│F1│G1│H1│ 1\n" +
         "   ╰──┴──┴──┴──┴──┴──┴──┴──╯\n" +
-        "    A  B  C  D  E  F  G  H";
+        "    A  B  C  D  E  F  G  H\n" +
+        "%s moves. Possibilities: %s";
 
     private static final Map<Class<? extends Piece>, String> pieceLetters = HashMap.of(Pawn.class, "P", Knight.class, "N", Rook.class, "R", Bishop.class, "B", Queen.class, "Q", King.class, "K");
     private static final Map<Player, String> playerLetters = HashMap.of(Player.Black, "B", Player.White, "W");
@@ -54,28 +57,38 @@ public class TerminalView implements View {
 
 
     @Override
-    public void refresh(Map<Position, Piece> board, Player player, List<Piece> capturedPieces, Position source, Set<Position> targets) {
-        outStream.print(makeOutput(board, player, source, targets));
+    public void refresh(final Map<Position, Piece> board, final Player player, final Traversable<Piece> capturedPieces, Traversable<Tuple2<Position, Position>> possibleMoves) {
+        outStream.println(makeOutput(board, player, capturedPieces, possibleMoves));
     }
 
     @VisibleForTesting
-    String makeOutput(Map<Position, Piece> board, Player player, Position source, Set<Position> targets) {
-        // TODO Highlights, captured
-        // Ugh, mutable
-        String output = boardTemplate;
-        for (Tuple2<Position,Piece> t : board) {
-            output = output.replace(t._1.toString(), playerLetters.getOrElse(t._2.getPlayer(), " ") + pieceLetters.getOrElse(t._2.getClass(), " "));
+    String makeOutput(final Map<Position, Piece> board, final Player player, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMoves) {
+        val piecesByPlayer = capturedPieces.groupBy(Piece::getPlayer).mapValues(Traversable::narrow);
+
+        return String.format(makeBoardWithPieces(board, boardTemplate),
+               String.join(" ", makePieceList(piecesByPlayer.get(Player.White))),
+               String.join(" ", makePieceList(piecesByPlayer.get(Player.Black))),
+               player,
+               String.join(" ", possibleMoves.map(m -> m._1 + "-" + m._2)));
+    }
+
+    private String makeBoardWithPieces(final Map<Position, Piece> board, String output) {
+        for (final Tuple2<Position,Piece> t : board) {
+            output = output.replace(t._1.toString(), stringifyPiece(t._2));
         }
-        output = slot.matcher(output).replaceAll("  ");
-        output = String.format("%s%n%s moves.%n", output, player);
-        if (source != Position.OutOfBoard) {
-            output = String.format("%sSelected: %s%nPossible moves: %s%n", output, source, targets);
-        }
-        return output;
+        return slot.matcher(output).replaceAll("  ");
+    }
+
+    private Traversable<String> makePieceList(final Option<Traversable<Piece>> maybePieces) {
+        return maybePieces.getOrElse(List::empty).map(this::stringifyPiece);
+    }
+
+    private String stringifyPiece(final Piece piece) {
+        return playerLetters.getOrElse(piece.getPlayer(), " ") + pieceLetters.getOrElse(piece.getClass(), " ");
     }
 
     @Override
-    public void announce(String message) {
+    public void announce(final String message) {
         outStream.println(message);
     }
 }

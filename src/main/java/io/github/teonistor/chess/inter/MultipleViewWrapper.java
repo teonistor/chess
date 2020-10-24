@@ -3,9 +3,10 @@ package io.github.teonistor.chess.inter;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.piece.Piece;
+import io.vavr.Tuple2;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
-import io.vavr.collection.Set;
+import io.vavr.collection.Traversable;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.Validate.isTrue;
@@ -19,8 +20,8 @@ public class MultipleViewWrapper implements View {
     }
 
     @Override
-    public void refresh(Map<Position, Piece> board, Player player, List<Piece> capturedPieces, Position source, Set<Position> targets) {
-        views.forEach(v -> v.refresh(board, player, capturedPieces, source, targets));
+    public void refresh(Map<Position, Piece> board, Player player, Traversable<Piece> capturedPieces, Traversable<Tuple2<Position,Position>> possibleMoves) {
+        views.forEach(v -> v.refresh(board, player, capturedPieces, possibleMoves));
     }
 
     @Override

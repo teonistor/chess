@@ -7,12 +7,7 @@ import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 import static io.github.teonistor.chess.core.Player.White;
-import static java.util.function.Function.identity;
-import static org.assertj.core.api.Assertions.fail;
 
 public abstract class MoveTest {
 

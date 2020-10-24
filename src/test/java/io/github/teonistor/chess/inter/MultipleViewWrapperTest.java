@@ -3,7 +3,6 @@ package io.github.teonistor.chess.inter;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
 import io.vavr.collection.HashMap;
-import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -41,10 +40,10 @@ class MultipleViewWrapperTest {
     @EnumSource(Player.class)
     void wrapManyAndRefresh(Player player) {
         final View view = MultipleViewWrapper.wrapIfNeeded(aView, anotherView);
-        view.refresh(HashMap.empty(), player, List.empty(), Position.E1, HashSet.of(Position.C2));
+        view.refresh(HashMap.empty(), player, List.empty(), HashMap.of(Position.C2, Position.E5));
 
-        verify(aView).refresh(HashMap.empty(), player, List.empty(), Position.E1, HashSet.of(Position.C2));
-        verify(anotherView).refresh(HashMap.empty(), player, List.empty(), Position.E1, HashSet.of(Position.C2));
+        verify(aView).refresh(HashMap.empty(), player, List.empty(), HashMap.of(Position.C2, Position.E5));
+        verify(anotherView).refresh(HashMap.empty(), player, List.empty(), HashMap.of(Position.C2, Position.E5));
     }
 
     @ParameterizedTest

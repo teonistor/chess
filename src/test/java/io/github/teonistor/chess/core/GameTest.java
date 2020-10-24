@@ -5,12 +5,13 @@ import io.github.teonistor.chess.inter.Input;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.move.Move;
 import io.github.teonistor.chess.piece.Piece;
+import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
-import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -20,12 +21,13 @@ import java.util.stream.Stream;
 import static io.github.teonistor.chess.board.Position.A1;
 import static io.github.teonistor.chess.board.Position.A2;
 import static io.github.teonistor.chess.board.Position.A3;
+import static io.github.teonistor.chess.board.Position.B2;
 import static io.github.teonistor.chess.board.Position.B4;
 import static io.github.teonistor.chess.board.Position.B5;
+import static io.github.teonistor.chess.board.Position.D7;
 import static io.github.teonistor.chess.board.Position.D8;
 import static io.github.teonistor.chess.board.Position.E5;
 import static io.github.teonistor.chess.board.Position.H6;
-import static io.github.teonistor.chess.board.Position.OutOfBoard;
 import static io.github.teonistor.chess.core.GameCondition.Continue;
 import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,10 +75,12 @@ class GameTest {
                 "25,Stalemate,Stalemate!"})
     void loop(final int howManyLoops, final GameCondition endGame, final String endMessage) {
         final Map<Position, Map<Position,GameState>> possibleMoves = mock(Map.class);
+        final io.vavr.collection.Stream<Tuple2<Position, Position>> movesAsPairs = mock(io.vavr.collection.Stream.class);
 
         // Bloody hell don't use the when-return notation with actioning spies!
         doReturn(possibleMoves).when(game).computeAvailableMoves(state);
-        doReturn(state).when(game).takeFirstInput(state, possibleMoves);
+        doReturn(state).when(game).processInput(possibleMoves);
+        doReturn(movesAsPairs).when(game).turnMovesIntoPairs(possibleMoves);
 
         OngoingStubbing<GameCondition> checkerStub = when(checker.check(board, White, possibleMoves));
         for (int i = 1; i < howManyLoops; i++) {
@@ -87,12 +91,12 @@ class GameTest {
         game.play();
 
         verify(provider).createState();
-        verify(view, times(howManyLoops)).refresh(board, White, List.empty(), OutOfBoard, HashSet.empty());
+        verify(view, times(howManyLoops)).refresh(board, White, List.empty(), movesAsPairs);
         verify(view).announce(endMessage);
         verify(state, times(howManyLoops * 2)).getBoard();
         verify(state, times(howManyLoops * 2)).getPlayer();
         verify(checker, times(howManyLoops)).check(board, White, possibleMoves);
-        verify(game, times(howManyLoops - 1)).takeFirstInput(state, possibleMoves);
+        verify(game, times(howManyLoops - 1)).processInput(possibleMoves);
     }
 
     @ParameterizedTest(name="{0}")
@@ -143,35 +147,45 @@ class GameTest {
         verify(rule).validate(ruleFilteredBoard, currentPlayer);
     }
 
-//    @Test
-//    void playOne() {
-//
-//        org.junit.jupiter.api.Assumptions.assumeTrue(false, "TODO");
-//
-//        when(white.takeInput()).thenReturn(A3).thenReturn(A1).thenReturn(G7).thenReturn(B3);
-//        when(piece.getPlayer()).thenReturn(White);
-//        when(piece.computePossibleMoves(A1)).thenReturn(Stream.of(move));
-//        when(move.validate(any())).thenReturn(true);
-//        when(move.getTo()).thenReturn(B3);
-//        when(move.execute(eq(board), any(), any())).then(moveStub);
-//        game.play();
-//
-//        verify(provider).createState();
-//        verify(checker, times(2)).isOver(board, White, possibleMoves);
-//        verify(white, times(4)).takeInput();
-//        verify(view, times(3)).refresh(eq(board), any(), eq(HashSet.empty()), any(), any());
-//        verify(view).announce("Invalid pickup: A3");
-//        verify(view).announce("Invalid move: A1 - G7");
-//        verify(view).announce("White moves: A1 - B3");
-//        verify(piece).getPlayer();
-//        verify(piece).computePossibleMoves(A1);
-//        verify(move).validate(state);
-//        verify(move).getTo();
-//        verify(move).execute(eq(board), any(), any());
-//        verify(state).advance(board);
-//    }
+    @ParameterizedTest
+    @CsvSource({"A2,B5","A7,C1","D3,E3","F1,H8"})
+    void processInputGood(Position p1, Position p2) {
+        when(white.simpleInput()).thenReturn(new Tuple2<>(p1, p2));
 
-    // TODO Game deserves, like, a couple dozen tests
+        assertThat(game.processInput(HashMap.of(p1, HashMap.of(p2, state)))).isEqualTo(state);
+
+        verify(white).simpleInput();
+    }
+
+    @Test
+    void processInputBogus() {
+        when(white.simpleInput()).thenReturn(new Tuple2<>(A1, B2)).thenReturn(new Tuple2<>(A2, B4))
+                                 .thenReturn(new Tuple2<>(D7, B5)).thenReturn(new Tuple2<>(A2, B5));
+
+        assertThat(game.processInput(HashMap.of(A2, HashMap.of(B5, state)))).isEqualTo(state);
+
+        verify(white, times(4)).simpleInput();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"D1,C4,G2,A5,H3,B8,D5,D7",
+                "G7,H6,F3,E5,B6,C1,E2,A2",
+                "D4,A4,G5,A6,A8,C8,G1,C7",
+                "E4,A1,B4,C6,E3,G8,D2,H4"})
+    void turnMovesIntoPairs(Position p1, Position p2, Position p3, Position p4, Position p5, Position p6, Position p7, Position p8) {
+        assertThat(game.turnMovesIntoPairs(HashMap.of(
+                p1, HashMap.of(p2, state, p3, state),
+                p4, HashMap.of(p3, state),
+                p5, HashMap.of(p6, state, p7, state, p8, state),
+                p8, HashMap.empty())))
+            .containsExactlyInAnyOrder(
+                new Tuple2<>(p1, p2),
+                new Tuple2<>(p1, p3),
+                new Tuple2<>(p4, p3),
+                new Tuple2<>(p5, p6),
+                new Tuple2<>(p5, p7),
+                new Tuple2<>(p5, p8));
+    }
 
     @AfterEach
     void tearDown() {

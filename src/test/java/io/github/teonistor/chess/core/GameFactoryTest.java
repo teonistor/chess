@@ -34,7 +34,8 @@ class GameFactoryTest {
         soft.assertAll();
     }
 
-    // TODO Reinstate. Current problem: Game takes user input in constructor and holds up the test forever!
+    // TODO Reinstate. Current problem: createGame() takes user input in stateProvision() and holds up the test forever!
+    //   and I thought we were done with that construct
     /*@Test
     void createTerminalGame() {
         final Game game = gameFactory.createTerminalGame();

@@ -1,21 +1,11 @@
 package io.github.teonistor.chess.board;
 
-import io.github.teonistor.chess.core.UnderAttackRule;
-import io.github.teonistor.chess.piece.Bishop;
-import io.github.teonistor.chess.piece.Knight;
-import io.github.teonistor.chess.piece.Pawn;
 import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.piece.PieceBox;
-import io.github.teonistor.chess.piece.Queen;
-import io.github.teonistor.chess.piece.Rook;
-import io.github.teonistor.chess.piece.King;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-
-import static io.github.teonistor.chess.core.Player.Black;
-import static io.github.teonistor.chess.core.Player.White;
 
 
 @AllArgsConstructor

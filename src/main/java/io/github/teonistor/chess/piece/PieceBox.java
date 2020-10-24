@@ -1,8 +1,6 @@
 package io.github.teonistor.chess.piece;
 
-
 import io.github.teonistor.chess.core.UnderAttackRule;
-
 import static io.github.teonistor.chess.core.Player.*;
 
 // Tested by InitialBoardProviderTest

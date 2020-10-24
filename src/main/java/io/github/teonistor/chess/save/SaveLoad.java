@@ -42,7 +42,7 @@ public class SaveLoad {
     private final Map<String, Player> reconsPlayer;
     private final Map<String, Function<Player,Piece>> reconsPiece;
 
-    private SaveLoad() {
+    public SaveLoad() {
         objectMapper = new ObjectMapper();
         serializableStateListType = new TypeReference<>() {};
 

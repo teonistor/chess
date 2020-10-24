@@ -2,76 +2,121 @@ package io.github.teonistor.chess.inter;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.github.teonistor.chess.board.Position;
-import io.github.teonistor.chess.core.StateProvision;
-import io.vavr.collection.Stream;
-import io.vavr.control.Option;
+import io.github.teonistor.chess.ctrl.InputAction;
+import io.github.teonistor.chess.ctrl.InputActionProvider;
+import io.vavr.control.Try;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import static org.apache.commons.lang3.exception.ExceptionUtils.rethrow;
-import static org.apache.commons.lang3.StringUtils.strip;
 
-public class TerminalInput implements Input {
+public class TerminalInput implements InputEngine, Runnable {
     static final byte[] gamePrompt = " > ".getBytes();
     static final byte[] provisionPrompt = "new/load > ".getBytes();
-    static final Pattern twoInputs = Pattern.compile("\\s*([a-hA-H][0-9])[\\s-]*([a-hA-H][0-9])\\s*");
+    static final Pattern global = Pattern.compile("\\s*((NEW|LOAD|SAVE|EXIT)(.*)|([A-H][0-9])[\\s-]*([A-H][0-9]))\\s*", Pattern.CASE_INSENSITIVE);
 
     private final OutputStream outputStream;
     private final BufferedReader reader;
+    private final InputActionProvider inputActionProvider;
+    private final Consumer<InputAction> inputActionConsumer;
 
-    public TerminalInput() {
-        this(System.out, new BufferedReader(new InputStreamReader(System.in)));
+    public TerminalInput(InputActionProvider inputActionProvider, Consumer<InputAction> inputActionConsumer) {
+        this(System.out, new BufferedReader(new InputStreamReader(System.in)), inputActionProvider, inputActionConsumer);
     }
 
     @VisibleForTesting
-    TerminalInput(OutputStream outputStream, BufferedReader reader) {
+    TerminalInput(OutputStream outputStream, BufferedReader reader, InputActionProvider inputActionProvider, Consumer<InputAction> inputActionConsumer) {
         this.outputStream = outputStream;
         this.reader = reader;
+        this.inputActionProvider = inputActionProvider;
+        this.inputActionConsumer = inputActionConsumer;
     }
 
     @Override
-    public <T> T takeInput(Function<Position, T> callbackOne, BiFunction<Position, Position, T> callbackTwo) {
-        try {
-            outputStream.write(gamePrompt);
-            final String line = reader.readLine();
-            final Matcher match = twoInputs.matcher(line);
+    public void run() {
+        // TODO Global halt condition
+        while(true) {
+            // Try knows better what exceptions to let slide
+            Try.run(this::runOnce);
+        }
+    }
 
-            if (match.matches()) {
-                return callbackTwo.apply(Position.valueOf(match.group(1).toUpperCase()), Position.valueOf(match.group(2).toUpperCase()));
+    @VisibleForTesting
+    void runOnce() throws IOException {
+
+        outputStream.write(gamePrompt);
+
+        final Matcher match = global.matcher(reader.readLine());
+        if (match.matches()) {
+
+            if (match.group(2) == null) {
+                inputActionConsumer.accept(inputActionProvider.gameInput(Position.valueOf(match.group(4).toUpperCase()), Position.valueOf(match.group(5).toUpperCase())));
+
+            } else if ("NEW".equals(match.group(2))) {
+                inputActionConsumer.accept(inputActionProvider.newGame());
+
+            } else if ("LOAD".equals(match.group(2))) {
+                inputActionConsumer.accept(inputActionProvider.loadGame(match.group(3).strip()));
+
+            } else if ("SAVE".equals(match.group(2))) {
+                inputActionConsumer.accept(inputActionProvider.saveGame(match.group(3).strip()));
+
+            } else if ("EXIT".equals(match.group(2))) {
+                inputActionConsumer.accept(inputActionProvider.exit());
+
             }
-            return callbackOne.apply(Position.valueOf(strip(line).toUpperCase()));
-
-        } catch (final IOException | IllegalArgumentException e) {
-            return callbackOne.apply(Position.OutOfBoard);
         }
+
+    }
+
+//    @Override
+//    public InputAction simpleInput() {
+//        try {
+//            outputStream.write(gamePrompt);
+//
+//            final Matcher match = global.matcher(reader.readLine());
+//            if (match.matches()) {
+//
+//                if (match.group(2) == null) {
+//                    return inputActionProvider.gameInput(Position.valueOf(match.group(4).toUpperCase()), Position.valueOf(match.group(5).toUpperCase()));
+//
+//                } else if ("NEW".equals(match.group(2))) {
+//                    return inputActionProvider.newGame();
+//
+//                } else if ("LOAD".equals(match.group(2))) {
+//                    return inputActionProvider.loadGame(match.group(3).strip());
+//
+//                } else if ("SAVE".equals(match.group(2))) {
+//                    return inputActionProvider.saveGame(match.group(3).strip());
+//
+//                } else if ("EXIT".equals(match.group(2))) {
+//                    return inputActionProvider.exit();
+//
+//                }
+//            }
+//        } catch (final IOException | IllegalArgumentException ignore) {
+//        }
+//        // TODO not nice
+//        return new InputAction() {};
+//    }
+
+//    @Override
+//    public String specialInput(final String... options) {
+//        // TODO
+//        return null;
+//    }
+
+    @Override
+    public Runnable prepare(Consumer<InputAction> inputActionConsumer) {
+        return null;
     }
 
     @Override
-    public <T> T takeInput(Function<Position, T> callback) {
-        try {
-            outputStream.write(gamePrompt);
-            return callback.apply(Position.valueOf(strip(reader.readLine()).toUpperCase()));
-        } catch (final IOException | IllegalArgumentException e) {
-            return callback.apply(Position.OutOfBoard);
-        }
-    }
+    public void stop() {
 
-    @Override
-    public Option<StateProvision> stateProvision() {
-        try {
-            outputStream.write(provisionPrompt);
-            final String s = strip(reader.readLine()).toLowerCase();
-            return Stream.of(StateProvision.values())
-                    .filter(p -> s.equals(p.name().toLowerCase()))
-                    .headOption();
-
-        } catch (final IOException e) {
-            return rethrow(e);
-        }
     }
 }
