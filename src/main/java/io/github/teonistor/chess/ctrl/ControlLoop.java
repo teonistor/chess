@@ -20,9 +20,9 @@ public class ControlLoop {
 
     private final SaveLoad saveLoad;
     private final GameFactory gameFactory;
-    private final BlockingQueue<Tuple2<Position, Position>> gameInputActions;
     // FYI shutdownNow() - "typical implementations will cancel via Thread.interrupt()" so I can utilise this carefully but usefully
     private final InputEngineFactory inputEngineFactory;
+    private final BlockingQueue<Tuple2<Position, Position>> gameInputActions;
     private final ExecutorService executorService;
 
     // Mutable state!
