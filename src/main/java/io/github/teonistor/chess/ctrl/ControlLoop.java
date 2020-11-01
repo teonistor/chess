@@ -28,7 +28,7 @@ public class ControlLoop {
     // Mutable state!
     private Game game;
 
-    public ControlLoop(SaveLoad saveLoad, InputEngineFactory inputEngineFactory, GameFactory gameFactory) {
+    public ControlLoop(SaveLoad saveLoad, GameFactory gameFactory, InputEngineFactory inputEngineFactory) {
         this.saveLoad = saveLoad;
         this.gameFactory = gameFactory;
         this.inputEngineFactory = inputEngineFactory;
@@ -41,11 +41,24 @@ public class ControlLoop {
         executorService.submit(engine);
     }
 
-    public void processInput(InputAction action) {
+    private void processInput(InputAction action) {
         if (game == null)
             processInputWithoutGame(action);
         else
             processInputWithGame(action);
+    }
+
+    private void processInputWithoutGame(final InputAction action) {
+        if (action.gameStateProvider().isPresent()) {
+            System.err.println("[DEBUG] Game state provider provided - launching");
+            game = gameFactory.create(action.gameStateProvider().get(), new InputProxy());
+            executorService.submit(game::play);
+        }
+
+        if (action.isExit()) {
+            System.err.println("[DEBUG] Exit action received - ending early control loop");
+            executorService.shutdownNow();
+        }
     }
 
     public void processInputWithGame(InputAction action) {
@@ -70,19 +83,6 @@ public class ControlLoop {
         }
     }
 
-    private void processInputWithoutGame(final InputAction action) {
-        if (action.gameStateProvider().isPresent()) {
-            System.err.println("[DEBUG] Game state provider provided - launching");
-            game = gameFactory.create(action.gameStateProvider().get(), new InputProxy());
-            executorService.submit(game::play);
-        }
-
-        if (action.isExit()) {
-            System.err.println("[DEBUG] Exit action received - ending early control loop");
-            executorService.shutdownNow();
-        }
-    }
-
     //class ViewState {
 //
 //    private GameState gameState;
@@ -92,7 +92,7 @@ public class ControlLoop {
 //
 //}
 //
-    class InputProxy implements Input {
+    private class InputProxy implements Input {
 
         @Override
         public Tuple2<Position, Position> simpleInput() {

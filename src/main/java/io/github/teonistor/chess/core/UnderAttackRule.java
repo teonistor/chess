@@ -14,6 +14,7 @@ import io.vavr.collection.Map;
 
 import java.util.function.UnaryOperator;
 
+// This doesn't catch pawn being under attack by opposing pawn via EnPassant, but realistically we don't care
 public class UnderAttackRule {
 
     private final Map<UnaryOperator<Position>,HashSet<Class<? extends Piece>>> recursiveSteps;

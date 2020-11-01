@@ -33,7 +33,7 @@ public class Factory {
     }
 
     public ControlLoop createTerminalControlLoop() {
-        return new ControlLoop(saveLoad, createTerminalInputFactory(), createGameFactory(createTerminalView()));
+        return new ControlLoop(saveLoad, createGameFactory(createTerminalView()), createTerminalInputFactory());
     }
 
     GameFactory createGameFactory(View... views) {
