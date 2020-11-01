@@ -39,7 +39,7 @@ public class TerminalInput implements InputEngine, Runnable {
     @Override
     public void run() {
         // TODO Global halt condition
-        while(true) {
+        while(!Thread.currentThread().isInterrupted()) {
             // Try knows better what exceptions to let slide
             Try.run(this::runOnce);
         }
@@ -56,67 +56,20 @@ public class TerminalInput implements InputEngine, Runnable {
             if (match.group(2) == null) {
                 inputActionConsumer.accept(inputActionProvider.gameInput(Position.valueOf(match.group(4).toUpperCase()), Position.valueOf(match.group(5).toUpperCase())));
 
-            } else if ("NEW".equals(match.group(2))) {
+            } else if ("NEW".equalsIgnoreCase(match.group(2))) {
                 inputActionConsumer.accept(inputActionProvider.newGame());
 
-            } else if ("LOAD".equals(match.group(2))) {
+            } else if ("LOAD".equalsIgnoreCase(match.group(2))) {
                 inputActionConsumer.accept(inputActionProvider.loadGame(match.group(3).strip()));
 
-            } else if ("SAVE".equals(match.group(2))) {
+            } else if ("SAVE".equalsIgnoreCase(match.group(2))) {
                 inputActionConsumer.accept(inputActionProvider.saveGame(match.group(3).strip()));
 
-            } else if ("EXIT".equals(match.group(2))) {
+            } else if ("EXIT".equalsIgnoreCase(match.group(2))) {
                 inputActionConsumer.accept(inputActionProvider.exit());
 
             }
         }
-
-    }
-
-//    @Override
-//    public InputAction simpleInput() {
-//        try {
-//            outputStream.write(gamePrompt);
-//
-//            final Matcher match = global.matcher(reader.readLine());
-//            if (match.matches()) {
-//
-//                if (match.group(2) == null) {
-//                    return inputActionProvider.gameInput(Position.valueOf(match.group(4).toUpperCase()), Position.valueOf(match.group(5).toUpperCase()));
-//
-//                } else if ("NEW".equals(match.group(2))) {
-//                    return inputActionProvider.newGame();
-//
-//                } else if ("LOAD".equals(match.group(2))) {
-//                    return inputActionProvider.loadGame(match.group(3).strip());
-//
-//                } else if ("SAVE".equals(match.group(2))) {
-//                    return inputActionProvider.saveGame(match.group(3).strip());
-//
-//                } else if ("EXIT".equals(match.group(2))) {
-//                    return inputActionProvider.exit();
-//
-//                }
-//            }
-//        } catch (final IOException | IllegalArgumentException ignore) {
-//        }
-//        // TODO not nice
-//        return new InputAction() {};
-//    }
-
-//    @Override
-//    public String specialInput(final String... options) {
-//        // TODO
-//        return null;
-//    }
-
-    @Override
-    public Runnable prepare(Consumer<InputAction> inputActionConsumer) {
-        return null;
-    }
-
-    @Override
-    public void stop() {
 
     }
 }

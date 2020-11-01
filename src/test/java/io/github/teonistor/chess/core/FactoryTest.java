@@ -5,19 +5,19 @@ import org.junit.jupiter.api.Test;
 
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 
-class GameFactoryTest {
+class FactoryTest {
 
-    private static final GameFactory gameFactory = new GameFactory();
+    private static final Factory FACTORY = new Factory();
 
     @Test
     void constructorInitialisedFields() {
         final SoftAssertions soft = new SoftAssertions();
-        final Object underAttackRule = getField(gameFactory, "underAttackRule");
-        final Object checkRule = getField(gameFactory, "checkRule");
-        final Object gameOverChecker = getField(gameFactory, "gameOverChecker");
-        final Object pieceBox = getField(gameFactory, "pieceBox");
-        final Object initialBoardProvider = getField(gameFactory, "initialBoardProvider");
-        final Object initialStateProvider = getField(gameFactory, "initialStateProvider");
+        final Object underAttackRule = getField(FACTORY, "underAttackRule");
+        final Object checkRule = getField(FACTORY, "checkRule");
+        final Object gameOverChecker = getField(FACTORY, "gameOverChecker");
+        final Object pieceBox = getField(FACTORY, "pieceBox");
+        final Object initialBoardProvider = getField(FACTORY, "initialBoardProvider");
+        final Object initialStateProvider = getField(FACTORY, "initialStateProvider");
 
         soft.assertThat(underAttackRule).isNotNull();
         soft.assertThat(checkRule).isNotNull();
@@ -38,7 +38,7 @@ class GameFactoryTest {
     //   and I thought we were done with that construct
     /*@Test
     void createTerminalGame() {
-        final Game game = gameFactory.createTerminalGame();
+        final Game game = FACTORY.createTerminalGame();
 
         assertThat((Input[]) getField(game, "inputs")).allSatisfy(input -> assertThat(input).isInstanceOf(TerminalInput.class));
         assertThat(getField(game, "view")).isInstanceOf(TerminalView.class);
@@ -52,7 +52,7 @@ class GameFactoryTest {
         final View viewTwo = mock(View.class);
         final View viewThree = mock(View.class);
 
-        final Game game = gameFactory.createGame(inputOne, inputTwo, viewOne, viewTwo, viewThree);
+        final Game game = FACTORY.createGame(inputOne, inputTwo, viewOne, viewTwo, viewThree);
 
         assertThat((Input[]) getField(game, "inputs")).containsExactly(inputOne, inputTwo);
         assertThat((Iterable) getField(getField(game, "view"), "views")).containsExactlyInAnyOrder(viewOne, viewTwo, viewThree);

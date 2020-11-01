@@ -16,16 +16,14 @@ public class Game {
     private final GameStateProvider gameStateProvider;
     private final CheckRule checkRule;
     private final GameOverChecker gameOverChecker;
-    private final Input[] inputs;
+    private final Input input;
     private final View view;
 
-    public Game(final GameStateProvider gameStateProvider, final CheckRule checkRule, final GameOverChecker gameOverChecker, final Input white, final Input black, final View view) {
+    public Game(final GameStateProvider gameStateProvider, final CheckRule checkRule, final GameOverChecker gameOverChecker, final Input input, final View view) {
         this.gameStateProvider = gameStateProvider;
         this.checkRule = checkRule;
         this.gameOverChecker = gameOverChecker;
-        inputs = new Input[2];
-        inputs[Player.White.ordinal()] = white;
-        inputs[Player.Black.ordinal()] = black;
+        this.input = input;
         this.view = view;
     }
 
@@ -71,7 +69,7 @@ public class Game {
 
     @VisibleForTesting
     GameState processInput(final Map<Position, Map<Position,GameState>> possibleMoves) {
-        final Tuple2<Position, Position> fromTo = inputs[0].simpleInput();
+        final Tuple2<Position, Position> fromTo = input.simpleInput();
 
         return possibleMoves.get(fromTo._1)
               .flatMap(m -> m.get(fromTo._2))

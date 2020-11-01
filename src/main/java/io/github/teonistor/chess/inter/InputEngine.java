@@ -5,8 +5,6 @@ import io.github.teonistor.chess.ctrl.InputAction;
 import java.util.function.Consumer;
 
 // TODO Rename
-public interface InputEngine {
+public interface InputEngine extends Runnable {
 
-    Runnable prepare(Consumer<InputAction> inputActionConsumer);
-    void stop();
 }

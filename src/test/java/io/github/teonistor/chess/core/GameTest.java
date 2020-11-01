@@ -45,8 +45,7 @@ class GameTest {
     private final GameStateProvider provider = mock(InitialStateProvider.class);
     private final CheckRule rule = mock(CheckRule.class);
     private final GameOverChecker checker = mock(GameOverChecker.class);
-    private final Input white = mock(Input.class);
-    private final Input black = mock(Input.class);
+    private final Input input = mock(Input.class);
     private final View view = mock(View.class);
     private final Piece a1Piece = mock(Piece.class);
     private final Piece b4Piece = mock(Piece.class);
@@ -60,7 +59,7 @@ class GameTest {
 
     @BeforeEach
     void setUp() {
-        game = spy(new Game(provider, rule, checker, white, black, view));
+        game = spy(new Game(provider, rule, checker, input, view));
         when(provider.createState()).thenReturn(state);
         when(rule.validate(any(), any())).thenReturn(true);
         doReturn(state).when(state).advance(any());
@@ -150,21 +149,21 @@ class GameTest {
     @ParameterizedTest
     @CsvSource({"A2,B5","A7,C1","D3,E3","F1,H8"})
     void processInputGood(Position p1, Position p2) {
-        when(white.simpleInput()).thenReturn(new Tuple2<>(p1, p2));
+        when(input.simpleInput()).thenReturn(new Tuple2<>(p1, p2));
 
         assertThat(game.processInput(HashMap.of(p1, HashMap.of(p2, state)))).isEqualTo(state);
 
-        verify(white).simpleInput();
+        verify(input).simpleInput();
     }
 
     @Test
     void processInputBogus() {
-        when(white.simpleInput()).thenReturn(new Tuple2<>(A1, B2)).thenReturn(new Tuple2<>(A2, B4))
+        when(input.simpleInput()).thenReturn(new Tuple2<>(A1, B2)).thenReturn(new Tuple2<>(A2, B4))
                                  .thenReturn(new Tuple2<>(D7, B5)).thenReturn(new Tuple2<>(A2, B5));
 
         assertThat(game.processInput(HashMap.of(A2, HashMap.of(B5, state)))).isEqualTo(state);
 
-        verify(white, times(4)).simpleInput();
+        verify(input, times(4)).simpleInput();
     }
 
     @ParameterizedTest
@@ -189,6 +188,6 @@ class GameTest {
 
     @AfterEach
     void tearDown() {
-        verifyNoMoreInteractions(provider, rule, checker, white, black, view, a1Piece, b4Piece, d8Piece, h6Piece, move);
+        verifyNoMoreInteractions(provider, rule, checker, input, view, a1Piece, b4Piece, d8Piece, h6Piece, move);
     }
 }
