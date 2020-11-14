@@ -24,7 +24,7 @@ public class Factory {
     public Factory() {
         underAttackRule = new UnderAttackRule();
         checkRule = new CheckRule(underAttackRule);
-        gameOverChecker = new GameOverChecker(underAttackRule);
+        gameOverChecker = new GameOverChecker(checkRule);
         pieceBox = new PieceBox(underAttackRule);
         initialBoardProvider = new InitialBoardProvider(pieceBox);
         initialStateProvider = new InitialStateProvider(initialBoardProvider);

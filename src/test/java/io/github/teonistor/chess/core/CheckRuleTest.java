@@ -24,7 +24,7 @@ class CheckRuleTest {
     void failIfNoKing(Player player) {
         king = new King(player, rule);
 
-        assertThatIllegalArgumentException().isThrownBy(()-> new CheckRule(rule).validate(HashMap.empty(), player))
+        assertThatIllegalArgumentException().isThrownBy(() -> new CheckRule(rule).check(HashMap.empty(), player))
                 .withMessage("There should be exactly one %s King but found 0", player);
     }
 
@@ -34,7 +34,7 @@ class CheckRuleTest {
         king = new King(player, rule);
 
         assertThatIllegalArgumentException()
-                .isThrownBy(()-> new CheckRule(rule).validate(HashMap.of(Position.A2, king, Position.F1, king, Position.G6, king), player))
+                .isThrownBy(() -> new CheckRule(rule).check(HashMap.of(Position.A2, king, Position.F1, king, Position.G6, king), player))
                 .withMessage("There should be exactly one %s King but found 3", player);
     }
 
@@ -45,7 +45,7 @@ class CheckRuleTest {
         final HashMap<Position,Piece> board = HashMap.of(position, king);
         when(rule.checkAttack(board, position, player)).thenReturn(false);
 
-        assertThat(new CheckRule(rule).validate(board, player)).isTrue();
+        assertThat(new CheckRule(rule).check(board, player)).isFalse();
 
         verify(rule).checkAttack(board, position, player);
     }
@@ -57,7 +57,7 @@ class CheckRuleTest {
         final HashMap<Position,Piece> board = HashMap.of(position, king);
         when(rule.checkAttack(board, position, player)).thenReturn(true);
 
-        assertThat(new CheckRule(rule).validate(board, player)).isFalse();
+        assertThat(new CheckRule(rule).check(board, player)).isTrue();
 
         verify(rule).checkAttack(board, position, player);
     }

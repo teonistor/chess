@@ -19,19 +19,19 @@ import static org.mockito.Mockito.when;
 
 class GameOverCheckerTest {
 
-    private final UnderAttackRule rule = mock(UnderAttackRule.class);
-    private final PieceBox box = new PieceBox(rule);
+    private final CheckRule rule = mock(CheckRule.class);
+    private final PieceBox box = new PieceBox(mock(UnderAttackRule.class));
 
     @Test
     void constructorThrowsOnNull() {
         assertThatNullPointerException().isThrownBy(() -> new GameOverChecker(null))
-                .withMessageContaining("underAttackRule");
+                .withMessageContaining("checkRule");
     }
 
     @Test
     void blackWins() {
         final HashMap<Position, Piece> board = HashMap.of(Position.A1, box.whiteKing, Position.H8, box.blackKing, Position.D4, box.whiteRook);
-        when(rule.checkAttack(board, Position.A1, White)).thenReturn(true);
+        when(rule.check(board, White)).thenReturn(true);
 
         assertThat(new GameOverChecker(rule).check(board, White, HashMap.of(Position.A1, HashMap.empty()))).isEqualTo(BlackWins);
     }
@@ -39,7 +39,7 @@ class GameOverCheckerTest {
     @Test
     void whiteWins() {
         final HashMap<Position, Piece> board = HashMap.of(Position.A1, box.whiteKing, Position.H8, box.blackKing, Position.F3, box.blackRook);
-        when(rule.checkAttack(board, Position.H8, Black)).thenReturn(true);
+        when(rule.check(board, Black)).thenReturn(true);
 
         assertThat(new GameOverChecker(rule).check(board, Black, HashMap.of(Position.H8, HashMap.empty()))).isEqualTo(WhiteWins);
     }

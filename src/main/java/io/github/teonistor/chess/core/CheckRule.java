@@ -14,11 +14,16 @@ import static org.apache.commons.lang3.Validate.isTrue;
 public class CheckRule {
     private final @NonNull UnderAttackRule underAttackRule;
 
-    public boolean validate(Map<Position, Piece> board, Player player) {
-        // TODO Dedup this line and/or store in redundant state
-        // TODO Change this combo to .equals() in Piece after trimming King
+    /**
+     * Check whether the given player is under check
+     * @param board the board to check
+     * @param player the player to check
+     * @return true if the given player is under check, false otherwise
+     * @throws IllegalArgumentException if there is not exactly one king of the given player on the board
+     */
+    public boolean check(final Map<Position, Piece> board, final Player player) {
         final Set<Position> kingPosition = board.filterValues(piece -> piece instanceof King && piece.getPlayer() == player).keySet();
         isTrue(kingPosition.size() == 1, "There should be exactly one %s King but found %d", player, kingPosition.size());
-        return !underAttackRule.checkAttack(board, kingPosition.get(), player);
+        return underAttackRule.checkAttack(board, kingPosition.get(), player);
     }
 }

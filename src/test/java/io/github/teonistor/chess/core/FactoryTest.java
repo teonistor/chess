@@ -41,7 +41,7 @@ class FactoryTest {
         soft.assertThat(initialBoardProvider).isNotNull();
         soft.assertThat(initialStateProvider).isNotNull();
         soft.assertThat(getField(checkRule, "underAttackRule")).isEqualTo(underAttackRule);
-        soft.assertThat(getField(gameOverChecker, "underAttackRule")).isEqualTo(underAttackRule);
+        soft.assertThat(getField(gameOverChecker, "checkRule")).isEqualTo(checkRule);
         soft.assertThat(getField(initialBoardProvider, "box")).isEqualTo(pieceBox);
         soft.assertThat(getFieldRec(pieceBox, "whiteKing", "underAttackRule")).isEqualTo(underAttackRule);
         soft.assertThat(getFieldRec(pieceBox, "blackKing", "underAttackRule")).isEqualTo(underAttackRule);

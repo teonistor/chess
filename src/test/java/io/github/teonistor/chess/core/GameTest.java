@@ -61,7 +61,7 @@ class GameTest {
     void setUp() {
         game = spy(new Game(provider, rule, checker, input, view));
         when(provider.createState()).thenReturn(state);
-        when(rule.validate(any(), any())).thenReturn(true);
+        when(rule.check(any(), any())).thenReturn(false);
         doReturn(state).when(state).advance(any());
     }
 
@@ -123,8 +123,8 @@ class GameTest {
         when(ruleFilteredMove.getTo()).thenReturn(E5);
         when(move.execute(state)).thenReturn(outputState);
         when(ruleFilteredMove.execute(state)).thenReturn(ruleFilteredState);
-        when(rule.validate(outputBoard, currentPlayer)).thenReturn(true);
-        when(rule.validate(ruleFilteredBoard, currentPlayer)).thenReturn(false);
+        when(rule.check(outputBoard, currentPlayer)).thenReturn(false);
+        when(rule.check(ruleFilteredBoard, currentPlayer)).thenReturn(true);
 
         // n.b. We are including pieces of the current user which have nowhere to move
         assertThat(game.computeAvailableMoves(state)).isEqualTo(HashMap.of(A1, HashMap.of(A3, outputState), D8, HashMap.empty()));
@@ -142,8 +142,8 @@ class GameTest {
         verify(ruleFilteredMove).getTo();
         verify(move).execute(state);
         verify(ruleFilteredMove).execute(state);
-        verify(rule).validate(outputBoard, currentPlayer);
-        verify(rule).validate(ruleFilteredBoard, currentPlayer);
+        verify(rule).check(outputBoard, currentPlayer);
+        verify(rule).check(ruleFilteredBoard, currentPlayer);
     }
 
     @ParameterizedTest
