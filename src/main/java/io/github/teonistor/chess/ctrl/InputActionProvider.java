@@ -27,7 +27,7 @@ public class InputActionProvider {
         return new InputAction() {
             @Override
             public Optional<GameStateProvider> gameStateProvider() {
-                return Optional.of(saveLoad.doLoadState(fileName));
+                return Optional.of(saveLoad.loadState(fileName));
             }
         };
     }

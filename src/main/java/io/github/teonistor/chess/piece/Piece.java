@@ -25,4 +25,9 @@ public abstract class Piece {
     public int hashCode() {
         return Objects.hash(player, getClass());
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s(%s)", getClass().getName(), player);
+    }
 }

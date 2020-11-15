@@ -34,6 +34,7 @@ class FactoryTest {
         final Object pieceBox = getField(FACTORY, "pieceBox");
         final Object initialBoardProvider = getField(FACTORY, "initialBoardProvider");
         final Object initialStateProvider = getField(FACTORY, "initialStateProvider");
+        final Object pieceSerialiser = getField(FACTORY, "pieceSerialiser");
 
         soft.assertThat(underAttackRule).isNotNull();
         soft.assertThat(checkRule).isNotNull();
@@ -46,6 +47,9 @@ class FactoryTest {
         soft.assertThat(getFieldRec(pieceBox, "whiteKing", "underAttackRule")).isEqualTo(underAttackRule);
         soft.assertThat(getFieldRec(pieceBox, "blackKing", "underAttackRule")).isEqualTo(underAttackRule);
         soft.assertThat(getField(initialStateProvider, "initialBoardProvider")).isEqualTo(initialBoardProvider);
+        // Actions in constructors render these untestable
+//        soft.assertThat(pieceSerialiser).hasFieldOrPropertyWithValue("pieceBox", pieceBox);
+//        soft.assertThat(getField(FACTORY, "saveLoad")).hasFieldOrPropertyWithValue("pieceSerialiser", pieceSerialiser);
 
         soft.assertAll();
     }

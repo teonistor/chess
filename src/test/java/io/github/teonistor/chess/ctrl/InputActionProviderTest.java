@@ -27,7 +27,7 @@ class InputActionProviderTest {
 
     @Test
     void loadGame() {
-        when(saveLoad.doLoadState("file name")).thenReturn(provider);
+        when(saveLoad.loadState("file name")).thenReturn(provider);
 
         final InputAction action = new InputActionProvider(provider, saveLoad).loadGame("file name");
         assertThat(action.gameStateProvider()).contains(provider);

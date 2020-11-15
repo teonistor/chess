@@ -18,6 +18,7 @@ public class Factory {
     private final PieceBox pieceBox;
     private final InitialBoardProvider initialBoardProvider;
     private final InitialStateProvider initialStateProvider;
+    private final PieceSerialiser pieceSerialiser;
     private final SaveLoad saveLoad;
     private final InputActionProvider inputActionProvider;
 
@@ -28,7 +29,8 @@ public class Factory {
         pieceBox = new PieceBox(underAttackRule);
         initialBoardProvider = new InitialBoardProvider(pieceBox);
         initialStateProvider = new InitialStateProvider(initialBoardProvider);
-        saveLoad = new SaveLoad();
+        pieceSerialiser = new PieceSerialiser(pieceBox);
+        saveLoad = new SaveLoad(pieceSerialiser);
         inputActionProvider = new InputActionProvider(initialStateProvider, saveLoad);
     }
 
