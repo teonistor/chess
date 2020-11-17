@@ -2,8 +2,8 @@ package io.github.teonistor.chess.core;
 
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.InputAction;
+import io.github.teonistor.chess.inter.DefinitelyInput;
 import io.github.teonistor.chess.inter.Input;
-import io.github.teonistor.chess.inter.InputEngine;
 import io.github.teonistor.chess.inter.TerminalInput;
 import io.github.teonistor.chess.inter.TerminalView;
 import io.github.teonistor.chess.inter.View;
@@ -57,17 +57,16 @@ class FactoryTest {
     @Test
     void createTerminalControlLoop() {
         final GameFactory gameFactory = mock(GameFactory.class);
-        final InputEngineFactory engineFactory = mock(InputEngineFactory.class);
+        final DefinitelyInput input = mock(DefinitelyInput.class);
         final ArgumentCaptor<View> view = ArgumentCaptor.forClass(View.class);
         doReturn(gameFactory).when(FACTORY).createGameFactory(view.capture());
-        doReturn(engineFactory).when(FACTORY).createTerminalInputFactory();
+        doReturn(input).when(FACTORY).createTerminalInput();
 
         final ControlLoop loop = FACTORY.createTerminalControlLoop();
 
         assertThat(loop).hasFieldOrPropertyWithValue("saveLoad", getField(FACTORY, "saveLoad"));
         assertThat(loop).hasFieldOrPropertyWithValue("gameFactory", gameFactory);
-        assertThat(loop).hasFieldOrPropertyWithValue("inputEngineFactory", engineFactory);
-        assertThat(getField(loop, "gameInputActions")).isInstanceOf(BlockingQueue.class);
+        assertThat(loop).hasFieldOrPropertyWithValue("input", input);
         assertThat(getField(loop, "executorService")).isInstanceOf(ThreadPoolExecutor.class);
         assertThat(view.getValue()).isInstanceOf(TerminalView.class);
 
@@ -95,18 +94,18 @@ class FactoryTest {
     void createTerminalInputFactory() {
         final Consumer<InputAction> inputActionConsumer = mock(Consumer.class);
 
-        final InputEngine engine = FACTORY.createTerminalInputFactory().create(inputActionConsumer);
+        final DefinitelyInput input = FACTORY.createTerminalInput();
 
-        assertThat(engine).isInstanceOf(TerminalInput.class);
-        assertThat(engine).hasFieldOrPropertyWithValue("inputActionProvider", getField(FACTORY, "inputActionProvider"));
-        assertThat(engine).hasFieldOrPropertyWithValue("inputActionConsumer", inputActionConsumer);
+        assertThat(input).isInstanceOf(TerminalInput.class);
+        assertThat(input).hasFieldOrPropertyWithValue("inputActionProvider", getField(FACTORY, "inputActionProvider"));
+//        assertThat(input).hasFieldOrPropertyWithValue("inputActionConsumer", inputActionConsumer);
     }
 
-    private Object getFieldRec(Object object, String...names) {
+    private Object getFieldRec(final Object object, final String...names) {
         return getFieldRec(object, 0, names);
     }
 
-    private Object getFieldRec(Object object, int i, String...names) {
+    private Object getFieldRec(final Object object, final int i, final String...names) {
         return i == names.length
              ? object
              : getFieldRec(getField(object, names[i]), i+1, names);

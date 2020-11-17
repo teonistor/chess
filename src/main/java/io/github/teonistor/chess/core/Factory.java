@@ -3,6 +3,7 @@ package io.github.teonistor.chess.core;
 import io.github.teonistor.chess.board.InitialBoardProvider;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.InputActionProvider;
+import io.github.teonistor.chess.inter.DefinitelyInput;
 import io.github.teonistor.chess.inter.MultipleViewWrapper;
 import io.github.teonistor.chess.inter.TerminalInput;
 import io.github.teonistor.chess.inter.TerminalView;
@@ -35,15 +36,15 @@ public class Factory {
     }
 
     public ControlLoop createTerminalControlLoop() {
-        return new ControlLoop(saveLoad, createGameFactory(createTerminalView()), createTerminalInputFactory());
+        return new ControlLoop(saveLoad, createGameFactory(createTerminalView()), createTerminalInput());
     }
 
-    GameFactory createGameFactory(View... views) {
+    GameFactory createGameFactory(final View... views) {
         return (p, i) -> new Game(p, checkRule, gameOverChecker, i, MultipleViewWrapper.wrapIfNeeded(views));
     }
 
-    InputEngineFactory createTerminalInputFactory() {
-        return c -> new TerminalInput(inputActionProvider, c);
+    DefinitelyInput createTerminalInput() {
+        return new TerminalInput(inputActionProvider);
     }
 
     View createTerminalView() {

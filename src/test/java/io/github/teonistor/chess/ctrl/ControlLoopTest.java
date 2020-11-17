@@ -2,6 +2,7 @@ package io.github.teonistor.chess.ctrl;
 
 import io.github.teonistor.chess.core.Game;
 import io.github.teonistor.chess.core.GameStateProvider;
+import io.github.teonistor.chess.inter.DefinitelyInput;
 import io.github.teonistor.chess.inter.Input;
 import io.github.teonistor.chess.inter.InputEngine;
 import io.github.teonistor.chess.save.SaveLoad;
@@ -27,10 +28,10 @@ class ControlLoopTest {
     @Mock private InputEngine inputEngine;
     @Mock private InputAction action;
     @Mock private GameStateProvider providerIn;
+    @Mock private DefinitelyInput input;
 
     private GameStateProvider providerOut;
-    private Input input;
-    private Consumer<InputAction> inputActionConsumer;
+    private Input inputProxy;
 
     private ControlLoop loop;
 
@@ -39,12 +40,9 @@ class ControlLoopTest {
         initMocks(this);
         loop = new ControlLoop(saveLoad, (p, i) -> {
             this.providerOut = p;
-            this.input = i;
+            this.inputProxy = i;
             return game;
-        }, c -> {
-            this.inputActionConsumer = c;
-            return inputEngine;
-        });
+        }, input);
     }
 
     @Test
@@ -59,7 +57,7 @@ class ControlLoopTest {
         when(action.gameStateProvider()).thenReturn(Optional.of(providerIn));
 
         loop.launch();
-        inputActionConsumer.accept(action);
+//        inputActionConsumer.accept(action);
 
         assertThat(providerOut).isSameAs(providerIn);
         assertThat(input).isNotNull();

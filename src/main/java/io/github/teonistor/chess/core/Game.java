@@ -9,15 +9,19 @@ import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
+import lombok.Getter;
 import lombok.val;
 
-public class Game {
+public class Game implements Runnable {
 
     private final GameStateProvider gameStateProvider;
     private final CheckRule checkRule;
     private final GameOverChecker gameOverChecker;
     private final Input input;
     private final View view;
+
+    // Mutable state!
+    private @Getter GameState state;
 
     public Game(final GameStateProvider gameStateProvider, final CheckRule checkRule, final GameOverChecker gameOverChecker, final Input input, final View view) {
         this.gameStateProvider = gameStateProvider;
@@ -27,12 +31,38 @@ public class Game {
         this.view = view;
     }
 
+    public void run() {
+        if (state == null)
+            state = gameStateProvider.createState();
+
+        final val possibleMoves = computeAvailableMoves(state);
+        final val gameCondition = gameOverChecker.check(state.getBoard(), state.getPlayer(), possibleMoves);
+        view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), turnMovesIntoPairs(possibleMoves));
+
+        switch (gameCondition) {
+            case Continue:
+                state = processInput(possibleMoves);
+                break;
+
+            case WhiteWins:
+                view.announce("White wins!");
+                break;
+            case BlackWins:
+                view.announce("Black wins!");
+                break;
+            case Stalemate:
+                view.announce("Stalemate!");
+                break;
+        }
+    }
+
+    @Deprecated
     public void play() {
         var state = gameStateProvider.createState();
 
         while (true) {
-            val possibleMoves = computeAvailableMoves(state);
-            val gameCondition = gameOverChecker.check(state.getBoard(), state.getPlayer(), possibleMoves);
+            final val possibleMoves = computeAvailableMoves(state);
+            final val gameCondition = gameOverChecker.check(state.getBoard(), state.getPlayer(), possibleMoves);
             view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), turnMovesIntoPairs(possibleMoves));
 
             switch (gameCondition) {
@@ -77,7 +107,7 @@ public class Game {
     }
 
     @VisibleForTesting
-    Stream<Tuple2<Position, Position>> turnMovesIntoPairs(Map<Position, Map<Position, GameState>> possibleMoves) {
+    Stream<Tuple2<Position, Position>> turnMovesIntoPairs(final Map<Position, Map<Position, GameState>> possibleMoves) {
         return possibleMoves.toStream()
                 .flatMap(m -> Stream.continually(m._1).zip(m._2.keySet()));
     }
