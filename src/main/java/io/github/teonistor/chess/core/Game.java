@@ -31,18 +31,23 @@ public class Game implements Runnable {
         this.view = view;
     }
 
+    // public Runnable launch() {
+    //   state = gameStateProvider.createState();
+    //   return this::playRound;
+    // }
+
     public void run() {
         if (state == null)
             state = gameStateProvider.createState();
 
         final val possibleMoves = computeAvailableMoves(state);
         final val gameCondition = gameOverChecker.check(state.getBoard(), state.getPlayer(), possibleMoves);
-        view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), turnMovesIntoPairs(possibleMoves));
 
         switch (gameCondition) {
             case Continue:
+                view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), turnMovesIntoPairs(possibleMoves));
                 state = processInput(possibleMoves);
-                break;
+                return;
 
             case WhiteWins:
                 view.announce("White wins!");
@@ -54,6 +59,10 @@ public class Game implements Runnable {
                 view.announce("Stalemate!");
                 break;
         }
+
+        // Evict this thread from the scheduler when the game has finished to prevent a loop of announcements. Not nice but.
+        // TODO Under current implementation this means when the game ends there is no more input
+        throw new ThreadDeath();
     }
 
     @Deprecated
