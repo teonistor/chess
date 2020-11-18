@@ -44,14 +44,16 @@ public class SaveLoad {
     }
 
     public void saveState(final GameState state, final String fileName) {
-        final List<SerializableState> serializableStates = Stream.iterate(state, GameState::getPrevious)
-                .takeUntil(Objects::isNull)
-                .map(this::deconstructState)
-                .toList();
-        try (final GZIPOutputStream outputStream = new GZIPOutputStream(new FileOutputStream(fileName))) {
-            objectMapper.get().writeValue(outputStream, serializableStates);
-        } catch (final IOException e) {
-            rethrow(e);
+        try {
+            final List<SerializableState> serializableStates = Stream.iterate(state, GameState::getPrevious)
+                    .takeUntil(Objects::isNull)
+                    .map(this::deconstructState)
+                    .toList();
+            try (final GZIPOutputStream outputStream = new GZIPOutputStream(new FileOutputStream(fileName))) {
+                objectMapper.get().writeValue(outputStream, serializableStates);
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -60,6 +62,7 @@ public class SaveLoad {
             try (final GZIPInputStream inputStream = new GZIPInputStream(new FileInputStream(fileName))) {
                 return reconstructStatesRecursively(objectMapper.get().readValue(inputStream, serializableStateListType), 0);
             } catch (final IOException e) {
+                // TODO Nasty
                 return rethrow(e);
             }
         };

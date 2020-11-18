@@ -41,7 +41,7 @@ public class ControlLoop {
             System.err.println("[DEBUG] Game state provider provided - launching");
             game = gameFactory.create(action.gameStateProvider().get(), new InputProxy());
             // TODO protect
-            executorService.scheduleWithFixedDelay(game, 1, 1, MILLISECONDS);
+            executorService.scheduleWithFixedDelay(game.launch(), 1, 1, MILLISECONDS);
 
         } else if (!action.isExit()) {
             // Loop (by recursion) until we get something relevant

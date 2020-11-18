@@ -12,7 +12,7 @@ import io.vavr.collection.Stream;
 import lombok.Getter;
 import lombok.val;
 
-public class Game implements Runnable {
+public class Game {
 
     private final GameStateProvider gameStateProvider;
     private final CheckRule checkRule;
@@ -22,6 +22,7 @@ public class Game implements Runnable {
 
     // Mutable state!
     private @Getter GameState state;
+    private boolean gameOver;
 
     public Game(final GameStateProvider gameStateProvider, final CheckRule checkRule, final GameOverChecker gameOverChecker, final Input input, final View view) {
         this.gameStateProvider = gameStateProvider;
@@ -31,17 +32,22 @@ public class Game implements Runnable {
         this.view = view;
     }
 
-    // public Runnable launch() {
-    //   state = gameStateProvider.createState();
-    //   return this::playRound;
-    // }
+     public Runnable launch() {
+       state = gameStateProvider.createState();
+       gameOver = false;
+       return this::playRound;
+     }
 
-    public void run() {
-        if (state == null)
-            state = gameStateProvider.createState();
+     @VisibleForTesting
+     void playRound() {
+        if (gameOver) {
+            // TODO This hack means the game is painfully aware of the shared input interface
+            input.simpleInput();
+            return;
+        }
 
-        final val possibleMoves = computeAvailableMoves(state);
-        final val gameCondition = gameOverChecker.check(state.getBoard(), state.getPlayer(), possibleMoves);
+        val possibleMoves = computeAvailableMoves(state);
+        val gameCondition = gameOverChecker.check(state.getBoard(), state.getPlayer(), possibleMoves);
 
         switch (gameCondition) {
             case Continue:
@@ -59,10 +65,7 @@ public class Game implements Runnable {
                 view.announce("Stalemate!");
                 break;
         }
-
-        // Evict this thread from the scheduler when the game has finished to prevent a loop of announcements. Not nice but.
-        // TODO Under current implementation this means when the game ends there is no more input
-        throw new ThreadDeath();
+        gameOver = true;
     }
 
     @Deprecated
