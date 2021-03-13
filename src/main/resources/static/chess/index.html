@@ -1,0 +1,55 @@
+<html lang="en">
+<head>
+    <title>Basic Chess</title>
+    <link rel="stylesheet" href="main.css" />
+<!--    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">-->
+</head>
+
+<body>
+
+<div id="app">
+
+    <h2>Basic But Not So Basic Chess</h2>
+
+    <div class="play-area-inner">
+        <div v-for="(row,i) in board"
+             :key="i">
+            <span v-for="(piece,j) in row"
+                  :key="j"
+                  :class="{cell: true, dark: !!((i + j) % 2), light: !((i + j) % 2)}"
+                  @drop="drop($event, i, j)"
+                  @dragover="allowDrop($event)">
+
+                <img v-if="pieceBox.hasOwnProperty(piece)"
+                     :src="pieceBox[piece]"
+                     draggable="true"
+                     @dragstart="drag(i,j)">
+
+                <span v-else class="img-placeholder"></span>
+            </span>
+        </div>
+    </div>
+
+<!--    <div>-->
+<!--        Black on top-->
+<!--        <v-switch v-model="whiteOnTop" style="display: inline-block; vertical-align: middle"></v-switch>-->
+<!--        White on top-->
+<!--    </div>-->
+
+<!--    <div>-->
+<!--        Normal pieces-->
+<!--        <v-switch v-model="outlandishPieces" style="display: inline-block; vertical-align: middle"></v-switch>-->
+<!--        Outlandish pieces-->
+<!--    </div>-->
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="stomp.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>-->
+<script src="main.js"></script>
+
+</body>
+</html>
