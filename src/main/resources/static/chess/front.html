@@ -1,0 +1,33 @@
+<html lang="en">
+<head>
+    <title>Basic Chess Frontpage</title>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="main.css" />
+</head>
+
+<body>
+
+<div id="app">
+    <h2>Basic But Not So Basic Chess</h2>
+    <h4>Choose player:</h4>
+
+    <form v-for="player in players"
+          :key="player"
+          :action="'/chess-api/start-' + player.toLowerCase()"
+          method="post">
+        <v-btn type="submit" elevation="7" x-large dark
+               @click="clicked=player"
+               :loading="clicked===player"
+               :disabled="!!clicked"
+               v-html="player"></v-btn>
+    </form>
+</div>
+
+<!--<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>-->
+<!--<script src="stomp.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script src="front.js"></script>
+
+</body>
+</html>

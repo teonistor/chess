@@ -24,12 +24,12 @@ new Vue({
     board: [
       ['', '', '', '', '', '', '', ''],
       ['', '', '', '', '', '', '', ''],
-      ['', '', '', '', '', 'WN', '', ''],
       ['', '', '', '', '', '', '', ''],
       ['', '', '', '', '', '', '', ''],
-      ['', '', 'BP', '', '', '', '', ''],
       ['', '', '', '', '', '', '', ''],
-      ['', '', '', 'BK', '', '', '', '']
+      ['', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '']
     ],
     whiteOnTop: false,
 
@@ -46,7 +46,7 @@ new Vue({
   methods: {
 
     connect () {
-      let socket = new SockJS('/ttt-subscribe');
+      let socket = new SockJS('/chess-subscribe');
       this.stompClient = Stomp.over(socket);
       this.stompClient.connect({}, frame => {
         this.stompClient.subscribe('/ttt/board', this.receiveBoard);

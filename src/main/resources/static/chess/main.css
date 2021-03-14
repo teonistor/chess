@@ -8,6 +8,10 @@ h2 {
 	padding: 28px 0;
 }
 
+form {
+	padding: 20px;
+}
+
 .play-area-outer {
 	overflow: auto;
 }
