@@ -12,18 +12,19 @@
     <h2>Basic But Not So Basic Chess</h2>
 
     <div class="play-area-inner">
-        <div v-for="(row,i) in board"
+        <div v-for="(row,i) in positions"
              :key="i">
-            <span v-for="(piece,j) in row"
+            <span v-for="(position,j) in row"
                   :key="j"
                   :class="{cell: true, dark: !!((i + j) % 2), light: !((i + j) % 2)}"
-                  @drop="drop($event, i, j)"
+                  @drop="drop($event, position)"
                   @dragover="allowDrop($event)">
 
-                <img v-if="pieceBox.hasOwnProperty(piece)"
-                     :src="pieceBox[piece]"
+                <img v-if="board.hasOwnProperty(position)"
+                     :src="pieceBox[board[position]]"
+                     :class="{provisional: provisional.indexOf(position) >= 0}"
                      draggable="true"
-                     @dragstart="drag(i,j)">
+                     @dragstart="drag(position)">
 
                 <span v-else class="img-placeholder"></span>
             </span>

@@ -32,6 +32,10 @@ form {
 	width: 60px;
 }
 
+.cell img.provisional {
+	opacity: 0.35;
+}
+
 .cell.dark {
 	background: #00000040;
 }
