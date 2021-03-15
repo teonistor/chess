@@ -2,7 +2,10 @@ package io.github.teonistor.chess.spring;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
-import io.github.teonistor.chess.inter.Input;
+import io.github.teonistor.chess.ctrl.ControlLoop;
+import io.github.teonistor.chess.ctrl.InputAction;
+import io.github.teonistor.chess.ctrl.InputActionProvider;
+import io.github.teonistor.chess.inter.DefinitelyInput;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.Tuple2;
@@ -18,23 +21,35 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.function.Supplier;
 
 @RestController
 @RequestMapping("chess-api")
 @RequiredArgsConstructor
-public class ChessCtrl implements View, Input {
+public class ChessCtrl implements View, DefinitelyInput {
 
     private final SimpMessagingTemplate ws;
-    private final ArrayBlockingQueue<Tuple2<Position,Position>> q = new ArrayBlockingQueue<>(1);
+    private final InputActionProvider inputActionProvider;
+
+    private final ArrayBlockingQueue<InputAction> q = new ArrayBlockingQueue<>(1);
     private List<Traversable<?>> lastState = List.of(HashMap.empty(), List.empty(), List.empty());
+
+
+    @PostConstruct
+    void initialInput() {
+        // TODO Hacks are piling on...
+        q.offer(inputActionProvider.newGame());
+    }
 
     @Override
     public void refresh(Map<Position, Piece> board, Player player, Traversable<Piece> capturedPieces, Traversable<Tuple2<Position, Position>> possibleMoves) {
         lastState = List.of(board, capturedPieces, possibleMoves);
-        ws.convertAndSend("/chess-ws/board");
+        System.out.printf("Last state now: %s%n", lastState);
+        ws.convertAndSend("/chess-ws/board", lastState);
     }
 
     @Override
@@ -70,12 +85,20 @@ public class ChessCtrl implements View, Input {
     @MessageMapping("/move")
     void onMove(Tuple2<Position, Position> move) {
         System.out.println(move);
-        q.offer(move);
+        q.offer(inputActionProvider.gameInput(move._1, move._2));
     }
 
     @Override
-    public Tuple2<Position, Position> simpleInput() {
-        return null;
+    public InputAction simpleInput() {
+        try {
+            return q.take();
+
+        } catch (InterruptedException e) {
+            // TODO This is so horrible my keyboard is melting
+            e.printStackTrace();
+            Thread.currentThread().interrupt();
+            return inputActionProvider.exit();
+        }
     }
 
     @Override
