@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
     <title>Basic Chess</title>
-<!--    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">-->
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
     <link rel="stylesheet" href="main.css" />
 </head>
 
@@ -31,6 +31,12 @@
         </div>
     </div>
 
+    <v-btn elevation="7" x-large dark
+           v-if="!stompClient"
+           @click="connect()">
+        Lost connection? Reconnect
+    </v-btn>
+
 <!--    <div>-->
 <!--        Black on top-->
 <!--        <v-switch v-model="whiteOnTop" style="display: inline-block; vertical-align: middle"></v-switch>-->
@@ -49,7 +55,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="stomp.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
-<!--<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0-0/axios.min.js"></script>
 <script src="game.js"></script>
 
