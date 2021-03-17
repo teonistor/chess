@@ -133,6 +133,7 @@ new Vue({
             }
 
             this.dragStart = null;
+            this.targets = [];
         }
     },
 

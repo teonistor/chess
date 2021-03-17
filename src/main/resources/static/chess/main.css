@@ -37,11 +37,19 @@ form {
 }
 
 .cell.dark {
-	background: #00000040;
+	background: #322929;
 }
 
 .cell.light {
-	background: #00000010;
+	background: #3e3434;
+}
+
+.cell.dark.target {
+	background: #2f231e;
+}
+
+.cell.light.target {
+	background: #42332e;
 }
 
 .cell.selected {

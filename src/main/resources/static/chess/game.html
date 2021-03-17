@@ -16,7 +16,7 @@
              :key="i">
             <span v-for="(position,j) in row"
                   :key="j"
-                  :class="{cell: true, dark: !!((i + j) % 2), light: !((i + j) % 2)}"
+                  :class="{cell: true, dark: !!((i + j) % 2), light: !((i + j) % 2), target: targets.indexOf(position) > -1}"
                   @drop="drop($event, position)"
                   @dragover="allowDrop($event)">
 
