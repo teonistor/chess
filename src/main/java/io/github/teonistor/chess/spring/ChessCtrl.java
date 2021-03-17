@@ -2,7 +2,6 @@ package io.github.teonistor.chess.spring;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
-import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.InputAction;
 import io.github.teonistor.chess.ctrl.InputActionProvider;
 import io.github.teonistor.chess.inter.DefinitelyInput;
@@ -14,9 +13,9 @@ import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Traversable;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
@@ -25,7 +24,6 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.function.Supplier;
 
 @RestController
 @RequestMapping("chess-api")
@@ -82,8 +80,8 @@ public class ChessCtrl implements View, DefinitelyInput {
         return lastState;
     }
 
-    @MessageMapping("/move")
-    void onMove(Tuple2<Position, Position> move) {
+    @RequestMapping("/move")
+    void onMove(final @RequestBody Tuple2<Position, Position> move) {
         System.out.println(move);
         q.offer(inputActionProvider.gameInput(move._1, move._2));
     }

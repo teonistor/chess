@@ -22,8 +22,8 @@
 
                 <img v-if="board.hasOwnProperty(position)"
                      :src="pieceBox[board[position]]"
-                     :class="{provisional: provisional.indexOf(position) >= 0}"
-                     draggable="true"
+                     :class="{provisional: provisional === position}"
+                     :draggable="!dragStart"
                      @dragstart="drag(position)">
 
                 <span v-else class="img-placeholder"></span>
@@ -50,6 +50,7 @@
 <script src="stomp.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
 <!--<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0-0/axios.min.js"></script>
 <script src="game.js"></script>
 
 </body>
