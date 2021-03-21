@@ -3,15 +3,14 @@ package io.github.teonistor.chess.core;
 import io.github.teonistor.chess.board.InitialBoardProvider;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.InputActionProvider;
-import io.github.teonistor.chess.inter.DefinitelyInput;
+import io.github.teonistor.chess.factory.ControlLoopFactory;
 import io.github.teonistor.chess.inter.MultipleViewWrapper;
-import io.github.teonistor.chess.inter.TerminalInput;
-import io.github.teonistor.chess.inter.TerminalView;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.PieceBox;
 import io.github.teonistor.chess.save.SaveLoad;
+import io.github.teonistor.chess.util.NestedMapKeyExtractor;
 
-public class Factory {
+public class Factory implements ControlLoopFactory, io.github.teonistor.chess.factory.GameFactory {
 
     private final UnderAttackRule underAttackRule;
     private final CheckRule checkRule;
@@ -22,6 +21,8 @@ public class Factory {
     private final PieceSerialiser pieceSerialiser;
     private final SaveLoad saveLoad;
     private final InputActionProvider inputActionProvider;
+    private final AvailableMovesRule availableMovesRule;
+    private final NestedMapKeyExtractor nestedMapKeyExtractor;
 
     public Factory() {
         underAttackRule = new UnderAttackRule();
@@ -33,21 +34,19 @@ public class Factory {
         pieceSerialiser = new PieceSerialiser(pieceBox);
         saveLoad = new SaveLoad(pieceSerialiser);
         inputActionProvider = new InputActionProvider(initialStateProvider, saveLoad);
+        availableMovesRule = new AvailableMovesRule(checkRule);
+        nestedMapKeyExtractor = new NestedMapKeyExtractor();
     }
 
-    public ControlLoop createTerminalControlLoop() {
-        return new ControlLoop(saveLoad, createGameFactory(createTerminalView()), createTerminalInput());
+    public ControlLoop createControlLoop(final View... views) {
+        return new ControlLoop(saveLoad, this, MultipleViewWrapper.wrapIfNeeded(views));
     }
 
-    GameFactory createGameFactory(final View... views) {
-        return (p, i) -> new Game(p, checkRule, gameOverChecker, i, MultipleViewWrapper.wrapIfNeeded(views));
+    public Game createNewGame(final View view) {
+        return new Game(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, view, initialStateProvider.createState());
     }
 
-    DefinitelyInput createTerminalInput() {
-        return new TerminalInput(inputActionProvider);
-    }
-
-    View createTerminalView() {
-        return new TerminalView();
+    public Game createGame(final View view, final GameState state) {
+        return new Game(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, view, state);
     }
 }

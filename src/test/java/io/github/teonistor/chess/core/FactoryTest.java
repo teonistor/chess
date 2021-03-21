@@ -1,33 +1,26 @@
 package io.github.teonistor.chess.core;
 
 import io.github.teonistor.chess.ctrl.ControlLoop;
-import io.github.teonistor.chess.ctrl.InputAction;
-import io.github.teonistor.chess.inter.DefinitelyInput;
-import io.github.teonistor.chess.inter.Input;
-import io.github.teonistor.chess.inter.TerminalInput;
-import io.github.teonistor.chess.inter.TerminalView;
 import io.github.teonistor.chess.inter.View;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.function.Consumer;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+@MockitoSettings
 class FactoryTest {
 
-    private static final Factory FACTORY = spy(new Factory());
+    private static final Factory FACTORY = new Factory();
 
     @Test
     void constructorInitialisedFields() {
         final SoftAssertions soft = new SoftAssertions();
+
         final Object underAttackRule = getField(FACTORY, "underAttackRule");
         final Object checkRule = getField(FACTORY, "checkRule");
         final Object gameOverChecker = getField(FACTORY, "gameOverChecker");
@@ -35,6 +28,10 @@ class FactoryTest {
         final Object initialBoardProvider = getField(FACTORY, "initialBoardProvider");
         final Object initialStateProvider = getField(FACTORY, "initialStateProvider");
         final Object pieceSerialiser = getField(FACTORY, "pieceSerialiser");
+        final Object saveLoad = getField(FACTORY, "saveLoad");
+        final Object inputActionProvider = getField(FACTORY, "inputActionProvider");
+        final Object availableMovesRule = getField(FACTORY, "availableMovesRule");
+        final Object nestedMapKeyExtractor = getField(FACTORY, "nestedMapKeyExtractor");
 
         soft.assertThat(underAttackRule).isNotNull();
         soft.assertThat(checkRule).isNotNull();
@@ -47,65 +44,61 @@ class FactoryTest {
         soft.assertThat(getFieldRec(pieceBox, "whiteKing", "underAttackRule")).isEqualTo(underAttackRule);
         soft.assertThat(getFieldRec(pieceBox, "blackKing", "underAttackRule")).isEqualTo(underAttackRule);
         soft.assertThat(getField(initialStateProvider, "initialBoardProvider")).isEqualTo(initialBoardProvider);
-        // Actions in constructors render these untestable
+        // TODO How to test arbitrarily long constructor chains
 //        soft.assertThat(pieceSerialiser).hasFieldOrPropertyWithValue("pieceBox", pieceBox);
-//        soft.assertThat(getField(FACTORY, "saveLoad")).hasFieldOrPropertyWithValue("pieceSerialiser", pieceSerialiser);
+        soft.assertThat(pieceSerialiser).isNotNull();
+//        soft.assertThat(saveLoad).hasFieldOrPropertyWithValue("pieceSerialiser", pieceSerialiser);
+        soft.assertThat(inputActionProvider).hasFieldOrPropertyWithValue("initialStateProvider", initialStateProvider);
+        soft.assertThat(inputActionProvider).hasFieldOrPropertyWithValue("saveLoad", saveLoad);
+        soft.assertThat(availableMovesRule).hasFieldOrPropertyWithValue("rule", checkRule);
+        soft.assertThat(nestedMapKeyExtractor).isNotNull();
 
         soft.assertAll();
     }
 
     @Test
-    void createTerminalControlLoop() {
-        final GameFactory gameFactory = mock(GameFactory.class);
-        final DefinitelyInput input = mock(DefinitelyInput.class);
-        final ArgumentCaptor<View> view = ArgumentCaptor.forClass(View.class);
-        doReturn(gameFactory).when(FACTORY).createGameFactory(view.capture());
-        doReturn(input).when(FACTORY).createTerminalInput();
-
-        final ControlLoop loop = FACTORY.createTerminalControlLoop();
+    void createControlLoop(final @Mock View view) {
+        final ControlLoop loop = FACTORY.createControlLoop(view);
 
         assertThat(loop).hasFieldOrPropertyWithValue("saveLoad", getField(FACTORY, "saveLoad"));
-        assertThat(loop).hasFieldOrPropertyWithValue("gameFactory", gameFactory);
-        assertThat(loop).hasFieldOrPropertyWithValue("input", input);
-        assertThat(getField(loop, "executorService")).isInstanceOf(ThreadPoolExecutor.class);
-        assertThat(view.getValue()).isInstanceOf(TerminalView.class);
-
-        reset(FACTORY);
+        assertThat(loop).hasFieldOrPropertyWithValue("gameFactory", FACTORY);
+        assertThat(loop).hasFieldOrPropertyWithValue("view", view);
     }
 
     @Test
-    void createGame() {
-        final GameStateProvider provider = mock(GameStateProvider.class);
-        final Input input = mock(Input.class);
-        final View viewOne = mock(View.class);
-        final View viewTwo = mock(View.class);
-        final View viewThree = mock(View.class);
+    void createNewGame(final @Mock View view, final @Mock InitialStateProvider provider, final @Mock GameState state) {
+        final Factory factory = new Factory();
+        setField(factory, "initialStateProvider", provider);
+        when(provider.createState()).thenReturn(state);
 
-        final Game game = FACTORY.createGameFactory(viewOne, viewTwo, viewThree).create(provider, input);
+        final Game game = factory.createNewGame(view);
 
-        assertThat(game).hasFieldOrPropertyWithValue("gameStateProvider", provider);
-        assertThat(game).hasFieldOrPropertyWithValue("checkRule", getField(FACTORY, "checkRule"));
-        assertThat(game).hasFieldOrPropertyWithValue("gameOverChecker", getField(FACTORY, "gameOverChecker"));
-        assertThat(game).hasFieldOrPropertyWithValue("input", input);
-        assertThat((Iterable) getFieldRec(game, "view", "views")).containsExactlyInAnyOrder(viewOne, viewTwo, viewThree);
+        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "nestedMapKeyExtractor", "view", "state").containsExactly(
+                getField(factory, "availableMovesRule"),
+                getField(factory, "gameOverChecker"),
+                getField(factory, "nestedMapKeyExtractor"),
+                view,
+                state);
     }
 
     @Test
-    void createTerminalInputFactory() {
-        final Consumer<InputAction> inputActionConsumer = mock(Consumer.class);
+    void createGame(final @Mock View view, final @Mock GameState state) {
+        final Game game = FACTORY.createGame(view, state);
 
-        final DefinitelyInput input = FACTORY.createTerminalInput();
-
-        assertThat(input).isInstanceOf(TerminalInput.class);
-        assertThat(input).hasFieldOrPropertyWithValue("inputActionProvider", getField(FACTORY, "inputActionProvider"));
-//        assertThat(input).hasFieldOrPropertyWithValue("inputActionConsumer", inputActionConsumer);
+        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "nestedMapKeyExtractor", "view", "state").containsExactly(
+                getField(FACTORY, "availableMovesRule"),
+                getField(FACTORY, "gameOverChecker"),
+                getField(FACTORY, "nestedMapKeyExtractor"),
+                view,
+                state);
     }
 
-    private Object getFieldRec(final Object object, final String...names) {
+    // TODO Looks like a mixin opportunity
+    private Object getFieldRec(final Object object, final String... names) {
         return getFieldRec(object, 0, names);
     }
 
-    private Object getFieldRec(final Object object, final int i, final String...names) {
+    private Object getFieldRec(final Object object, final int i, final String... names) {
         return i == names.length
              ? object
              : getFieldRec(getField(object, names[i]), i+1, names);
