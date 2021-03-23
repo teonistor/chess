@@ -1,32 +1,46 @@
 package io.github.teonistor.chess.ctrl;
 
+import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Game;
 import io.github.teonistor.chess.core.GameStateProvider;
+import io.github.teonistor.chess.factory.GameFactory;
 import io.github.teonistor.chess.inter.DefinitelyInput;
 import io.github.teonistor.chess.inter.Input;
 import io.github.teonistor.chess.inter.InputEngine;
+import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.save.SaveLoad;
+import io.vavr.Tuple2;
+import io.vavr.collection.Iterator;
+import io.vavr.collection.Stream;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-// TODO This shit is untestable. Who wrote it come up front and take 10.000 facepalms.
+@MockitoSettings
 class ControlLoopTest {
+    public static final Iterator<Position> randomPositions = Stream.continually(Stream.of(Position.values()))
+            .flatMap(s -> s.splitAt(32).apply(Stream::of))
+            .flatMap(Stream::shuffle).iterator();
 
     @Mock private SaveLoad saveLoad;
-    @Mock private Game game;
-    @Mock private InputEngine inputEngine;
+    @Mock private GameFactory factory;
+    @Mock private View view;
+
     @Mock private InputAction action;
+    @Mock private Game game;
+    @Mock private Game newGame;
+
+    @Mock private InputEngine inputEngine;
     @Mock private GameStateProvider providerIn;
     @Mock private DefinitelyInput input;
 
@@ -37,36 +51,60 @@ class ControlLoopTest {
 
     @BeforeEach
     void setUp() {
-        initMocks(this);
-        loop = new ControlLoop(saveLoad, (p, i) -> {
-            this.providerOut = p;
-            this.inputProxy = i;
-            return game;
-        }, input);
+        loop = new ControlLoop(saveLoad, factory, view);
     }
 
     @Test
-    void launch() {
-        loop.launch();
-        verify(inputEngine).run();
+    void onGameInput() {
+        setField(loop, "game", game);
+        final Position from = randomPositions.get();
+        final Position to = randomPositions.get();
+        when(action.gameInput()).thenReturn(Optional.of(new Tuple2<>(from, to)));
+        // TODO Refactor: The fact that I have to stub the next 2 calls is concerning
+        when(action.savePath()).thenReturn(Optional.empty());
+        when(action.gameStateProvider()).thenReturn(Optional.empty());
+        when(game.processInput(from, to)).thenReturn(newGame);
+
+        loop.onInput(action);
+
+        assertThat(loop).hasFieldOrPropertyWithValue("game", newGame);
+        verify(newGame).triggerView(view);
     }
 
     @Test
-    void gameNotStartedAndGameStateProviderGiven() {
-        setField(loop, "game", null);
-        when(action.gameStateProvider()).thenReturn(Optional.of(providerIn));
+    void onGameInputInAbsenceOfGame() {
+        when(action.gameStateProvider()).thenReturn(Optional.empty());
+        loop.onInput(action);
+    }
 
-        loop.launch();
-//        inputActionConsumer.accept(action);
+    // TODO These  -->
 
-        assertThat(providerOut).isSameAs(providerIn);
-        assertThat(input).isNotNull();
-        verify(action, atLeastOnce()).gameStateProvider();
-        verify(inputEngine).run();
-        verify(game).play();
+    @Test
+    void onSave() {
+
     }
 
     @Test
-    void processInputWithGame() {
+    void onSaveInAbsenceOfGame() {
+
+    }
+
+    @Test
+    void onNew() {
+
+
+//        verify(newGame).triggerView(view);
+    }
+
+    @Test
+    void onIrrelevantInput() {
+
+    }
+
+
+
+    @AfterEach
+    void afterEach() {
+        verifyNoMoreInteractions(saveLoad, factory, view, action, game, newGame);
     }
 }

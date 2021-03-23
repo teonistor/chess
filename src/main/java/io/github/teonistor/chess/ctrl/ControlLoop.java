@@ -3,26 +3,26 @@ package io.github.teonistor.chess.ctrl;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Game;
 import io.github.teonistor.chess.factory.GameFactory;
+import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.save.SaveLoad;
 import io.vavr.Tuple2;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class ControlLoop {
 
     private final SaveLoad saveLoad;
     private final GameFactory gameFactory;
+    private final View view;
 
     // The only allowed mutable state
     private Game game;
-
-    public ControlLoop(final SaveLoad saveLoad, final GameFactory gameFactory) {
-        this.saveLoad = saveLoad;
-        this.gameFactory = gameFactory;
-    }
 
     public void onInput(final InputAction action) {
         if (game != null && action.gameInput().isPresent()) {
             final Tuple2<Position, Position> fromTo = action.gameInput().get();
             game = game.processInput(fromTo._1, fromTo._2);
+            game.triggerView(view);
         }
 
         // TODO Feature: Decouple from file persistence to allow downloading over
@@ -34,7 +34,8 @@ public class ControlLoop {
 
         if (action.gameStateProvider().isPresent()) {
             System.err.println("[DEBUG] Game state provider provided - launching");
-            game = gameFactory.createGame(action.gameStateProvider().get().createState());
+            game = gameFactory.createGame(view, action.gameStateProvider().get().createState());
+            game.triggerView(view);
         }
     }
 }
