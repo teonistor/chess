@@ -2,36 +2,29 @@ package io.github.teonistor.chess.ctrl;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Game;
-import io.github.teonistor.chess.core.GameStateProvider;
+import io.github.teonistor.chess.core.GameState;
 import io.github.teonistor.chess.factory.GameFactory;
-import io.github.teonistor.chess.inter.DefinitelyInput;
-import io.github.teonistor.chess.inter.Input;
-import io.github.teonistor.chess.inter.InputEngine;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.save.SaveLoad;
+import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
 import io.vavr.Tuple2;
-import io.vavr.collection.Iterator;
-import io.vavr.collection.Stream;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 @MockitoSettings
-class ControlLoopTest {
-    public static final Iterator<Position> randomPositions = Stream.continually(Stream.of(Position.values()))
-            .flatMap(s -> s.splitAt(32).apply(Stream::of))
-            .flatMap(Stream::shuffle).iterator();
-
+class ControlLoopTest implements RandomPositionsTestMixin {
     @Mock private SaveLoad saveLoad;
     @Mock private GameFactory factory;
     @Mock private View view;
@@ -40,19 +33,7 @@ class ControlLoopTest {
     @Mock private Game game;
     @Mock private Game newGame;
 
-    @Mock private InputEngine inputEngine;
-    @Mock private GameStateProvider providerIn;
-    @Mock private DefinitelyInput input;
-
-    private GameStateProvider providerOut;
-    private Input inputProxy;
-
-    private ControlLoop loop;
-
-    @BeforeEach
-    void setUp() {
-        loop = new ControlLoop(saveLoad, factory, view);
-    }
+    @InjectMocks private ControlLoop loop;
 
     @Test
     void onGameInput() {
@@ -73,35 +54,51 @@ class ControlLoopTest {
 
     @Test
     void onGameInputInAbsenceOfGame() {
+        lenient().when(action.gameInput()).thenReturn(Optional.of(new Tuple2<>(randomPositions.next(), randomPositions.next())));
         when(action.gameStateProvider()).thenReturn(Optional.empty());
         loop.onInput(action);
     }
 
-    // TODO These  -->
-
     @Test
-    void onSave() {
+    void onSave(final @Mock GameState state) {
+        setField(loop, "game", game);
+        when(action.gameInput()).thenReturn(Optional.empty());
+        when(action.savePath()).thenReturn(Optional.of("some path"));
+        when(action.gameStateProvider()).thenReturn(Optional.empty());
+        when(game.getState()).thenReturn(state);
 
+        loop.onInput(action);
+
+        verify(saveLoad).saveState(state, "some path");
     }
 
     @Test
     void onSaveInAbsenceOfGame() {
-
+        lenient().when(action.savePath()).thenReturn(Optional.of("some other path"));
+        when(action.gameStateProvider()).thenReturn(Optional.empty());
+        loop.onInput(action);
     }
 
     @Test
-    void onNew() {
+    void onNew(final @Mock GameState state) {
+        when(action.gameStateProvider()).thenReturn(Optional.of(() -> state));
+        when(factory.createGame(state)).thenReturn(game);
 
+        loop.onInput(action);
 
-//        verify(newGame).triggerView(view);
+        assertThat(loop).hasFieldOrPropertyWithValue("game", game);
+        verify(game).triggerView(view);
     }
 
     @Test
     void onIrrelevantInput() {
+        setField(loop, "game", game);
+        when(action.gameInput()).thenReturn(Optional.empty());
+        when(action.savePath()).thenReturn(Optional.empty());
+        when(action.gameStateProvider()).thenReturn(Optional.empty());
 
+        loop.onInput(action);
     }
-
-
 
     @AfterEach
     void afterEach() {

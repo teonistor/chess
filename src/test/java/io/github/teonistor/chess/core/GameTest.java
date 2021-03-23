@@ -3,10 +3,10 @@ package io.github.teonistor.chess.core;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
+import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
 import io.github.teonistor.chess.util.NestedMapKeyExtractor;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
-import io.vavr.collection.Iterator;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
@@ -31,11 +31,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings
-class GameTest {
-    public static final Iterator<Position> randomPositions = Stream.continually(Stream.of(Position.values()))
-            .flatMap(s -> s.splitAt(32).apply(Stream::of))
-            .flatMap(Stream::shuffle).iterator();
-
+class GameTest implements RandomPositionsTestMixin {
     private @Mock AvailableMovesRule rule;
     private @Mock GameOverChecker checker;
     private @Mock NestedMapKeyExtractor extractor;
