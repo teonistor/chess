@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.With;
 
 import static io.github.teonistor.chess.core.GameCondition.Continue;
+import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor
 public class Game {
@@ -17,21 +18,20 @@ public class Game {
     private final AvailableMovesRule availableMovesRule;
     private final GameOverChecker gameOverChecker;
     private final NestedMapKeyExtractor nestedMapKeyExtractor;
-    private final View view;
 
-    private final @Getter @With GameState state;
+    private final @Getter @With(PRIVATE) GameState state;
     private final Lazy<Map<Position, Map<Position, GameState>>> availableMoves = Lazy.of(this::computeAvailableMoves);
     private final Lazy<GameCondition> condition = Lazy.of(this::computeCondition);
 
     public Game(final AvailableMovesRule availableMovesRule, final GameOverChecker gameOverChecker, final NestedMapKeyExtractor nestedMapKeyExtractor, final View view, final GameStateProvider gameStateProvider) {
-        this(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, view, gameStateProvider.createState());
+        this(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, gameStateProvider.createState());
     }
 
     public GameCondition getCondition() {
         return condition.get();
     }
 
-    public void triggerView() {
+    public void triggerView(final View view) {
         switch (getCondition()) {
             case Continue:
                 view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), nestedMapKeyExtractor.extract(getAvailableMoves()));

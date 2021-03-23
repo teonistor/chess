@@ -9,6 +9,7 @@ import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.PieceBox;
 import io.github.teonistor.chess.save.SaveLoad;
 import io.github.teonistor.chess.util.NestedMapKeyExtractor;
+import lombok.Getter;
 
 public class Factory implements ControlLoopFactory, io.github.teonistor.chess.factory.GameFactory {
 
@@ -20,7 +21,7 @@ public class Factory implements ControlLoopFactory, io.github.teonistor.chess.fa
     private final InitialStateProvider initialStateProvider;
     private final PieceSerialiser pieceSerialiser;
     private final SaveLoad saveLoad;
-    private final InputActionProvider inputActionProvider;
+    private final @Getter InputActionProvider inputActionProvider;
     private final AvailableMovesRule availableMovesRule;
     private final NestedMapKeyExtractor nestedMapKeyExtractor;
 
@@ -43,10 +44,10 @@ public class Factory implements ControlLoopFactory, io.github.teonistor.chess.fa
     }
 
     public Game createNewGame(final View view) {
-        return new Game(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, view, initialStateProvider.createState());
+        return new Game(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, initialStateProvider.createState());
     }
 
     public Game createGame(final View view, final GameState state) {
-        return new Game(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, view, state);
+        return new Game(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, state);
     }
 }

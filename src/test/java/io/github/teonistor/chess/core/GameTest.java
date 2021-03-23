@@ -65,7 +65,7 @@ class GameTest {
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(checker.check(board, player, availableMoves)).thenReturn(condition);
 
-        final Game game = new Game(rule, checker, extractor, view, state);
+        final Game game = new Game(rule, checker, extractor, state);
 
         assertThat(game.getState()).isEqualTo(state);
         assertThat(game.getCondition()).isEqualTo(condition);
@@ -81,7 +81,7 @@ class GameTest {
         when(checker.check(board, player, availableMoves)).thenReturn(Continue);
         when(extractor.extract(availableMoves)).thenReturn(possibleMoves);
 
-        new Game(rule, checker, extractor, view, state).triggerView();
+        new Game(rule, checker, extractor, state).triggerView(view);
 
         verify(view).refresh(board, player, List.of(piece1, piece2), possibleMoves);
     }
@@ -93,7 +93,7 @@ class GameTest {
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(checker.check(board, Black, availableMoves)).thenReturn(WhiteWins);
 
-        new Game(rule, checker, extractor, view, state).triggerView();
+        new Game(rule, checker, extractor, state).triggerView(view);
 
         verify(view).announce("White wins!");
     }
@@ -105,7 +105,7 @@ class GameTest {
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(checker.check(board, White, availableMoves)).thenReturn(BlackWins);
 
-        new Game(rule, checker, extractor, view, state).triggerView();
+        new Game(rule, checker, extractor, state).triggerView(view);
 
         verify(view).announce("Black wins!");
     }
@@ -118,7 +118,7 @@ class GameTest {
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(checker.check(board, player, availableMoves)).thenReturn(Stalemate);
 
-        new Game(rule, checker, extractor, view, state).triggerView();
+        new Game(rule, checker, extractor, state).triggerView(view);
 
         verify(view).announce("Stalemate!");
     }
@@ -134,8 +134,8 @@ class GameTest {
         when(checker.check(board, player, availableMoves)).thenReturn(Continue);
         when(availableMoves.get(from)).thenReturn(Option.of(HashMap.of(to, state2)));
 
-        final Game game = new Game(rule, checker, extractor, view, state);
-        assertThat(game.processInput(from, to)).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "nestedMapKeyExtractor", "view")
+        final Game game = new Game(rule, checker, extractor, state);
+        assertThat(game.processInput(from, to)).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "nestedMapKeyExtractor")
                 .extracting(Game::getState).isEqualTo(state2);
     }
 
@@ -150,7 +150,7 @@ class GameTest {
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(checker.check(board, player, availableMoves)).thenReturn(Continue);
 
-        final Game game = new Game(rule, checker, extractor, view, state);
+        final Game game = new Game(rule, checker, extractor, state);
         assertThat(game.processInput(randomPositions.next(), randomPositions.next())).isEqualTo(game);
     }
 
@@ -165,7 +165,7 @@ class GameTest {
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(checker.check(board, player, availableMoves)).thenReturn(condition);
 
-        final Game game = new Game(rule, checker, extractor, view, state);
+        final Game game = new Game(rule, checker, extractor, state);
         assertThat(game.processInput(randomPositions.next(), randomPositions.next())).isEqualTo(game);
     }
 
