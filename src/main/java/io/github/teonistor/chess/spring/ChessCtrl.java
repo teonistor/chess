@@ -2,9 +2,8 @@ package io.github.teonistor.chess.spring;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
-import io.github.teonistor.chess.ctrl.InputAction;
+import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.InputActionProvider;
-import io.github.teonistor.chess.inter.DefinitelyInput;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.Tuple2;
@@ -23,35 +22,34 @@ import org.springframework.web.servlet.view.RedirectView;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import java.util.concurrent.ArrayBlockingQueue;
 
 @RestController
 @RequestMapping("chess-api")
 @RequiredArgsConstructor
-public class ChessCtrl implements View, DefinitelyInput {
+public class ChessCtrl implements View {
 
     private final SimpMessagingTemplate ws;
     private final InputActionProvider inputActionProvider;
+    private final ControlLoop controlLoop;
 
-    private final ArrayBlockingQueue<InputAction> q = new ArrayBlockingQueue<>(1);
+//    private final ArrayBlockingQueue<InputAction> q = new ArrayBlockingQueue<>(1);
     private List<Traversable<?>> lastState = List.of(HashMap.empty(), List.empty(), List.empty());
-
 
     @PostConstruct
     void initialInput() {
-        // TODO Hacks are piling on...
-        q.offer(inputActionProvider.newGame());
+        // TODO Have "new game" button instead of this autostart
+        controlLoop.onInput(inputActionProvider.newGame());
     }
 
     @Override
-    public void refresh(Map<Position, Piece> board, Player player, Traversable<Piece> capturedPieces, Traversable<Tuple2<Position, Position>> possibleMoves) {
+    public void refresh(final Map<Position, Piece> board, final Player player, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMoves) {
         lastState = List.of(board, capturedPieces, possibleMoves);
         System.out.printf("Last state now: %s%n", lastState);
         ws.convertAndSend("/chess-ws/board", lastState);
     }
 
     @Override
-    public void announce(String message) {
+    public void announce(final String message) {
         ws.convertAndSend("/chess-ws/announcements");
     }
 
@@ -70,7 +68,7 @@ public class ChessCtrl implements View, DefinitelyInput {
         return startGame(response, "white");
     }
 
-    private RedirectView startGame(HttpServletResponse response, String white) {
+    private RedirectView startGame(final HttpServletResponse response, final String white) {
         response.addCookie(new Cookie("player", white));
         return new RedirectView("/chess/game.html");
     }
@@ -82,26 +80,6 @@ public class ChessCtrl implements View, DefinitelyInput {
 
     @RequestMapping("/move")
     void onMove(final @RequestBody Tuple2<Position, Position> move) {
-        System.out.println(move);
-        q.offer(inputActionProvider.gameInput(move._1, move._2));
-    }
-
-    @Override
-    public InputAction simpleInput() {
-        try {
-            return q.take();
-
-        } catch (InterruptedException e) {
-            // TODO This is so horrible my keyboard is melting
-            e.printStackTrace();
-            Thread.currentThread().interrupt();
-            return inputActionProvider.exit();
-        }
-    }
-
-    @Override
-    public String specialInput(String... options) {
-        // TODO
-        return options[0];
+        controlLoop.onInput(inputActionProvider.gameInput(move._1, move._2));
     }
 }

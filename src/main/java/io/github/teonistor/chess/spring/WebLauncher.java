@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class WebLauncher {
     public static void main(final String[] arg) {
-        SpringApplication.run(WebLauncher.class, arg);
+        final SpringApplication app = new SpringApplication(WebLauncher.class);
+        app.run(arg);
     }
 }

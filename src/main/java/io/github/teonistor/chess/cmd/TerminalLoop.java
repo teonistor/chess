@@ -1,13 +1,12 @@
 package io.github.teonistor.chess.cmd;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.github.teonistor.chess.core.Factory;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.InputAction;
-import io.github.teonistor.chess.ctrl.InputActionProvider;
 import io.github.teonistor.chess.inter.DefinitelyInput;
 import io.github.teonistor.chess.inter.TerminalInput;
 import io.github.teonistor.chess.inter.TerminalView;
-import io.github.teonistor.chess.inter.View;
 import lombok.AllArgsConstructor;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -20,21 +19,29 @@ import static lombok.AccessLevel.PACKAGE;
 public class TerminalLoop implements Runnable {
 
     private final DefinitelyInput input;
-    private final View view;
     private final ControlLoop controlLoop;
     private final ScheduledExecutorService executorService;
 
-    public TerminalLoop(ControlLoop controlLoop, InputActionProvider inputActionProvider) {
-        this(new TerminalInput(inputActionProvider),
-             new TerminalView(),
-             controlLoop,
-             newScheduledThreadPool(2));
+    public TerminalLoop() {
+        this(new Factory());
     }
 
+    private TerminalLoop(final Factory factory) {
+        this(new TerminalInput(factory.getInputActionProvider()),
+             factory.createControlLoop(new TerminalView()),
+             newScheduledThreadPool(1));
+    }
+
+    /**
+     * Schedule this application to be run in a loop
+     */
     public void start() {
         executorService.scheduleWithFixedDelay(this, 1, 1, MILLISECONDS);
     }
 
+    /**
+     * Run one iteration. You probably don't want to call this manually
+     */
     public void run() {
         final InputAction action = input.simpleInput();
         if (action.isExit())
@@ -43,6 +50,9 @@ public class TerminalLoop implements Runnable {
             controlLoop.onInput(action);
     }
 
+    /**
+     * Stop the application loop, preventing future iterations. The currently running iteration is not affected
+     */
     public void stop() {
         executorService.shutdown();
     }

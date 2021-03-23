@@ -19,7 +19,7 @@ public class Factory implements ControlLoopFactory, io.github.teonistor.chess.fa
     private final PieceBox pieceBox;
     private final InitialBoardProvider initialBoardProvider;
     private final InitialStateProvider initialStateProvider;
-    private final PieceSerialiser pieceSerialiser;
+    private final @Getter PieceSerialiser pieceSerialiser;
     private final SaveLoad saveLoad;
     private final @Getter InputActionProvider inputActionProvider;
     private final AvailableMovesRule availableMovesRule;
