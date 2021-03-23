@@ -43,11 +43,11 @@ public class Factory implements ControlLoopFactory, io.github.teonistor.chess.fa
         return new ControlLoop(saveLoad, this, MultipleViewWrapper.wrapIfNeeded(views));
     }
 
-    public Game createNewGame(final View view) {
+    public Game createNewGame() {
         return new Game(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, initialStateProvider.createState());
     }
 
-    public Game createGame(final View view, final GameState state) {
+    public Game createGame(final GameState state) {
         return new Game(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, state);
     }
 }

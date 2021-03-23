@@ -34,7 +34,7 @@ public class ControlLoop {
 
         if (action.gameStateProvider().isPresent()) {
             System.err.println("[DEBUG] Game state provider provided - launching");
-            game = gameFactory.createGame(view, action.gameStateProvider().get().createState());
+            game = gameFactory.createGame(action.gameStateProvider().get().createState());
             game.triggerView(view);
         }
     }

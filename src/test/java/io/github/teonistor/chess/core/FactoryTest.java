@@ -71,7 +71,7 @@ class FactoryTest {
         setField(factory, "initialStateProvider", provider);
         when(provider.createState()).thenReturn(state);
 
-        final Game game = factory.createNewGame(view);
+        final Game game = factory.createNewGame();
 
         assertThat(game).extracting("availableMovesRule", "gameOverChecker", "nestedMapKeyExtractor", "view", "state").containsExactly(
                 getField(factory, "availableMovesRule"),
@@ -83,7 +83,7 @@ class FactoryTest {
 
     @Test
     void createGame(final @Mock View view, final @Mock GameState state) {
-        final Game game = FACTORY.createGame(view, state);
+        final Game game = FACTORY.createGame(state);
 
         assertThat(game).extracting("availableMovesRule", "gameOverChecker", "nestedMapKeyExtractor", "view", "state").containsExactly(
                 getField(FACTORY, "availableMovesRule"),
