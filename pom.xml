@@ -120,7 +120,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>io.github.teonistor.chess.Main</mainClass>
+                            <mainClass>io.github.teonistor.chess.term.TerminalLauncher</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

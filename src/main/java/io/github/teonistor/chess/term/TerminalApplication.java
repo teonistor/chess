@@ -1,12 +1,9 @@
-package io.github.teonistor.chess.cmd;
+package io.github.teonistor.chess.term;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.github.teonistor.chess.core.Factory;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.InputAction;
-import io.github.teonistor.chess.inter.DefinitelyInput;
-import io.github.teonistor.chess.inter.TerminalInput;
-import io.github.teonistor.chess.inter.TerminalView;
+import io.github.teonistor.chess.factory.Factory;
 import lombok.AllArgsConstructor;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,17 +13,17 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static lombok.AccessLevel.PACKAGE;
 
 @AllArgsConstructor(access=PACKAGE, onConstructor_=@VisibleForTesting)
-public class TerminalLoop implements Runnable {
+public class TerminalApplication implements Runnable {
 
-    private final DefinitelyInput input;
+    private final TerminalInput input;
     private final ControlLoop controlLoop;
     private final ScheduledExecutorService executorService;
 
-    public TerminalLoop() {
+    public TerminalApplication() {
         this(new Factory());
     }
 
-    private TerminalLoop(final Factory factory) {
+    private TerminalApplication(final Factory factory) {
         this(new TerminalInput(factory.getInputActionProvider()),
              factory.createControlLoop(new TerminalView()),
              newScheduledThreadPool(1));

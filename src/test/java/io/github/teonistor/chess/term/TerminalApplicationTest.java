@@ -1,10 +1,8 @@
-package io.github.teonistor.chess.cmd;
+package io.github.teonistor.chess.term;
 
-import io.github.teonistor.chess.core.Factory;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.InputAction;
-import io.github.teonistor.chess.inter.DefinitelyInput;
-import io.github.teonistor.chess.inter.TerminalInput;
+import io.github.teonistor.chess.factory.Factory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -20,16 +18,16 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 
 @MockitoSettings
-class TerminalLoopTest {
+class TerminalApplicationTest {
 
     private @Mock Factory factory;
-    private @Mock DefinitelyInput input;
+    private @Mock TerminalInput input;
     private @Mock ControlLoop controlLoop;
     private @Mock ScheduledExecutorService executorService;
 
     @Test
     void constructor() {
-        final TerminalLoop loop = new TerminalLoop();
+        final TerminalApplication loop = new TerminalApplication();
         assertThat(getField(loop, "input")).isInstanceOf(TerminalInput.class);
         assertThat(getField(loop, "controlLoop")).isInstanceOf(ControlLoop.class);
         assertThat(getField(loop, "executorService")).isInstanceOf(ScheduledExecutorService.class);
@@ -37,7 +35,7 @@ class TerminalLoopTest {
 
     @Test
     void start() {
-        final TerminalLoop loop = new TerminalLoop(input, controlLoop, executorService);
+        final TerminalApplication loop = new TerminalApplication(input, controlLoop, executorService);
 
         loop.start();
 
@@ -46,7 +44,7 @@ class TerminalLoopTest {
 
     @Test
     void run() {
-        final TerminalLoop loop = new TerminalLoop(input, controlLoop, executorService);
+        final TerminalApplication loop = new TerminalApplication(input, controlLoop, executorService);
         final InputAction action = new InputAction() {};
         when(input.simpleInput()).thenReturn(action);
 
@@ -57,7 +55,7 @@ class TerminalLoopTest {
 
     @Test
     void exit() {
-        final TerminalLoop loop = new TerminalLoop(input, controlLoop, executorService);
+        final TerminalApplication loop = new TerminalApplication(input, controlLoop, executorService);
         final InputAction action = new InputAction() {
             @Override
             public boolean isExit() {
@@ -73,7 +71,7 @@ class TerminalLoopTest {
 
     @Test
     void stop() {
-        final TerminalLoop loop = new TerminalLoop(input, controlLoop, executorService);
+        final TerminalApplication loop = new TerminalApplication(input, controlLoop, executorService);
 
         loop.stop();
 

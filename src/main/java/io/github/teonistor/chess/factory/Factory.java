@@ -1,9 +1,16 @@
-package io.github.teonistor.chess.core;
+package io.github.teonistor.chess.factory;
 
 import io.github.teonistor.chess.board.InitialBoardProvider;
+import io.github.teonistor.chess.core.AvailableMovesRule;
+import io.github.teonistor.chess.core.CheckRule;
+import io.github.teonistor.chess.core.Game;
+import io.github.teonistor.chess.core.GameOverChecker;
+import io.github.teonistor.chess.core.GameState;
+import io.github.teonistor.chess.core.InitialStateProvider;
+import io.github.teonistor.chess.core.PieceSerialiser;
+import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.InputActionProvider;
-import io.github.teonistor.chess.factory.ControlLoopFactory;
 import io.github.teonistor.chess.inter.MultipleViewWrapper;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.PieceBox;
@@ -11,7 +18,7 @@ import io.github.teonistor.chess.save.SaveLoad;
 import io.github.teonistor.chess.util.NestedMapKeyExtractor;
 import lombok.Getter;
 
-public class Factory implements ControlLoopFactory, io.github.teonistor.chess.factory.GameFactory {
+public class Factory implements ControlLoopFactory, GameFactory {
 
     private final UnderAttackRule underAttackRule;
     private final CheckRule checkRule;

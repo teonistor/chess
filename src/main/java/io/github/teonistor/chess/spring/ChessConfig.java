@@ -1,9 +1,9 @@
 package io.github.teonistor.chess.spring;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.teonistor.chess.core.Factory;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.InputActionProvider;
+import io.github.teonistor.chess.factory.Factory;
 import io.vavr.jackson.datatype.VavrModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;

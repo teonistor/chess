@@ -1,4 +1,4 @@
-package io.github.teonistor.chess.inter;
+package io.github.teonistor.chess.term;
 
 import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.piece.Bishop;
@@ -9,9 +9,21 @@ import io.github.teonistor.chess.piece.Rook;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import org.junit.jupiter.api.Test;
+
+import static io.github.teonistor.chess.board.Position.A1;
+import static io.github.teonistor.chess.board.Position.B5;
+import static io.github.teonistor.chess.board.Position.B7;
+import static io.github.teonistor.chess.board.Position.C7;
+import static io.github.teonistor.chess.board.Position.D6;
+import static io.github.teonistor.chess.board.Position.D8;
+import static io.github.teonistor.chess.board.Position.E1;
+import static io.github.teonistor.chess.board.Position.E2;
+import static io.github.teonistor.chess.board.Position.E5;
+import static io.github.teonistor.chess.board.Position.F2;
+import static io.github.teonistor.chess.board.Position.F4;
+import static io.github.teonistor.chess.board.Position.G7;
 import static io.github.teonistor.chess.core.Player.Black;
 import static io.github.teonistor.chess.core.Player.White;
-import static io.github.teonistor.chess.board.Position.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 

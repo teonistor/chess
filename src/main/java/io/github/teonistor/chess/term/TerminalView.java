@@ -1,8 +1,9 @@
-package io.github.teonistor.chess.inter;
+package io.github.teonistor.chess.term;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.core.Player;
+import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Bishop;
 import io.github.teonistor.chess.piece.King;
 import io.github.teonistor.chess.piece.Knight;

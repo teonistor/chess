@@ -1,5 +1,8 @@
-package io.github.teonistor.chess.core;
+package io.github.teonistor.chess.factory;
 
+import io.github.teonistor.chess.core.Game;
+import io.github.teonistor.chess.core.GameState;
+import io.github.teonistor.chess.core.InitialStateProvider;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.inter.View;
 import org.assertj.core.api.SoftAssertions;
