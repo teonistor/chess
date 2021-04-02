@@ -56,6 +56,15 @@ form {
 	background: #10000070;
 }
 
-/*.cell.enabled:hover {*/
-/*	background: #00000070;*/
-/*}*/
+#alerts-outer {
+	position: absolute;
+	top: 50px;
+	right: 50px;
+	width: 768px;
+	text-align: justify;
+}
+
+#bottom-buttons .v-btn {
+	margin-top: 10px;
+}
+

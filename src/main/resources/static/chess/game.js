@@ -1,6 +1,6 @@
 new Vue({
     el: '#app',
-    // vuetify: new Vuetify(),
+    vuetify: new Vuetify(),
     data: () => ({
 
         stompClient: null,
@@ -40,6 +40,7 @@ new Vue({
         provisional: null,
         targets: [],
 
+        alerts: [],
 // TODO See the TODO in game.html
 //        newGameOptions: ['Standard', 'Turnless'],
 //        newGameSelection: null,
@@ -51,6 +52,7 @@ new Vue({
     methods: {
 
         connect () {
+            this.restCallsGoing++;
             let socket = new SockJS('/chess-subscribe');
 
             // This may seem very contrived considering the player is in a plain text cookie; but it leaves the possibility open to use something less forgeable in the future
@@ -58,7 +60,7 @@ new Vue({
               .then(response => {
                 console.log(response);
                 let possibleMovesChannel = response.data;
-
+                this.restCallsGoing--;
 
                 this.stompClient = Stomp.over(socket);
                 this.stompClient.connect({}, frame => {
@@ -81,8 +83,10 @@ new Vue({
               }
 
             })
-             .catch(function (error) {
+             .catch(error => {
                 console.log(error);
+                this.restCallsGoing--;
+                this.alerts.push({type: 'warning', text: 'Error fetching moves channel: ' + error});
             });
         },
 
@@ -143,6 +147,7 @@ new Vue({
                     // })
                     .catch(function (error) {
                         console.log(error);
+                        this.alerts.push({type: 'warning', text: 'Error sending move: ' + error});
                     });
                 // console.log(axios({method: 'POST', url: this.sourcePath, data: [this.dragStart, position]}))
                 // .then(result => {
@@ -182,8 +187,9 @@ new Vue({
               this.restCallsGoing--;
             })
             .catch(error => {
-                this.restCallsGoing--;
-                console.log('Error calling for new game:', error);
+              this.restCallsGoing--;
+              console.log('Error calling for new game:', error);
+              this.alerts.push({type: 'warning', text: 'Error calling for new game: ' + error});
             });
         }
     },
