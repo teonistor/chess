@@ -13,7 +13,7 @@
 
     <form v-for="player in players"
           :key="player"
-          :action="'/chess-api/start-' + player.toLowerCase()"
+          :action="'/chess-api/assign-' + player.toLowerCase()"
           method="post">
         <v-btn type="submit" elevation="7" x-large dark
                @click="clicked=player"

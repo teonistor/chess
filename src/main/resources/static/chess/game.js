@@ -4,6 +4,7 @@ new Vue({
     data: () => ({
 
         stompClient: null,
+        restCallsGoing: 0,
 
         pieceBox: {
             // https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
@@ -39,6 +40,10 @@ new Vue({
         provisional: null,
         targets: [],
 
+// TODO See the TODO in game.html
+//        newGameOptions: ['Standard', 'Turnless'],
+//        newGameSelection: null,
+
         whiteOnTop: false,
         outlandishPieces: false
     }),
@@ -47,39 +52,69 @@ new Vue({
 
         connect () {
             let socket = new SockJS('/chess-subscribe');
-            this.stompClient = Stomp.over(socket);
-            this.stompClient.connect({}, frame => {
-                this.stompClient.subscribe('/chess-ws/board', this.receiveBoard);
-                this.stompClient.subscribe('/chess-ws/announcements', this.receiveAnnouncement);
-            });
 
-            // Poor man's callback chain
-            let stompOnClose = socket.onclose;
-            socket.onclose = status => {
-                stompOnClose(status);
-                this.stompClient = null;
-            }
+            // This may seem very contrived considering the player is in a plain text cookie; but it leaves the possibility open to use something less forgeable in the future
+            axios.get('/chess-api/moves-channel')
+              .then(response => {
+                console.log(response);
+                let possibleMovesChannel = response.data;
+
+
+                this.stompClient = Stomp.over(socket);
+                this.stompClient.connect({}, frame => {
+                  console.log("Subscribing to board", this.receiveBoard)
+                  this.stompClient.subscribe('/chess-ws/board', this.receiveBoard);
+                  console.log("Subscribing to captured-pieces")
+                  this.stompClient.subscribe('/chess-ws/captured-pieces', this.receiveCapturedPieces);
+                  console.log("Subscribing to " + possibleMovesChannel)
+                  this.stompClient.subscribe('/chess-ws/' + possibleMovesChannel, this.receivePossibleMoves);
+                  console.log("Subscribing to announcements")
+                  this.stompClient.subscribe('/chess-ws/announcements', this.receiveAnnouncement);
+                  console.log("Subscribed all")
+                });
+
+              // Poor man's callback chain
+              let stompOnClose = socket.onclose;
+              socket.onclose = status => {
+                  stompOnClose(status);
+                  this.stompClient = null;
+              }
+
+            })
+             .catch(function (error) {
+                console.log(error);
+            });
         },
 
         receiveBoard (message) {
-            console.log('receive board', message)
-            let data = JSON.parse(message.body);
-            this.board = data[0];
-            this.capturedPieces = data[1];
-            this.possibleMoves = data[2];
+        console.log('receiveBoard', message)
+            this.board = JSON.parse(message.body);
+        },
+
+        receiveCapturedPieces (message) {
+        console.log('receiveCapturedPieces', message)
+            this.capturedPieces = JSON.parse(message.body);
+        },
+
+        receivePossibleMoves (message) {
+        console.log('receivePossibleMoves', message)
+            this.possibleMoves = JSON.parse(message.body);
             this.dragStart = null;
             this.provisional = null;
             this.targets = [];
         },
 
         receiveAnnouncement (message) {
+        console.log('receiveAnnouncement', message)
             // TODO
         },
+
 
         restart() {
             // this.stompClient.send("/ttt/restart", {}, ".");
             // this.winner = '';
         },
+
 
         send (i, j) {
             this.stompClient.send("/chess-ws/move", {}, JSON.stringify([this.dragStart]));
@@ -134,6 +169,22 @@ new Vue({
 
             this.dragStart = null;
             this.targets = [];
+        },
+
+        newStandardGame () {
+          this.restCallsGoing++;
+
+          let url = '/chess-api/new/standard';
+          console.log("New game  " + url, this.restCallsGoing)
+
+          axios.post(url, {})
+            .then(response => {
+              this.restCallsGoing--;
+            })
+            .catch(error => {
+                this.restCallsGoing--;
+                console.log('Error calling for new game:', error);
+            });
         }
     },
 

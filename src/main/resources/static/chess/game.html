@@ -31,11 +31,43 @@
         </div>
     </div>
 
-    <v-btn elevation="7" x-large dark
-           v-if="!stompClient"
-           @click="connect()">
-        Lost connection? Reconnect
-    </v-btn>
+    <v-container>
+      <div v-if="!stompClient">
+        <v-btn elevation="7" x-large dark
+               @click="connect()">
+          Lost connection? Reconnect
+        </v-btn>
+      </div>
+
+      <v-btn elevation="7" x-large dark
+             disabled >
+        Save
+      </v-btn>
+
+      <v-btn elevation="7" x-large dark
+             disabled >
+        Load
+      </v-btn>
+
+      <v-btn elevation="7" x-large dark
+             :disabled="!!restCallsGoing"
+             @click="newStandardGame()">
+        New (Standard)
+      </v-btn>
+
+      <v-btn elevation="7" x-large dark
+             disabled >
+        New (Turnless)
+      </v-btn>
+
+<!-- TODO I'd like this instead of 2 buttons above but there seems to be a bug with v-select when running in client only mode (or who knows) -->
+<!--      <v-select elevation="7" dense solo x-large-->
+<!--                label="New game"-->
+<!--                v-model="newGameSelection"-->
+<!--                :items="newGameOptions"-->
+<!--      ></v-select>-->
+
+    </v-container>
 
 <!--    <div>-->
 <!--        Black on top-->
@@ -53,8 +85,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-<script src="stomp.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+<script src="stomp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0-0/axios.min.js"></script>
 <script src="game.js"></script>
