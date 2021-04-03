@@ -10,18 +10,7 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import org.junit.jupiter.api.Test;
 
-import static io.github.teonistor.chess.board.Position.A1;
-import static io.github.teonistor.chess.board.Position.B5;
-import static io.github.teonistor.chess.board.Position.B7;
-import static io.github.teonistor.chess.board.Position.C7;
-import static io.github.teonistor.chess.board.Position.D6;
-import static io.github.teonistor.chess.board.Position.D8;
-import static io.github.teonistor.chess.board.Position.E1;
-import static io.github.teonistor.chess.board.Position.E2;
-import static io.github.teonistor.chess.board.Position.E5;
-import static io.github.teonistor.chess.board.Position.F2;
-import static io.github.teonistor.chess.board.Position.F4;
-import static io.github.teonistor.chess.board.Position.G7;
+import static io.github.teonistor.chess.board.Position.*;
 import static io.github.teonistor.chess.core.Player.Black;
 import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,9 +30,9 @@ class TerminalViewTest {
                 F4, box.whiteKnight,
                 B5, box.blackKing,
                 D8, box.blackKnight),
-                White,
                 List.of(new Pawn(White), new Bishop(Black), new Knight(Black), new Rook(White), new Pawn(White)),
-                List.of(F4, F4, F4, E2, E2).zip(List.of(E5, D6, C7, E1, F2)));
+                List.of(F4, F4, F4, E2, E2).zip(List.of(E5, D6, C7, E1, F2)),
+                List.of(G4, G4, G4, A2, A2).zip(List.of(D5, E3, C1, E3, F8)));
 
         assertThat(output).isEqualTo(
             "    A  B  C  D  E  F  G  H\n" +
@@ -65,6 +54,7 @@ class TerminalViewTest {
             " 1 │WP│  │  │  │  │  │  │  │ 1\n" +
             "   ╰──┴──┴──┴──┴──┴──┴──┴──╯\n" +
             "    A  B  C  D  E  F  G  H\n" +
-            "White moves. Possibilities: F4-E5 F4-D6 F4-C7 E2-E1 E2-F2");
+            "Black possible moves: F4-E5 F4-D6 F4-C7 E2-E1 E2-F2" +
+            "White possible moves: G4-D5 G4-E3 G4-C1 A2-E3 A2-F8");
     }
 }

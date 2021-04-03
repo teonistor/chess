@@ -4,7 +4,9 @@ import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.util.NestedMapKeyExtractor;
 import io.vavr.Lazy;
+import io.vavr.Tuple2;
 import io.vavr.collection.Map;
+import io.vavr.collection.Stream;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.With;
@@ -34,7 +36,11 @@ public class Game {
     public void triggerView(final View view) {
         switch (getCondition()) {
             case Continue:
-                view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), nestedMapKeyExtractor.extract(getAvailableMoves()));
+                final Stream<Tuple2<Position, Position>> possibleMoves = nestedMapKeyExtractor.extract(getAvailableMoves());
+                if (state.getPlayer() == Player.White)
+                    view.refresh(state.getBoard(), state.getCapturedPieces(), Stream.empty(), possibleMoves);
+                else
+                    view.refresh(state.getBoard(), state.getCapturedPieces(), possibleMoves, Stream.empty());
                 break;
 
             case WhiteWins:

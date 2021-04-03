@@ -10,11 +10,14 @@ import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import io.vavr.collection.Stream;
 import io.vavr.collection.Traversable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,29 +38,22 @@ public class ChessCtrl implements View {
     // Intermediate UI caches. This feels like it's violating some principle, I'm really unsure
     private Map<?,?> lastBoard = HashMap.empty();
     private Traversable<?> lastCapturedPieces = List.empty();
+    private Traversable<?> lastPossibleMovesWhite = List.empty();
+    private Traversable<?> lastPossibleMovesBlack = List.empty();
     private Traversable<?> lastPossibleMovesAll = List.empty();
-    private Traversable<?> lastPossibleWhiteMoves = List.empty();
-    private Traversable<?> lastPossibleBlackMoves = List.empty();
 
     @Override
-    public void refresh(final Map<Position, Piece> board, final Player player, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMoves) {
+    public void refresh(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, Traversable<Tuple2<Position, Position>> possibleMovesWhite) {
         lastBoard = board;
         lastCapturedPieces = capturedPieces;
-        lastPossibleMovesAll = possibleMoves;
-
-        // TODO New moves paradigm
-        if (player == Player.White) {
-            lastPossibleWhiteMoves = possibleMoves;
-            lastPossibleBlackMoves = List.empty();
-        } else {
-            lastPossibleWhiteMoves = List.empty();
-            lastPossibleBlackMoves = possibleMoves;
-        }
+        lastPossibleMovesBlack = possibleMovesBlack;
+        lastPossibleMovesWhite = possibleMovesWhite;
+        lastPossibleMovesAll = Stream.concat(possibleMovesBlack, possibleMovesWhite);
 
         ws.convertAndSend("/chess-ws/board", lastBoard);
         ws.convertAndSend("/chess-ws/captured-pieces", lastCapturedPieces);
-        ws.convertAndSend("/chess-ws/moves-white", lastPossibleWhiteMoves);
-        ws.convertAndSend("/chess-ws/moves-black", lastPossibleBlackMoves);
+        ws.convertAndSend("/chess-ws/moves-white", lastPossibleMovesWhite);
+        ws.convertAndSend("/chess-ws/moves-black", lastPossibleMovesBlack);
         ws.convertAndSend("/chess-ws/moves-all", lastPossibleMovesAll);
     }
 
@@ -98,12 +94,12 @@ public class ChessCtrl implements View {
 
     @SubscribeMapping("/moves-black")
     Traversable<?> onSubscribeMovesBlack() {
-        return lastPossibleBlackMoves;
+        return lastPossibleMovesBlack;
     }
 
     @SubscribeMapping("/moves-white")
     Traversable<?> onSubscribeMovesWhite() {
-        return lastPossibleWhiteMoves;
+        return lastPossibleMovesWhite;
     }
 
     @SubscribeMapping("/moves-all")
@@ -129,5 +125,11 @@ public class ChessCtrl implements View {
     @RequestMapping("/new/standard")
     void newGame() {
         controlLoop.onInput(inputActionProvider.newGame());
+    }
+
+    @ExceptionHandler
+    ResponseEntity<String> handleException(final Exception e) {
+        // TODO Special
+        return ResponseEntity.badRequest().body(e.toString());
     }
 }

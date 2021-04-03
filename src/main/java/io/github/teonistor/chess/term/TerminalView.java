@@ -44,7 +44,8 @@ public class TerminalView implements View {
         " 1 │A1│B1│C1│D1│E1│F1│G1│H1│ 1\n" +
         "   ╰──┴──┴──┴──┴──┴──┴──┴──╯\n" +
         "    A  B  C  D  E  F  G  H\n" +
-        "%s moves. Possibilities: %s";
+        "Black possible moves: %s" +
+        "White possible moves: %s";
 
     private static final Map<Class<? extends Piece>, String> pieceLetters = HashMap.of(Pawn.class, "P", Knight.class, "N", Rook.class, "R", Bishop.class, "B", Queen.class, "Q", King.class, "K");
     private static final Map<Player, String> playerLetters = HashMap.of(Player.Black, "B", Player.White, "W");
@@ -58,19 +59,19 @@ public class TerminalView implements View {
 
 
     @Override
-    public void refresh(final Map<Position, Piece> board, final Player player, final Traversable<Piece> capturedPieces, Traversable<Tuple2<Position, Position>> possibleMoves) {
-        outStream.println(makeOutput(board, player, capturedPieces, possibleMoves));
+    public void refresh(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, Traversable<Tuple2<Position, Position>> possibleMovesBlack, Traversable<Tuple2<Position, Position>> possibleMovesWhite) {
+        outStream.println(makeOutput(board, capturedPieces, possibleMovesBlack, possibleMovesWhite));
     }
 
     @VisibleForTesting
-    String makeOutput(final Map<Position, Piece> board, final Player player, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMoves) {
+    String makeOutput(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, Traversable<Tuple2<Position, Position>> possibleMovesWhite) {
         val piecesByPlayer = capturedPieces.groupBy(Piece::getPlayer).mapValues(Traversable::narrow);
 
         return String.format(makeBoardWithPieces(board, boardTemplate),
                String.join(" ", makePieceList(piecesByPlayer.get(Player.White))),
                String.join(" ", makePieceList(piecesByPlayer.get(Player.Black))),
-               player,
-               String.join(" ", possibleMoves.map(m -> m._1 + "-" + m._2)));
+               String.join(" ", possibleMovesBlack.map(m -> m._1 + "-" + m._2)),
+               String.join(" ", possibleMovesWhite.map(m -> m._1 + "-" + m._2)));
     }
 
     private String makeBoardWithPieces(final Map<Position, Piece> board, String output) {
