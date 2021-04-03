@@ -108,7 +108,7 @@ public class ChessCtrl implements View {
     }
 
     @RequestMapping("/move")
-    void onMove(final @RequestBody Tuple2<Position, Position> move) {
+    void onMove(final @CookieValue("player") String player, final @RequestBody Tuple2<Position, Position> move) {
         controlLoop.onInput(inputActionProvider.gameInput(move._1, move._2));
     }
 

@@ -52,15 +52,10 @@ new Vue({
     methods: {
 
         connect () {
-            this.restCallsGoing++;
             let socket = new SockJS('/chess-subscribe');
 
             // This may seem very contrived considering the player is in a plain text cookie; but it leaves the possibility open to use something less forgeable in the future
-            axios.get('/chess-api/moves-channel')
-              .then(response => {
-                console.log(response);
-                let possibleMovesChannel = response.data;
-                this.restCallsGoing--;
+            this.axiosHelper('fetching moves channel', () => axios.get('/chess-api/moves-channel'), possibleMovesChannel => {
 
                 this.stompClient = Stomp.over(socket);
                 this.stompClient.connect({}, frame => {
@@ -81,12 +76,6 @@ new Vue({
                   stompOnClose(status);
                   this.stompClient = null;
               }
-
-            })
-             .catch(error => {
-                console.log(error);
-                this.restCallsGoing--;
-                this.alerts.push({type: 'warning', text: 'Error fetching moves channel: ' + error});
             });
         },
 
@@ -108,20 +97,8 @@ new Vue({
             this.targets = [];
         },
 
-        receiveAnnouncement (message) {
-        console.log('receiveAnnouncement', message)
-            // TODO
-        },
-
-
-        restart() {
-            // this.stompClient.send("/ttt/restart", {}, ".");
-            // this.winner = '';
-        },
-
-
-        send (i, j) {
-            this.stompClient.send("/chess-ws/move", {}, JSON.stringify([this.dragStart]));
+        receiveAnnouncement (text) {
+            this.alerts.push({type: 'info', text});
         },
 
         allowDrop(ev) {
@@ -137,39 +114,10 @@ new Vue({
             ev.preventDefault();
 
             if (this.targets.indexOf(position) > -1) {
+                this.axiosHelper('sending move', () => axios.post('/chess-api/move', [this.dragStart, position]));
                 this.provisional = position
                 this.board[position] = this.board[this.dragStart];
                 this.$forceUpdate();
-
-                axios.post('/chess-api/move', [this.dragStart, position])
-                    // .then(function (response) {
-                    //   console.log(response);
-                    // })
-                    .catch(function (error) {
-                        console.log(error);
-                        this.alerts.push({type: 'warning', text: 'Error sending move: ' + error});
-                    });
-                // console.log(axios({method: 'POST', url: this.sourcePath, data: [this.dragStart, position]}))
-                // .then(result => {
-                //       this.entryHtml = result.data;
-                //     },
-                //     error => {
-                //       this.canLoad = true;
-                //       this.entryHtml = ' ';
-                //       console.error(error);
-                //       switch (error.response && error.response.status) {
-                //           // TODO these are specific to one use case; and we probably want a more global error balloon framework anyhow
-                //         case 401:
-                //           this.errorMessage = 'You do not have access to read this entry.';
-                //           break;
-                //         case 404:
-                //           this.errorMessage = 'Entry not found. The table of contents is probably broken.';
-                //           break;
-                //         default :
-                //           this.errorMessage = 'Could not load entry: ' + error.toString();
-                //           break;
-                //       }
-                //     });
             }
 
             this.dragStart = null;
@@ -177,20 +125,25 @@ new Vue({
         },
 
         newStandardGame () {
-          this.restCallsGoing++;
+            this.axiosHelper('calling for new game', () => axios.post('/chess-api/new/standard', {}));
+        },
 
-          let url = '/chess-api/new/standard';
-          console.log("New game  " + url, this.restCallsGoing)
+        axiosHelper(flowDescription, promiseProducer, dataConsumer) {
+            // dataConsumer is optional... because I said so
+            if (!dataConsumer)
+              return this.axiosHelper(flowDescription, promiseProducer, () => {});
 
-          axios.post(url, {})
-            .then(response => {
-              this.restCallsGoing--;
-            })
-            .catch(error => {
-              this.restCallsGoing--;
-              console.log('Error calling for new game:', error);
-              this.alerts.push({type: 'warning', text: 'Error calling for new game: ' + error});
-            });
+            this.restCallsGoing++;
+            promiseProducer()
+              .then(response => dataConsumer(response.data))
+              .catch(error => {
+                let errorLog = 'Error ' + flowDescription;
+                console.log(errorLog, error);
+                let errorCode = error.response && error.response.status && ' (' + error.response.status + ')' || '';
+                let errorDetail = error.response && error.response.data || error.toString();
+                this.alerts.push({type: 'warning', text: errorLog + errorCode + ': ' + errorDetail});
+              })
+              .then(() => this.restCallsGoing--);
         }
     },
 
