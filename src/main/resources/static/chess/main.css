@@ -12,6 +12,21 @@ form {
 	padding: 20px;
 }
 
+#cookie-notice {
+	max-width: 768px;
+	font-size: 10px;
+	text-align: justify;
+	margin: 0 auto;
+	padding: 30px;
+}
+
+#cookie-notice>svg {
+	width: 48px;
+	height: 52px;
+	float: left;
+	margin-right: 12px;
+}
+
 .play-area-outer {
 	overflow: auto;
 }
