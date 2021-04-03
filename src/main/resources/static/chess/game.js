@@ -57,18 +57,16 @@ new Vue({
             // This may seem very contrived considering the player is in a plain text cookie; but it leaves the possibility open to use something less forgeable in the future
             this.axiosHelper('fetching moves channel', () => axios.get('/chess-api/moves-channel'), possibleMovesChannel => {
 
-                this.stompClient = Stomp.over(socket);
-                this.stompClient.connect({}, frame => {
-                  console.log("Subscribing to board", this.receiveBoard)
-                  this.stompClient.subscribe('/chess-ws/board', this.receiveBoard);
-                  console.log("Subscribing to captured-pieces")
-                  this.stompClient.subscribe('/chess-ws/captured-pieces', this.receiveCapturedPieces);
-                  console.log("Subscribing to " + possibleMovesChannel)
-                  this.stompClient.subscribe('/chess-ws/' + possibleMovesChannel, this.receivePossibleMoves);
-                  console.log("Subscribing to announcements")
-                  this.stompClient.subscribe('/chess-ws/announcements', this.receiveAnnouncement);
-                  console.log("Subscribed all")
-                });
+              this.stompClient = Stomp.over(socket);
+              this.stompClient.connect({}, frame => {
+                this.stompClient.subscribe('/chess-ws/board', this.receiveBoard);
+                this.stompClient.subscribe('/chess-ws/captured-pieces', this.receiveCapturedPieces);
+                this.stompClient.subscribe('/chess-ws/' + possibleMovesChannel, this.receivePossibleMoves);
+                this.stompClient.subscribe('/chess-ws/announcements', this.receiveAnnouncement);
+              });
+
+              // Apparently this is how you stop the debug log
+              this.stompClient.debug = null;
 
               // Poor man's callback chain
               let stompOnClose = socket.onclose;
@@ -80,17 +78,14 @@ new Vue({
         },
 
         receiveBoard (message) {
-        console.log('receiveBoard', message)
             this.board = JSON.parse(message.body);
         },
 
         receiveCapturedPieces (message) {
-        console.log('receiveCapturedPieces', message)
             this.capturedPieces = JSON.parse(message.body);
         },
 
         receivePossibleMoves (message) {
-        console.log('receivePossibleMoves', message)
             this.possibleMoves = JSON.parse(message.body);
             this.dragStart = null;
             this.provisional = null;
