@@ -42,12 +42,6 @@ class GameTest implements RandomPositionsTestMixin {
     private @Mock GameState state3;
     private @Mock Map<Position, Piece> board;
 
-    @Test
-    void constructWithGameStateProvider(final @Mock GameStateProvider provider) {
-        when(provider.createState()).thenReturn(state);
-        assertThat(new Game(rule, checker, extractor, view, provider).getState()).isEqualTo(state);
-    }
-
     @ParameterizedTest(name="{0} {1}")
     @CsvSource({"Black,Continue",
                 "White,BlackWins",

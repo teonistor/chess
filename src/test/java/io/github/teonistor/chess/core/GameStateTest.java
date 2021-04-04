@@ -68,4 +68,11 @@ class GameStateTest {
         assertThat(finalState.getCapturedPieces()).containsExactlyInAnyOrder(aPiece, anotherPiece);
         assertThat(finalState.getPrevious()).isSameAs(initialState);
     }
+
+    @Test
+    void completeStateIsSelf() {
+        final GameState state = new GameState(initialBoard, Black, List.of(aPiece), null);
+
+        assertThat(state.completeState()).containsExactly(state);
+    }
 }

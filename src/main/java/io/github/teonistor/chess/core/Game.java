@@ -21,12 +21,14 @@ public class Game {
     private final GameOverChecker gameOverChecker;
     private final NestedMapKeyExtractor nestedMapKeyExtractor;
 
-    private final @Getter @With(PRIVATE) GameState state;
+    private final @Getter GameState state;
+    private final @With(PRIVATE) PartialState partialState;
+
     private final Lazy<Map<Position, Map<Position, GameState>>> availableMoves = Lazy.of(this::computeAvailableMoves);
     private final Lazy<GameCondition> condition = Lazy.of(this::computeCondition);
 
-    public Game(final AvailableMovesRule availableMovesRule, final GameOverChecker gameOverChecker, final NestedMapKeyExtractor nestedMapKeyExtractor, final View view, final GameStateProvider gameStateProvider) {
-        this(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, gameStateProvider.createState());
+    public Game(AvailableMovesRule availableMovesRule, GameOverChecker gameOverChecker, NestedMapKeyExtractor nestedMapKeyExtractor, GameState state) {
+        this(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, state, null);
     }
 
     public GameCondition getCondition() {
@@ -79,5 +81,9 @@ public class Game {
 
     private GameCondition computeCondition() {
         return gameOverChecker.check(state.getBoard(), state.getPlayer(), getAvailableMoves());
+    }
+
+    private Game withState(GameState state) {
+        return this.state == state ? this : new Game(this.availableMovesRule, this.gameOverChecker, this.nestedMapKeyExtractor, state, null);
     }
 }

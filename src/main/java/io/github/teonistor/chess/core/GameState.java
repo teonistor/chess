@@ -4,14 +4,16 @@ import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
+
 import javax.annotation.Nullable;
 
 @AllArgsConstructor
 @Getter
-public class GameState {
+public class GameState extends PartialState {
     private final @NonNull  Map<Position, Piece> board;
     private final @NonNull  Player player;
     private final @NonNull  List<Piece> capturedPieces;
@@ -23,5 +25,10 @@ public class GameState {
 
     public GameState advance(Map<Position, Piece> newBoard, Piece newCapturedPiece) {
         return new GameState(newBoard, player.next(), capturedPieces.append(newCapturedPiece), this);
+    }
+
+    @Override
+    public Option<GameState> completeState() {
+        return Option.some(this);
     }
 }
