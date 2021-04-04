@@ -1,72 +1,107 @@
 package io.github.teonistor.chess.ctrl;
 
+import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Game;
-import io.github.teonistor.chess.core.GameStateProvider;
-import io.github.teonistor.chess.inter.DefinitelyInput;
-import io.github.teonistor.chess.inter.Input;
-import io.github.teonistor.chess.inter.InputEngine;
+import io.github.teonistor.chess.core.GameState;
+import io.github.teonistor.chess.factory.GameFactory;
+import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.save.SaveLoad;
-import org.junit.jupiter.api.BeforeEach;
+import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
+import io.vavr.Tuple2;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-// TODO This shit is untestable. Who wrote it come up front and take 10.000 facepalms.
-class ControlLoopTest {
-
+@MockitoSettings
+class ControlLoopTest implements RandomPositionsTestMixin {
     @Mock private SaveLoad saveLoad;
-    @Mock private Game game;
-    @Mock private InputEngine inputEngine;
+    @Mock private GameFactory factory;
+    @Mock private View view;
+
     @Mock private InputAction action;
-    @Mock private GameStateProvider providerIn;
-    @Mock private DefinitelyInput input;
+    @Mock private Game game;
+    @Mock private Game newGame;
 
-    private GameStateProvider providerOut;
-    private Input inputProxy;
+    @InjectMocks private ControlLoop loop;
 
-    private ControlLoop loop;
+    @Test
+    void onGameInput() {
+        setField(loop, "game", game);
+        final Position from = randomPositions.get();
+        final Position to = randomPositions.get();
+        when(action.gameInput()).thenReturn(Optional.of(new Tuple2<>(from, to)));
+        // TODO Refactor: The fact that I have to stub the next 2 calls is concerning
+        when(action.savePath()).thenReturn(Optional.empty());
+        when(action.gameStateProvider()).thenReturn(Optional.empty());
+        when(game.processInput(from, to)).thenReturn(newGame);
 
-    @BeforeEach
-    void setUp() {
-        initMocks(this);
-        loop = new ControlLoop(saveLoad, (p, i) -> {
-            this.providerOut = p;
-            this.inputProxy = i;
-            return game;
-        }, input);
+        loop.onInput(action);
+
+        assertThat(loop).hasFieldOrPropertyWithValue("game", newGame);
+        verify(newGame).triggerView(view);
     }
 
     @Test
-    void launch() {
-        loop.launch();
-        verify(inputEngine).run();
+    void onGameInputInAbsenceOfGame() {
+        lenient().when(action.gameInput()).thenReturn(Optional.of(new Tuple2<>(randomPositions.next(), randomPositions.next())));
+        when(action.gameStateProvider()).thenReturn(Optional.empty());
+        loop.onInput(action);
     }
 
     @Test
-    void gameNotStartedAndGameStateProviderGiven() {
-        setField(loop, "game", null);
-        when(action.gameStateProvider()).thenReturn(Optional.of(providerIn));
+    void onSave(final @Mock GameState state) {
+        setField(loop, "game", game);
+        when(action.gameInput()).thenReturn(Optional.empty());
+        when(action.savePath()).thenReturn(Optional.of("some path"));
+        when(action.gameStateProvider()).thenReturn(Optional.empty());
+        when(game.getState()).thenReturn(state);
 
-        loop.launch();
-//        inputActionConsumer.accept(action);
+        loop.onInput(action);
 
-        assertThat(providerOut).isSameAs(providerIn);
-        assertThat(input).isNotNull();
-        verify(action, atLeastOnce()).gameStateProvider();
-        verify(inputEngine).run();
-        verify(game).play();
+        verify(saveLoad).saveState(state, "some path");
     }
 
     @Test
-    void processInputWithGame() {
+    void onSaveInAbsenceOfGame() {
+        lenient().when(action.savePath()).thenReturn(Optional.of("some other path"));
+        when(action.gameStateProvider()).thenReturn(Optional.empty());
+        loop.onInput(action);
+    }
+
+    @Test
+    void onNew(final @Mock GameState state) {
+        when(action.gameStateProvider()).thenReturn(Optional.of(() -> state));
+        when(factory.createGame(state)).thenReturn(game);
+
+        loop.onInput(action);
+
+        assertThat(loop).hasFieldOrPropertyWithValue("game", game);
+        verify(game).triggerView(view);
+    }
+
+    @Test
+    void onIrrelevantInput() {
+        setField(loop, "game", game);
+        when(action.gameInput()).thenReturn(Optional.empty());
+        when(action.savePath()).thenReturn(Optional.empty());
+        when(action.gameStateProvider()).thenReturn(Optional.empty());
+
+        loop.onInput(action);
+    }
+
+    @AfterEach
+    void afterEach() {
+        verifyNoMoreInteractions(saveLoad, factory, view, action, game, newGame);
     }
 }

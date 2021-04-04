@@ -1,4 +1,4 @@
-package io.github.teonistor.chess.inter;
+package io.github.teonistor.chess.term;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.ctrl.InputAction;
@@ -10,6 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;

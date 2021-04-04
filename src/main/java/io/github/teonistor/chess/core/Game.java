@@ -1,126 +1,83 @@
 package io.github.teonistor.chess.core;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.github.teonistor.chess.board.Position;
-import io.github.teonistor.chess.inter.Input;
 import io.github.teonistor.chess.inter.View;
-import io.github.teonistor.chess.piece.Piece;
+import io.github.teonistor.chess.util.NestedMapKeyExtractor;
+import io.vavr.Lazy;
 import io.vavr.Tuple2;
-import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
 import lombok.Getter;
-import lombok.val;
+import lombok.RequiredArgsConstructor;
+import lombok.With;
 
+import static io.github.teonistor.chess.core.GameCondition.Continue;
+import static lombok.AccessLevel.PRIVATE;
+
+@RequiredArgsConstructor
 public class Game {
 
-    private final GameStateProvider gameStateProvider;
-    private final CheckRule checkRule;
+    private final AvailableMovesRule availableMovesRule;
     private final GameOverChecker gameOverChecker;
-    private final Input input;
-    private final View view;
+    private final NestedMapKeyExtractor nestedMapKeyExtractor;
 
-    // Mutable state!
-    private @Getter GameState state;
-    private boolean gameOver;
+    private final @Getter @With(PRIVATE) GameState state;
+    private final Lazy<Map<Position, Map<Position, GameState>>> availableMoves = Lazy.of(this::computeAvailableMoves);
+    private final Lazy<GameCondition> condition = Lazy.of(this::computeCondition);
 
-    public Game(final GameStateProvider gameStateProvider, final CheckRule checkRule, final GameOverChecker gameOverChecker, final Input input, final View view) {
-        this.gameStateProvider = gameStateProvider;
-        this.checkRule = checkRule;
-        this.gameOverChecker = gameOverChecker;
-        this.input = input;
-        this.view = view;
+    public Game(final AvailableMovesRule availableMovesRule, final GameOverChecker gameOverChecker, final NestedMapKeyExtractor nestedMapKeyExtractor, final View view, final GameStateProvider gameStateProvider) {
+        this(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, gameStateProvider.createState());
     }
 
-     public Runnable launch() {
-       state = gameStateProvider.createState();
-       gameOver = false;
-       return this::playRound;
-     }
+    public GameCondition getCondition() {
+        return condition.get();
+    }
 
-     @VisibleForTesting
-     void playRound() {
-        if (gameOver) {
-            // TODO This hack means the game is painfully aware of the shared input interface
-            input.simpleInput();
-            return;
-        }
-
-        val possibleMoves = computeAvailableMoves(state);
-        val gameCondition = gameOverChecker.check(state.getBoard(), state.getPlayer(), possibleMoves);
-
-        switch (gameCondition) {
+    public void triggerView(final View view) {
+        switch (getCondition()) {
             case Continue:
-                view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), turnMovesIntoPairs(possibleMoves));
-                state = processInput(possibleMoves);
-                return;
+                final Stream<Tuple2<Position, Position>> possibleMoves = nestedMapKeyExtractor.extract(getAvailableMoves());
+                if (state.getPlayer() == Player.White)
+                    view.refresh(state.getBoard(), state.getCapturedPieces(), Stream.empty(), possibleMoves);
+                else
+                    view.refresh(state.getBoard(), state.getCapturedPieces(), possibleMoves, Stream.empty());
+                break;
 
             case WhiteWins:
                 view.announce("White wins!");
                 break;
+
             case BlackWins:
                 view.announce("Black wins!");
                 break;
+
             case Stalemate:
                 view.announce("Stalemate!");
                 break;
         }
-        gameOver = true;
     }
 
-    @Deprecated
-    public void play() {
-        var state = gameStateProvider.createState();
+    public Game processInput(final Position from, final Position to) {
+        if (Continue.equals(getCondition())) {
+            return getAvailableMoves().get(from)
+                    .flatMap(moveSubset -> moveSubset.get(to))
+                    .map(this::withState)
+                    .getOrElse(this);
 
-        while (true) {
-            final val possibleMoves = computeAvailableMoves(state);
-            final val gameCondition = gameOverChecker.check(state.getBoard(), state.getPlayer(), possibleMoves);
-            view.refresh(state.getBoard(), state.getPlayer(), state.getCapturedPieces(), turnMovesIntoPairs(possibleMoves));
-
-            switch (gameCondition) {
-                case Continue:
-                    state = processInput(possibleMoves);
-                    continue;
-
-                case WhiteWins:
-                    view.announce("White wins!");
-                    break;
-                case BlackWins:
-                    view.announce("Black wins!");
-                    break;
-                case Stalemate:
-                    view.announce("Stalemate!");
-                    break;
-            }
-            break;
+        } else {
+            return this;
         }
     }
 
-    @VisibleForTesting
-    Map<Position, Map<Position, GameState>> computeAvailableMoves(final GameState state) {
-        final Map<Position,Piece> board = state.getBoard();
-        final Player player = state.getPlayer();
-
-        return board.filterValues(piece -> piece.getPlayer() == player)
-                .map((from, piece) -> new Tuple2<>(from, piece.computePossibleMoves(from)
-                .filter(move -> move.validate(state))
-                .map(move -> new Tuple2<>(move.getTo(), move.execute(state)))
-                .filter(targetAndState -> !checkRule.check(targetAndState._2.getBoard(), player))
-                .collect(HashMap.collector())));
+    private Map<Position, Map<Position, GameState>> getAvailableMoves() {
+        return availableMoves.get();
     }
 
-    @VisibleForTesting
-    GameState processInput(final Map<Position, Map<Position,GameState>> possibleMoves) {
-        final Tuple2<Position, Position> fromTo = input.simpleInput();
-
-        return possibleMoves.get(fromTo._1)
-              .flatMap(m -> m.get(fromTo._2))
-              .getOrElse(() -> processInput(possibleMoves));
+    private Map<Position, Map<Position, GameState>> computeAvailableMoves() {
+        return availableMovesRule.computeAvailableMoves(state);
     }
 
-    @VisibleForTesting
-    Stream<Tuple2<Position, Position>> turnMovesIntoPairs(final Map<Position, Map<Position, GameState>> possibleMoves) {
-        return possibleMoves.toStream()
-                .flatMap(m -> Stream.continually(m._1).zip(m._2.keySet()));
+    private GameCondition computeCondition() {
+        return gameOverChecker.check(state.getBoard(), state.getPlayer(), getAvailableMoves());
     }
 }

@@ -32,7 +32,18 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-
+<!--        <dependency>-->
+<!--            <groupId>org.springframework</groupId>-->
+<!--            <artifactId>spring-messaging</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework</groupId>-->
+<!--            <artifactId>spring-websocket</artifactId>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -109,7 +120,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>io.github.teonistor.chess.Main</mainClass>
+                            <mainClass>io.github.teonistor.chess.term.TerminalLauncher</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
