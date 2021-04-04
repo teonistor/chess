@@ -38,7 +38,7 @@ public class SaveLoad {
         objectMapper = Lazy.of(() -> {
             final ObjectMapper om = new ObjectMapper();
             om.registerModule(new VavrModule());
-            om.registerModule(pieceSerialiser.getPieceModule());
+            om.registerModule(pieceSerialiser);
             return om;
         });
     }

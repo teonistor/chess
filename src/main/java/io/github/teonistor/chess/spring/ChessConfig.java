@@ -38,7 +38,7 @@ public class ChessConfig implements WebSocketMessageBrokerConfigurer {
     public ObjectMapper objectMapper() {
         final ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new VavrModule());
-        objectMapper.registerModule(factory().getPieceSerialiser().getPieceModule());
+        objectMapper.registerModule(factory().getPieceSerialiser());
         return objectMapper;
     }
 

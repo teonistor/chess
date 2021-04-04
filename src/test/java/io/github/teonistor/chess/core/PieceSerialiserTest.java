@@ -1,84 +1,62 @@
 package io.github.teonistor.chess.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.teonistor.chess.piece.King;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.piece.PieceBox;
-import io.github.teonistor.chess.piece.Rook;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Map;
-
-import static io.github.teonistor.chess.core.Player.White;
-import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 class PieceSerialiserTest {
 
-    @BeforeEach
-    void setUp() {
+    private static PieceBox box;
+    private static ObjectMapper om;
+
+    @BeforeAll
+    static void setUp() {
+        box = new PieceBox(mock(UnderAttackRule.class));
+        om = new ObjectMapper();
+        om.registerModule(new PieceSerialiser(box));
+    }
+
+    @ParameterizedTest
+    @MethodSource("pieceStringPairs")
+    void serialise(Piece p, String s) throws JsonProcessingException {
+        assertThat(om.writeValueAsString(p)).isEqualTo(s);
+    }
+
+    @ParameterizedTest
+    @MethodSource("pieceStringPairs")
+    void deserialise(Piece p, String s) throws JsonProcessingException {
+        assertThat(om.readValue(s, Piece.class)).isEqualTo(p);
+    }
+
+    private static Object[][] pieceStringPairs() {
+        return new Object[][]{
+            {box.blackPawn, "\"BP\""},
+            {box.blackRook, "\"BR\""},
+            {box.blackKnight, "\"BN\""},
+            {box.blackBishop, "\"BB\""},
+            {box.blackQueen, "\"BQ\""},
+            {box.blackKing, "\"BK\""},
+            {box.whitePawn, "\"WP\""},
+            {box.whiteRook, "\"WR\""},
+            {box.whiteKnight, "\"WN\""},
+            {box.whiteBishop, "\"WB\""},
+            {box.whiteQueen, "\"WQ\""},
+            {box.whiteKing, "\"WK\""}};
     }
 
     @Test
-    void serialise() {
-        final PieceBox box = new PieceBox(mock(UnderAttackRule.class));
-        final PieceSerialiser ser = new PieceSerialiser(box);
-
-        assertThat(ser.serialise(box.blackPawn)).isEqualTo("BP");
-        assertThat(ser.serialise(box.blackRook)).isEqualTo("BR");
-        assertThat(ser.serialise(box.blackKnight)).isEqualTo("BN");
-        assertThat(ser.serialise(box.blackBishop)).isEqualTo("BB");
-        assertThat(ser.serialise(box.blackQueen)).isEqualTo("BQ");
-        assertThat(ser.serialise(box.blackKing)).isEqualTo("BK");
-        assertThat(ser.serialise(box.whitePawn)).isEqualTo("WP");
-        assertThat(ser.serialise(box.whiteRook)).isEqualTo("WR");
-        assertThat(ser.serialise(box.whiteKnight)).isEqualTo("WN");
-        assertThat(ser.serialise(box.whiteBishop)).isEqualTo("WB");
-        assertThat(ser.serialise(box.whiteQueen)).isEqualTo("WQ");
-        assertThat(ser.serialise(box.whiteKing)).isEqualTo("WK");
-    }
-
-    @Test
-    void deserialise() {
-        final PieceBox box = new PieceBox(mock(UnderAttackRule.class));
-        final PieceSerialiser ser = new PieceSerialiser(box);
-
-        assertThat(ser.deserialise("BP")).isEqualTo(box.blackPawn);
-        assertThat(ser.deserialise("BR")).isEqualTo(box.blackRook);
-        assertThat(ser.deserialise("BN")).isEqualTo(box.blackKnight);
-        assertThat(ser.deserialise("BB")).isEqualTo(box.blackBishop);
-        assertThat(ser.deserialise("BQ")).isEqualTo(box.blackQueen);
-        assertThat(ser.deserialise("BK")).isEqualTo(box.blackKing);
-        assertThat(ser.deserialise("WP")).isEqualTo(box.whitePawn);
-        assertThat(ser.deserialise("WR")).isEqualTo(box.whiteRook);
-        assertThat(ser.deserialise("WN")).isEqualTo(box.whiteKnight);
-        assertThat(ser.deserialise("WB")).isEqualTo(box.whiteBishop);
-        assertThat(ser.deserialise("WQ")).isEqualTo(box.whiteQueen);
-        assertThat(ser.deserialise("WK")).isEqualTo(box.whiteKing);
-    }
-
-    @Test
-    void getPieceModule() throws JsonProcessingException {
-        final PieceSerialiser ser = new PieceSerialiser(new PieceBox(mock(UnderAttackRule.class)));
-
-        final ObjectMapper om = new ObjectMapper();
-        om.registerModule(ser.getPieceModule());
-        om.writeValueAsString(singletonMap("u", new Rook(White)));
-        om.readValue("{\"u\":\"WR\", \"b\":\"BQ\"}", new TypeReference<Map<String, Piece>>() {});
-
-        System.out.println(ser.serialise(new Rook(White)));
-        System.out.println(ser.deserialise("BB"));
-
-        fail("We're not really doing anything here");
-    }
-
-    @AfterEach
-    void tearDown() {
+    void deserialiseJunk() throws JsonProcessingException {
+        assertThatThrownBy(() -> om.readValue("\"AA\"", Piece.class)).isInstanceOf(InvalidFormatException.class)
+                .hasMessageStartingWith("AA cannot be parsed as a piece");
     }
 }
