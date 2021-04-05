@@ -40,7 +40,9 @@ class GameTest implements RandomPositionsTestMixin {
     private @Mock GameState state;
     private @Mock GameState state2;
     private @Mock GameState state3;
+    private @Mock PartialState partialState;
     private @Mock Map<Position, Piece> board;
+    private @Mock Map<Position, Map<Position, PartialState>> availableMoves;
 
     @ParameterizedTest(name="{0} {1}")
     @CsvSource({"Black,Continue",
@@ -49,7 +51,7 @@ class GameTest implements RandomPositionsTestMixin {
                 "White,Continue",
                 "Black,Stalemate",
                 "White,Stalemate"})
-    void getCondition(final Player player, final GameCondition condition, final @Mock Map<Position, Map<Position, GameState>> availableMoves) {
+    void getCondition(final Player player, final GameCondition condition) {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(player);
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
@@ -62,7 +64,7 @@ class GameTest implements RandomPositionsTestMixin {
     }
 
     @Test
-    void triggerViewOnContinueBlack(final @Mock Map<Position, Map<Position, GameState>> availableMoves, final @Mock Stream<Tuple2<Position, Position>> possibleMoves, final @Mock Piece piece1, final @Mock Piece piece2) {
+    void triggerViewOnContinueBlack(final @Mock Stream<Tuple2<Position, Position>> possibleMoves, final @Mock Piece piece1, final @Mock Piece piece2) {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(Black);
         when(state.getCapturedPieces()).thenReturn(List.of(piece1, piece2));
@@ -76,7 +78,7 @@ class GameTest implements RandomPositionsTestMixin {
     }
 
     @Test
-    void triggerViewOnContinueWhite(final @Mock Map<Position, Map<Position, GameState>> availableMoves, final @Mock Stream<Tuple2<Position, Position>> possibleMoves, final @Mock Piece piece1, final @Mock Piece piece2) {
+    void triggerViewOnContinueWhite(final @Mock Stream<Tuple2<Position, Position>> possibleMoves, final @Mock Piece piece1, final @Mock Piece piece2) {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(White);
         when(state.getCapturedPieces()).thenReturn(List.of(piece1, piece2));
@@ -90,7 +92,7 @@ class GameTest implements RandomPositionsTestMixin {
     }
 
     @Test
-    void triggerViewOnWhiteWins(final @Mock Map<Position, Map<Position, GameState>> availableMoves) {
+    void triggerViewOnWhiteWins() {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(Black);
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
@@ -102,7 +104,7 @@ class GameTest implements RandomPositionsTestMixin {
     }
 
     @Test
-    void triggerViewOnBlackWins(final @Mock Map<Position, Map<Position, GameState>> availableMoves) {
+    void triggerViewOnBlackWins() {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(White);
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
@@ -115,7 +117,7 @@ class GameTest implements RandomPositionsTestMixin {
 
     @ParameterizedTest(name="{0}")
     @EnumSource(Player.class)
-    void triggerViewOnStalemate(final Player player, final @Mock Map<Position, Map<Position, GameState>> availableMoves) {
+    void triggerViewOnStalemate(final Player player) {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(player);
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
@@ -126,9 +128,18 @@ class GameTest implements RandomPositionsTestMixin {
         verify(view).announce("Stalemate!");
     }
 
+    @Test
+    void triggerViewWithPartialState() {
+        when(partialState.triggerViewIfNeeded()).thenReturn(Option.some(view -> view.announce("TBC")));
+
+        new Game(rule, checker, extractor, state, partialState).triggerView(view);
+
+        verify(view).announce("TBC");
+    }
+
     @ParameterizedTest(name="{0}")
     @EnumSource(Player.class)
-    void processInputWhenGameOn(final Player player, final @Mock Map<Position, Map<Position, GameState>> availableMoves) {
+    void processInputWhenGameOn(final Player player) {
         final Position from = randomPositions.next();
         final Position to = randomPositions.next();
         when(state.getBoard()).thenReturn(board);
@@ -136,6 +147,7 @@ class GameTest implements RandomPositionsTestMixin {
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(checker.check(board, player, availableMoves)).thenReturn(Continue);
         when(availableMoves.get(from)).thenReturn(Option.of(HashMap.of(to, state2)));
+        when(state2.completeState()).thenReturn(Option.some(state2));
 
         final Game game = new Game(rule, checker, extractor, state);
         assertThat(game.processInput(from, to)).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "nestedMapKeyExtractor")
@@ -145,7 +157,7 @@ class GameTest implements RandomPositionsTestMixin {
     @ParameterizedTest(name="{0}")
     @EnumSource(Player.class)
     void processBadInputWhenGameOn(final Player player) {
-        final Map<Position, Map<Position, GameState>> availableMoves = HashMap.of(
+        final Map<Position, Map<Position, PartialState>> availableMoves = HashMap.of(
                 randomPositions.next(), HashMap.of(randomPositions.next(), state2),
                 randomPositions.next(), HashMap.of(randomPositions.next(), state3));
         when(state.getBoard()).thenReturn(board);
@@ -162,7 +174,7 @@ class GameTest implements RandomPositionsTestMixin {
                 "Black,WhiteWins",
                 "Black,Stalemate",
                 "White,Stalemate"})
-    void processInputWhenGameOver(final Player player, final GameCondition condition, final @Mock Map<Position, Map<Position, GameState>> availableMoves) {
+    void processInputWhenGameOver(final Player player, final GameCondition condition) {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(player);
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
@@ -172,8 +184,25 @@ class GameTest implements RandomPositionsTestMixin {
         assertThat(game.processInput(randomPositions.next(), randomPositions.next())).isEqualTo(game);
     }
 
+    @ParameterizedTest(name="{0}")
+    @EnumSource(Player.class)
+    void processInputResultingInPartialState(final Player player, final @Mock Map<Position, Map<Position, PartialState>> availableMoves) {
+        final Position from = randomPositions.next();
+        final Position to = randomPositions.next();
+        when(state.getBoard()).thenReturn(board);
+        when(state.getPlayer()).thenReturn(player);
+        when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
+        when(checker.check(board, player, availableMoves)).thenReturn(Continue);
+        when(availableMoves.get(from)).thenReturn(Option.of(HashMap.of(to, partialState)));
+        when(partialState.completeState()).thenReturn(Option.none());
+
+        final Game game = new Game(rule, checker, extractor, state);
+        assertThat(game.processInput(from, to)).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "nestedMapKeyExtractor", "state")
+                .extracting("partialState").isEqualTo(partialState);
+    }
+
     @AfterEach
     void tearDown() {
-        verifyNoMoreInteractions(rule, checker, extractor, view, state, state2, state3, board);
+        verifyNoMoreInteractions(rule, checker, extractor, view, state, state2, state3, partialState, board, availableMoves);
     }
 }

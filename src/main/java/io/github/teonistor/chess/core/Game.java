@@ -24,11 +24,11 @@ public class Game {
     private final @Getter GameState state;
     private final @With(PRIVATE) PartialState partialState;
 
-    private final Lazy<Map<Position, Map<Position, GameState>>> availableMoves = Lazy.of(this::computeAvailableMoves);
+    private final Lazy<Map<Position, Map<Position, PartialState>>> availableMoves = Lazy.of(this::computeAvailableMoves);
     private final Lazy<GameCondition> condition = Lazy.of(this::computeCondition);
 
     public Game(AvailableMovesRule availableMovesRule, GameOverChecker gameOverChecker, NestedMapKeyExtractor nestedMapKeyExtractor, GameState state) {
-        this(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, state, null);
+        this(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, state, PartialState.NIL);
     }
 
     public GameCondition getCondition() {
@@ -36,6 +36,12 @@ public class Game {
     }
 
     public void triggerView(final View view) {
+        partialState.triggerViewIfNeeded()
+                .getOrElse(this::triggerView0)
+                .accept(view);
+    }
+
+    private void triggerView0(final View view) {
         switch (getCondition()) {
             case Continue:
                 final Stream<Tuple2<Position, Position>> possibleMoves = nestedMapKeyExtractor.extract(getAvailableMoves());
@@ -63,7 +69,8 @@ public class Game {
         if (Continue.equals(getCondition())) {
             return getAvailableMoves().get(from)
                     .flatMap(moveSubset -> moveSubset.get(to))
-                    .map(this::withState)
+                    .map(partialState -> partialState.completeState().map(this::withState)
+                    .getOrElse(this.withPartialState(partialState)))
                     .getOrElse(this);
 
         } else {
@@ -71,11 +78,11 @@ public class Game {
         }
     }
 
-    private Map<Position, Map<Position, GameState>> getAvailableMoves() {
+    private Map<Position, Map<Position, PartialState>> getAvailableMoves() {
         return availableMoves.get();
     }
 
-    private Map<Position, Map<Position, GameState>> computeAvailableMoves() {
+    private Map<Position, Map<Position, PartialState>> computeAvailableMoves() {
         return availableMovesRule.computeAvailableMoves(state);
     }
 
@@ -84,6 +91,6 @@ public class Game {
     }
 
     private Game withState(GameState state) {
-        return this.state == state ? this : new Game(this.availableMovesRule, this.gameOverChecker, this.nestedMapKeyExtractor, state, null);
+        return this.state == state ? this : new Game(this.availableMovesRule, this.gameOverChecker, this.nestedMapKeyExtractor, state, PartialState.NIL);
     }
 }

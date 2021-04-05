@@ -2,6 +2,7 @@ package io.github.teonistor.chess.move;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.GameState;
+import io.github.teonistor.chess.core.PartialState;
 
 
 public interface Move {
@@ -30,5 +31,5 @@ public interface Move {
      * @param state The current game state
      * @return What the chosen callback returns
      */
-    GameState execute(GameState state);
+    PartialState execute(GameState state);
 }

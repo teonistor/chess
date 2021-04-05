@@ -12,7 +12,7 @@ public class AvailableMovesRule {
 
     private final CheckRule rule;
 
-    public Map<Position, Map<Position, GameState>> computeAvailableMoves(final GameState state) {
+    public Map<Position, Map<Position, PartialState>> computeAvailableMoves(final GameState state) {
         final Map<Position, Piece> board = state.getBoard();
         final Player player = state.getPlayer();
 

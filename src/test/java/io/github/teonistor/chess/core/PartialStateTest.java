@@ -26,4 +26,9 @@ class PartialStateTest {
     void withPromotionInput(final @Mock Piece piece) {
         assertThatThrownBy(() -> NIL.withPromotionInput(piece)).isInstanceOf(UnsupportedOperationException.class);
     }
+
+    @Test
+    void getBoard() {
+        assertThatThrownBy(() -> NIL.getBoard()).isInstanceOf(UnsupportedOperationException.class);
+    }
 }
