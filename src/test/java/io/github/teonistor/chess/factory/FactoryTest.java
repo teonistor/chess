@@ -34,7 +34,7 @@ class FactoryTest {
         final Object saveLoad = getField(FACTORY, "saveLoad");
         final Object inputActionProvider = getField(FACTORY, "inputActionProvider");
         final Object availableMovesRule = getField(FACTORY, "availableMovesRule");
-        final Object nestedMapKeyExtractor = getField(FACTORY, "nestedMapKeyExtractor");
+        final Object positionPairExtractor = getField(FACTORY, "positionPairExtractor");
 
         soft.assertThat(underAttackRule).isNotNull();
         soft.assertThat(checkRule).isNotNull();
@@ -54,7 +54,7 @@ class FactoryTest {
         soft.assertThat(inputActionProvider).hasFieldOrPropertyWithValue("initialStateProvider", initialStateProvider);
         soft.assertThat(inputActionProvider).hasFieldOrPropertyWithValue("saveLoad", saveLoad);
         soft.assertThat(availableMovesRule).hasFieldOrPropertyWithValue("rule", checkRule);
-        soft.assertThat(nestedMapKeyExtractor).isNotNull();
+        soft.assertThat(positionPairExtractor).isNotNull();
 
         soft.assertAll();
     }
@@ -76,10 +76,10 @@ class FactoryTest {
 
         final Game game = factory.createNewGame();
 
-        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "nestedMapKeyExtractor", "state").containsExactly(
+        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "state").containsExactly(
                 getField(factory, "availableMovesRule"),
                 getField(factory, "gameOverChecker"),
-                getField(factory, "nestedMapKeyExtractor"),
+                getField(factory, "positionPairExtractor"),
                 state);
     }
 
@@ -87,10 +87,10 @@ class FactoryTest {
     void createGame(final @Mock View view, final @Mock GameState state) {
         final Game game = FACTORY.createGame(state);
 
-        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "nestedMapKeyExtractor", "state").containsExactly(
+        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "state").containsExactly(
                 getField(FACTORY, "availableMovesRule"),
                 getField(FACTORY, "gameOverChecker"),
-                getField(FACTORY, "nestedMapKeyExtractor"),
+                getField(FACTORY, "positionPairExtractor"),
                 state);
     }
 

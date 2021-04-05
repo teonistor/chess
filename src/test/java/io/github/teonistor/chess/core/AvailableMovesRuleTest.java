@@ -22,6 +22,7 @@ import static io.github.teonistor.chess.board.Position.B5;
 import static io.github.teonistor.chess.board.Position.D8;
 import static io.github.teonistor.chess.board.Position.E5;
 import static io.github.teonistor.chess.board.Position.H6;
+import static io.github.teonistor.chess.core.GameStateKey.NIL;
 import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -78,7 +79,7 @@ class AvailableMovesRuleTest {
         when(checkRule.check(ruleFilteredBoard, currentPlayer)).thenReturn(true);
 
         // n.b. We are including pieces of the current user which have nowhere to move
-        assertThat(availableMovesRule.computeAvailableMoves(state)).isEqualTo(HashMap.of(A1, HashMap.of(A3, outputState), D8, HashMap.empty()));
+        assertThat(availableMovesRule.computeAvailableMoves(state)).isEqualTo(HashMap.of(NIL.withInput(currentPlayer, A1, A3), outputState));
     }
 
     @AfterEach

@@ -15,7 +15,7 @@ import io.github.teonistor.chess.inter.MultipleViewWrapper;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.PieceBox;
 import io.github.teonistor.chess.save.SaveLoad;
-import io.github.teonistor.chess.util.NestedMapKeyExtractor;
+import io.github.teonistor.chess.util.PositionPairExtractor;
 import lombok.Getter;
 
 public class Factory implements ControlLoopFactory, GameFactory {
@@ -30,7 +30,7 @@ public class Factory implements ControlLoopFactory, GameFactory {
     private final SaveLoad saveLoad;
     private final @Getter InputActionProvider inputActionProvider;
     private final AvailableMovesRule availableMovesRule;
-    private final NestedMapKeyExtractor nestedMapKeyExtractor;
+    private final PositionPairExtractor positionPairExtractor;
 
     public Factory() {
         underAttackRule = new UnderAttackRule();
@@ -43,7 +43,7 @@ public class Factory implements ControlLoopFactory, GameFactory {
         saveLoad = new SaveLoad(pieceSerialiser);
         inputActionProvider = new InputActionProvider(initialStateProvider, saveLoad);
         availableMovesRule = new AvailableMovesRule(checkRule);
-        nestedMapKeyExtractor = new NestedMapKeyExtractor();
+        positionPairExtractor = new PositionPairExtractor();
     }
 
     public ControlLoop createControlLoop(final View... views) {
@@ -51,10 +51,10 @@ public class Factory implements ControlLoopFactory, GameFactory {
     }
 
     public Game createNewGame() {
-        return new Game(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, initialStateProvider.createState());
+        return new Game(availableMovesRule, gameOverChecker, positionPairExtractor, initialStateProvider.createState());
     }
 
     public Game createGame(final GameState state) {
-        return new Game(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, state);
+        return new Game(availableMovesRule, gameOverChecker, positionPairExtractor, state);
     }
 }
