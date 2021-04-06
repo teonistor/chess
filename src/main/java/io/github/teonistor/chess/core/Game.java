@@ -6,13 +6,12 @@ import io.github.teonistor.chess.util.PositionPairExtractor;
 import io.vavr.Lazy;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
+import io.vavr.control.Option;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.With;
 
 import static io.github.teonistor.chess.core.GameCondition.Continue;
-import static io.github.teonistor.chess.core.GameStateKey.NIL;
-import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor
 public class Game {
@@ -21,12 +20,14 @@ public class Game {
     private final GameOverChecker gameOverChecker;
     private final PositionPairExtractor positionPairExtractor;
 
-    private final @Getter @With(PRIVATE) GameState state;
+    private final @Getter GameState state;
+    private final @With GameStateKey key;
+
     private final Lazy<Map<GameStateKey,GameState>> availableMoves = Lazy.of(this::computeAvailableMoves);
     private final Lazy<GameCondition> condition = Lazy.of(this::computeCondition);
 
-    public Game(final AvailableMovesRule availableMovesRule, final GameOverChecker gameOverChecker, final PositionPairExtractor positionPairExtractor, final View view, final GameStateProvider gameStateProvider) {
-        this(availableMovesRule, gameOverChecker, positionPairExtractor, gameStateProvider.createState());
+    public Game(final AvailableMovesRule availableMovesRule, final GameOverChecker gameOverChecker, final PositionPairExtractor positionPairExtractor, final GameState state) {
+        this(availableMovesRule, gameOverChecker, positionPairExtractor, state, GameStateKey.NIL);
     }
 
     public GameCondition getCondition() {
@@ -59,14 +60,20 @@ public class Game {
     public Game processInput(final Position from, final Position to) {
         if (Continue.equals(getCondition())) {
             return state.getBoard().get(from)
-                 . map(piece -> NIL.withInput(piece.getPlayer(), from, to))
-                 . flatMap(getAvailableMoves()::get)
+                 . map(piece -> key.withInput(piece.getPlayer(), from, to))
+                 . flatMap(key -> getAvailableMoves().get(key)
                  . map(this::withState)
+                 . orElse(Option.some(key).filter(this::partialMatchesExist)
+                 . map(this::withKey)))
                  . getOrElse(this);
 
         } else {
             return this;
         }
+    }
+
+    private boolean partialMatchesExist(final GameStateKey key) {
+        return getAvailableMoves().keySet().count(key::matchesDefinedFields) > 0;
     }
 
     private Map<GameStateKey,GameState> getAvailableMoves() {
@@ -79,5 +86,9 @@ public class Game {
 
     private GameCondition computeCondition() {
         return gameOverChecker.check(state.getBoard(), state.getPlayer(), getAvailableMoves());
+    }
+
+    private Game withState(final GameState state) {
+        return this.state == state ? this : new Game(this.availableMovesRule, this.gameOverChecker, this.positionPairExtractor, state);
     }
 }

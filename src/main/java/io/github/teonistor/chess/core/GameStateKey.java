@@ -7,6 +7,7 @@ import io.vavr.collection.Map;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.With;
 
 import java.util.function.BiFunction;
@@ -14,7 +15,7 @@ import java.util.function.BiFunction;
 import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor(access = PRIVATE)
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude="withInput")
 @Getter
 public class GameStateKey {
     public static final GameStateKey NIL = new GameStateKey(null, null, null, null, null, null);

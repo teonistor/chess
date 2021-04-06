@@ -43,11 +43,6 @@ class GameTest implements RandomPositionsTestMixin {
     private @Mock Map<Position, Piece> board;
     private @Mock Map<GameStateKey,GameState> availableMoves;
 
-    @Test
-    void constructWithGameStateProvider(final @Mock GameStateProvider provider) {
-        when(provider.createState()).thenReturn(state);
-        assertThat(new Game(rule, checker, extractor, view, provider).getState()).isEqualTo(state);
-    }
 
     @ParameterizedTest(name="{0} {1}")
     @CsvSource({"Black,Continue",
@@ -138,17 +133,35 @@ class GameTest implements RandomPositionsTestMixin {
     void processInputWhenGameOn(final Player player, final @Mock Piece piece) {
         final Position from = randomPositions.next();
         final Position to = randomPositions.next();
+        final Map<GameStateKey,GameState> availableMoves = HashMap.of(GameStateKey.NIL.withInput(player, from, to), state2);
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(player);
         when(board.get(from)).thenReturn(Option.some(piece));
         when(piece.getPlayer()).thenReturn(player);
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(checker.check(board, player, availableMoves)).thenReturn(Continue);
-        when(availableMoves.get(GameStateKey.NIL.withInput(player, from, to))).thenReturn(Option.of(state2));
 
         final Game game = new Game(rule, checker, extractor, state);
-        assertThat(game.processInput(from, to)).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "positionPairExtractor")
+        assertThat(game.processInput(from, to)).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "positionPairExtractor", "key")
                 .extracting(Game::getState).isEqualTo(state2);
+    }
+
+    @ParameterizedTest(name="{0}")
+    @EnumSource(Player.class)
+    void processInputWhenGameOnButMoreInputIsNeeded(final Player player, final @Mock Piece piece) {
+        final Position from = randomPositions.next();
+        final Position to = randomPositions.next();
+        final Map<GameStateKey,GameState> availableMoves = HashMap.of(GameStateKey.NIL.withInput(player, from, to).withWhitePromotion(piece), state2);
+        when(state.getBoard()).thenReturn(board);
+        when(state.getPlayer()).thenReturn(player);
+        when(board.get(from)).thenReturn(Option.some(piece));
+        when(piece.getPlayer()).thenReturn(player);
+        when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
+        when(checker.check(board, player, availableMoves)).thenReturn(Continue);
+
+        final Game game = new Game(rule, checker, extractor, state);
+        assertThat(game.processInput(from, to)).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "positionPairExtractor", "state")
+                .extracting("key").isEqualTo(GameStateKey.NIL.withInput(player, from, to));
     }
 
     @ParameterizedTest(name="{0}")
