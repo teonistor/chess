@@ -7,12 +7,13 @@ import io.vavr.collection.Map;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.With;
 
 import java.util.function.BiFunction;
 
 import static lombok.AccessLevel.PRIVATE;
 
-@RequiredArgsConstructor(access=PRIVATE)
+@RequiredArgsConstructor(access = PRIVATE)
 @EqualsAndHashCode
 @Getter
 public class GameStateKey {
@@ -22,25 +23,30 @@ public class GameStateKey {
 
     private final Position whiteFrom;
     private final Position whiteTo;
-    private final Piece whitePromotion;
+    private final @With Piece whitePromotion;
     private final Position blackFrom;
     private final Position blackTo;
-    private final Piece blackPromotion;
+    private final @With Piece blackPromotion;
 
     public boolean matchesDefinedFields(final GameStateKey other) {
-        return true;
+        return (whiteFrom == null      || whiteFrom == other.whiteFrom)
+            && (whiteTo == null        || whiteTo == other.whiteTo)
+            && (whitePromotion == null || whitePromotion.equals(other.whitePromotion))
+            && (blackFrom == null      || blackFrom == other.blackFrom)
+            && (blackTo == null        || blackTo == other.blackTo)
+            && (blackPromotion == null || blackPromotion.equals(other.blackPromotion));
     }
 
-    public GameStateKey withInput(Player player, Position from, Position to){
+    public GameStateKey withInput(final Player player, final Position from, final Position to) {
         return withInput.get(player).get().apply(from, to);
     }
 
-    public GameStateKey withWhiteInput(Position from, Position to){
-        return this;
+    public GameStateKey withWhiteInput(final Position from, final Position to) {
+        return new GameStateKey(from, to, whitePromotion, blackFrom, blackTo, blackPromotion);
     }
 
-    public GameStateKey withBlackInput(Position from, Position to){
-        return this;
+    public GameStateKey withBlackInput(final Position from, final Position to) {
+        return new GameStateKey(whiteFrom, whiteTo, whitePromotion, from, to, blackPromotion);
     }
 
 }
