@@ -31,7 +31,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings
-class AvailableMovesRuleTest {
+class StandardAvailableMovesRuleTest {
 
     @Mock private Piece a1Piece;
     @Mock private Piece b4Piece;
@@ -47,7 +47,7 @@ class AvailableMovesRuleTest {
     void setUp() {
         HashMap<Position, Piece> board = HashMap.of(A1, a1Piece, B4, b4Piece, D8, d8Piece, H6, h6Piece);
         state = spy(new GameState(board, White, List.empty(), null));
-        availableMovesRule = new AvailableMovesRule(checkRule);
+        availableMovesRule = new StandardAvailableMovesRule(checkRule);
     }
 
     @ParameterizedTest(name="{0}")

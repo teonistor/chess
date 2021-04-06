@@ -33,7 +33,7 @@ class FactoryTest {
         final Object pieceSerialiser = getField(FACTORY, "pieceSerialiser");
         final Object saveLoad = getField(FACTORY, "saveLoad");
         final Object inputActionProvider = getField(FACTORY, "inputActionProvider");
-        final Object availableMovesRule = getField(FACTORY, "availableMovesRule");
+        final Object standardAvailableMovesRule = getField(FACTORY, "standardAvailableMovesRule");
         final Object positionPairExtractor = getField(FACTORY, "positionPairExtractor");
 
         soft.assertThat(underAttackRule).isNotNull();
@@ -53,7 +53,7 @@ class FactoryTest {
 //        soft.assertThat(saveLoad).hasFieldOrPropertyWithValue("pieceSerialiser", pieceSerialiser);
         soft.assertThat(inputActionProvider).hasFieldOrPropertyWithValue("initialStateProvider", initialStateProvider);
         soft.assertThat(inputActionProvider).hasFieldOrPropertyWithValue("saveLoad", saveLoad);
-        soft.assertThat(availableMovesRule).hasFieldOrPropertyWithValue("rule", checkRule);
+        soft.assertThat(standardAvailableMovesRule).hasFieldOrPropertyWithValue("rule", checkRule);
         soft.assertThat(positionPairExtractor).isNotNull();
 
         soft.assertAll();
@@ -77,7 +77,7 @@ class FactoryTest {
         final Game game = factory.createNewGame();
 
         assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "state").containsExactly(
-                getField(factory, "availableMovesRule"),
+                getField(factory, "standardAvailableMovesRule"),
                 getField(factory, "gameOverChecker"),
                 getField(factory, "positionPairExtractor"),
                 state);
@@ -88,7 +88,7 @@ class FactoryTest {
         final Game game = FACTORY.createGame(state);
 
         assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "state").containsExactly(
-                getField(FACTORY, "availableMovesRule"),
+                getField(FACTORY, "standardAvailableMovesRule"),
                 getField(FACTORY, "gameOverChecker"),
                 getField(FACTORY, "positionPairExtractor"),
                 state);

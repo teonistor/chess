@@ -1,13 +1,13 @@
 package io.github.teonistor.chess.factory;
 
 import io.github.teonistor.chess.board.InitialBoardProvider;
-import io.github.teonistor.chess.core.AvailableMovesRule;
 import io.github.teonistor.chess.core.CheckRule;
 import io.github.teonistor.chess.core.Game;
 import io.github.teonistor.chess.core.GameOverChecker;
 import io.github.teonistor.chess.core.GameState;
 import io.github.teonistor.chess.core.InitialStateProvider;
 import io.github.teonistor.chess.core.PieceSerialiser;
+import io.github.teonistor.chess.core.StandardAvailableMovesRule;
 import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.InputActionProvider;
@@ -29,7 +29,7 @@ public class Factory implements ControlLoopFactory, GameFactory {
     private final @Getter PieceSerialiser pieceSerialiser;
     private final SaveLoad saveLoad;
     private final @Getter InputActionProvider inputActionProvider;
-    private final AvailableMovesRule availableMovesRule;
+    private final StandardAvailableMovesRule standardAvailableMovesRule;
     private final PositionPairExtractor positionPairExtractor;
 
     public Factory() {
@@ -42,7 +42,7 @@ public class Factory implements ControlLoopFactory, GameFactory {
         pieceSerialiser = new PieceSerialiser(pieceBox);
         saveLoad = new SaveLoad(pieceSerialiser);
         inputActionProvider = new InputActionProvider(initialStateProvider, saveLoad);
-        availableMovesRule = new AvailableMovesRule(checkRule);
+        standardAvailableMovesRule = new StandardAvailableMovesRule(checkRule);
         positionPairExtractor = new PositionPairExtractor();
     }
 
@@ -51,10 +51,10 @@ public class Factory implements ControlLoopFactory, GameFactory {
     }
 
     public Game createNewGame() {
-        return new Game(availableMovesRule, gameOverChecker, positionPairExtractor, initialStateProvider.createState());
+        return new Game(standardAvailableMovesRule, gameOverChecker, positionPairExtractor, initialStateProvider.createState());
     }
 
     public Game createGame(final GameState state) {
-        return new Game(availableMovesRule, gameOverChecker, positionPairExtractor, state);
+        return new Game(standardAvailableMovesRule, gameOverChecker, positionPairExtractor, state);
     }
 }
