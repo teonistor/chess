@@ -5,16 +5,20 @@ import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.With;
+
 import javax.annotation.Nullable;
 
 @AllArgsConstructor
 @Getter
+@EqualsAndHashCode(exclude = "previous")
 public class GameState {
-    private final @NonNull  Map<Position, Piece> board;
-    private final @NonNull  Player player;
-    private final @NonNull  List<Piece> capturedPieces;
+    private final @NonNull Map<Position, Piece> board;
+    private final @NonNull @With Player player;
+    private final @NonNull List<Piece> capturedPieces;
     private final @Nullable GameState previous;
 
     public GameState advance(Map<Position, Piece> newBoard) {
