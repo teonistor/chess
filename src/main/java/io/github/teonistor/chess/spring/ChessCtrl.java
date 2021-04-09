@@ -35,7 +35,7 @@ public class ChessCtrl implements View {
     private final InputActionProvider inputActionProvider;
     private final ControlLoop controlLoop;
 
-    // Intermediate UI caches. This feels like it's violating some principle, I'm really unsure
+    // Intermediate UI caches. This feels like it's violating some principle, I'm really unsure. TODO Use Observable (?) to optimise messages sent
     private Map<?,?> lastBoard = HashMap.empty();
     private Traversable<?> lastCapturedPieces = List.empty();
     private Traversable<?> lastPossibleMovesWhite = List.empty();

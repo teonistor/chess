@@ -4,6 +4,7 @@ import io.github.teonistor.chess.core.Game;
 import io.github.teonistor.chess.core.GameState;
 
 public interface GameFactory {
-    Game createNewGame();
-    Game createGame(GameState state);
+    Game createNewStandardGame();
+    Game createNewParallelGame();
+    Game createGame(Factory.GameType type, GameState state);
 }

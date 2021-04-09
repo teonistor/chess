@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 
 import java.util.Optional;
 
+import static io.github.teonistor.chess.factory.Factory.GameType.STANDARD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -82,7 +83,7 @@ class ControlLoopTest implements RandomPositionsTestMixin {
     @Test
     void onNew(final @Mock GameState state) {
         when(action.gameStateProvider()).thenReturn(Optional.of(() -> state));
-        when(factory.createGame(state)).thenReturn(game);
+        when(factory.createGame(STANDARD, state)).thenReturn(game);
 
         loop.onInput(action);
 

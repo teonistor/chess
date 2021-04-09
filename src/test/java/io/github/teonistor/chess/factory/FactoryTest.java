@@ -34,6 +34,7 @@ class FactoryTest {
         final Object saveLoad = getField(FACTORY, "saveLoad");
         final Object inputActionProvider = getField(FACTORY, "inputActionProvider");
         final Object standardAvailableMovesRule = getField(FACTORY, "standardAvailableMovesRule");
+        final Object parallelAvailableMovesRule = getField(FACTORY, "parallelAvailableMovesRule");
         final Object positionPairExtractor = getField(FACTORY, "positionPairExtractor");
 
         soft.assertThat(underAttackRule).isNotNull();
@@ -54,6 +55,7 @@ class FactoryTest {
         soft.assertThat(inputActionProvider).hasFieldOrPropertyWithValue("initialStateProvider", initialStateProvider);
         soft.assertThat(inputActionProvider).hasFieldOrPropertyWithValue("saveLoad", saveLoad);
         soft.assertThat(standardAvailableMovesRule).hasFieldOrPropertyWithValue("rule", checkRule);
+        soft.assertThat(parallelAvailableMovesRule).hasFieldOrPropertyWithValue("rule", checkRule);
         soft.assertThat(positionPairExtractor).isNotNull();
 
         soft.assertAll();
@@ -69,12 +71,12 @@ class FactoryTest {
     }
 
     @Test
-    void createNewGame(final @Mock View view, final @Mock InitialStateProvider provider, final @Mock GameState state) {
+    void createNewStandardGame(final @Mock InitialStateProvider provider, final @Mock GameState state) {
         final Factory factory = new Factory();
         setField(factory, "initialStateProvider", provider);
         when(provider.createState()).thenReturn(state);
 
-        final Game game = factory.createNewGame();
+        final Game game = factory.createNewStandardGame();
 
         assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "state").containsExactly(
                 getField(factory, "standardAvailableMovesRule"),
@@ -84,8 +86,23 @@ class FactoryTest {
     }
 
     @Test
-    void createGame(final @Mock View view, final @Mock GameState state) {
-        final Game game = FACTORY.createGame(state);
+    void createNewParallelGame(final @Mock InitialStateProvider provider, final @Mock GameState state) {
+        final Factory factory = new Factory();
+        setField(factory, "initialStateProvider", provider);
+        when(provider.createState()).thenReturn(state);
+
+        final Game game = factory.createNewParallelGame();
+
+        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "state").containsExactly(
+                getField(factory, "parallelAvailableMovesRule"),
+                getField(factory, "gameOverChecker"),
+                getField(factory, "positionPairExtractor"),
+                state);
+    }
+
+    @Test
+    void createGame(final @Mock GameState state) {
+        final Game game = FACTORY.createGame(Factory.GameType.STANDARD, state);
 
         assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "state").containsExactly(
                 getField(FACTORY, "standardAvailableMovesRule"),

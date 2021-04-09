@@ -5,7 +5,6 @@ import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.util.PositionPairExtractor;
 import io.vavr.Lazy;
 import io.vavr.collection.Map;
-import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -37,11 +36,8 @@ public class Game {
     public void triggerView(final View view) {
         switch (getCondition()) {
             case Continue:
-                if (state.getPlayer() == Player.White)
-                    view.refresh(state.getBoard(), state.getCapturedPieces(), Stream.empty(), positionPairExtractor.extractWhite(getAvailableMoves()));
-                else
-                    view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), Stream.empty());
-                break;
+                 view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()));
+                 break;
 
             case WhiteWins:
                 view.announce("White wins!");

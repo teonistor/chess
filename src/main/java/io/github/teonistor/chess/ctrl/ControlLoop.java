@@ -8,6 +8,8 @@ import io.github.teonistor.chess.save.SaveLoad;
 import io.vavr.Tuple2;
 import lombok.RequiredArgsConstructor;
 
+import static io.github.teonistor.chess.factory.Factory.GameType.STANDARD;
+
 @RequiredArgsConstructor
 public class ControlLoop {
 
@@ -34,7 +36,7 @@ public class ControlLoop {
 
         if (action.gameStateProvider().isPresent()) {
             System.err.println("[DEBUG] Game state provider provided - launching");
-            game = gameFactory.createGame(action.gameStateProvider().get().createState());
+            game = gameFactory.createGame(STANDARD, action.gameStateProvider().get().createState());
             game.triggerView(view);
         }
     }
