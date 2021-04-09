@@ -21,15 +21,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@MockitoSettings//(strictness = Strictness.WARN)
+@MockitoSettings
 class ParallelAvailableMovesRuleTest implements RandomPositionsTestMixin {
 
     @Mock private Piece whitePiece;
     @Mock private Piece blackPiece;
-    @Mock private Move whiteMove1;
-    @Mock private Move whiteMove2;
-    @Mock private Move blackMove1;
-    @Mock private Move blackMove2;
+    @Mock private Move whiteMove;
+    @Mock private Move blackMove;
 
     @Mock private CheckRule checkRule;
 
@@ -62,26 +60,26 @@ class ParallelAvailableMovesRuleTest implements RandomPositionsTestMixin {
         final GameState stateAfterWhiteThenBlackMove = new GameState(boardAfterWhiteThenBlackMove, White, List.empty(), null);
         final GameState stateAfterBlackThenWhiteMove = new GameState(boardAfterBlackThenWhiteMove, Black, List.empty(), null);
 
-        when(whitePiece.computePossibleMoves(initialWhitePosition)).thenReturn(Stream.of(whiteMove1)).thenReturn(Stream.of(whiteMove1));
-        when(blackPiece.computePossibleMoves(initialBlackPosition)).thenReturn(Stream.of(blackMove1)).thenReturn(Stream.of(blackMove1));
+        when(whitePiece.computePossibleMoves(initialWhitePosition)).thenReturn(Stream.of(whiteMove)).thenReturn(Stream.of(whiteMove));
+        when(blackPiece.computePossibleMoves(initialBlackPosition)).thenReturn(Stream.of(blackMove)).thenReturn(Stream.of(blackMove));
 
-        when(whiteMove1.validate(initialState)).thenReturn(true);
-        when(blackMove1.validate(initialState.withPlayer(Black))).thenReturn(true);
-        when(whiteMove1.validate(stateAfterBlackMove)).thenReturn(true);
-        when(blackMove1.validate(stateAfterWhiteMove)).thenReturn(true);
+        when(whiteMove.validate(initialState)).thenReturn(true);
+        when(blackMove.validate(initialState.withPlayer(Black))).thenReturn(true);
+        when(whiteMove.validate(stateAfterBlackMove)).thenReturn(true);
+        when(blackMove.validate(stateAfterWhiteMove)).thenReturn(true);
 
-        when(whiteMove1.execute(initialState)).thenReturn(stateAfterWhiteMove);
-        when(blackMove1.execute(initialState.withPlayer(Black))).thenReturn(stateAfterBlackMove);
-        when(whiteMove1.execute(stateAfterBlackMove)).thenReturn(stateAfterBlackThenWhiteMove);
-        when(blackMove1.execute(stateAfterWhiteMove)).thenReturn(stateAfterWhiteThenBlackMove);
+        when(whiteMove.execute(initialState)).thenReturn(stateAfterWhiteMove);
+        when(blackMove.execute(initialState.withPlayer(Black))).thenReturn(stateAfterBlackMove);
+        when(whiteMove.execute(stateAfterBlackMove)).thenReturn(stateAfterBlackThenWhiteMove);
+        when(blackMove.execute(stateAfterWhiteMove)).thenReturn(stateAfterWhiteThenBlackMove);
 
         when(checkRule.check(boardAfterBlackMove, Black)).thenReturn(false);
         when(checkRule.check(boardAfterWhiteMove, White)).thenReturn(false);
         when(checkRule.check(boardAfterWhiteThenBlackMove, Black)).thenReturn(false);
         when(checkRule.check(boardAfterBlackThenWhiteMove, White)).thenReturn(false);
 
-        when(whiteMove1.getTo()).thenReturn(whitePositionIfMovedFirst);
-        when(blackMove1.getTo()).thenReturn(blackPositionIfMovedFirst);
+        when(whiteMove.getTo()).thenReturn(whitePositionIfMovedFirst);
+        when(blackMove.getTo()).thenReturn(blackPositionIfMovedFirst);
 
         final GameState result = availableMovesRule.computeAvailableMoves(initialState).get(
                 NIL.withBlackInput(initialBlackPosition, blackPositionIfMovedFirst).withWhiteInput(initialWhitePosition, whitePositionIfMovedFirst)).get();
@@ -89,7 +87,6 @@ class ParallelAvailableMovesRuleTest implements RandomPositionsTestMixin {
         assertThat(result.getBoard()).isEqualTo(HashMap.of(whitePositionIfMovedFirst, whitePiece, blackPositionIfMovedFirst, blackPiece));
     }
 
-    /*
     @Test
     void computeAvailableMovesWithConflict() {
         when(whitePiece.getPlayer()).thenReturn(White);
@@ -114,41 +111,32 @@ class ParallelAvailableMovesRuleTest implements RandomPositionsTestMixin {
         final GameState stateAfterWhiteThenBlackMove = new GameState(boardAfterWhiteThenBlackMove, White, List.empty(), null);
         final GameState stateAfterBlackThenWhiteMove = new GameState(boardAfterBlackThenWhiteMove, Black, List.empty(), null);
 
-        when(whitePiece.computePossibleMoves(initialWhitePosition)).thenReturn(Stream.of(whiteMove1)).thenReturn(Stream.of(whiteMove1));
-//          when(whitePiece.computePossibleMoves(whitePositionIfMovedFirst)).thenReturn(Stream.of(whiteMove2)).thenReturn(Stream.of(whiteMove2));
-        when(blackPiece.computePossibleMoves(initialBlackPosition)).thenReturn(Stream.of(blackMove1)).thenReturn(Stream.of(blackMove1));
-//          when(blackPiece.computePossibleMoves(blackPositionIfMovedFirst)).thenReturn(Stream.of(blackMove2)).thenReturn(Stream.of(blackMove2));
+        when(whitePiece.computePossibleMoves(initialWhitePosition)).thenReturn(Stream.of(whiteMove)).thenReturn(Stream.of(whiteMove));
+        when(blackPiece.computePossibleMoves(initialBlackPosition)).thenReturn(Stream.of(blackMove)).thenReturn(Stream.of(blackMove));
 
-        when(whiteMove1.validate(initialState)).thenReturn(true);
-        when(blackMove1.validate(initialState.withPlayer(Black))).thenReturn(true);
-        when(whiteMove1.validate(stateAfterBlackMove)).thenReturn(true);
-        when(blackMove1.validate(stateAfterWhiteMove)).thenReturn(true);
+        when(whiteMove.validate(initialState)).thenReturn(true);
+        when(blackMove.validate(initialState.withPlayer(Black))).thenReturn(true);
+        when(whiteMove.validate(stateAfterBlackMove)).thenReturn(true);
+        when(blackMove.validate(stateAfterWhiteMove)).thenReturn(true);
 
-        when(whiteMove1.execute(initialState)).thenReturn(stateAfterWhiteMove);
-        when(blackMove1.execute(initialState.withPlayer(Black))).thenReturn(stateAfterBlackMove);
-        when(whiteMove1.execute(stateAfterBlackMove)).thenReturn(stateAfterBlackThenWhiteMove);
-        when(blackMove1.execute(stateAfterWhiteMove)).thenReturn(stateAfterWhiteThenBlackMove);
+        when(whiteMove.execute(initialState)).thenReturn(stateAfterWhiteMove);
+        when(blackMove.execute(initialState.withPlayer(Black))).thenReturn(stateAfterBlackMove);
+        when(whiteMove.execute(stateAfterBlackMove)).thenReturn(stateAfterBlackThenWhiteMove);
+        when(blackMove.execute(stateAfterWhiteMove)).thenReturn(stateAfterWhiteThenBlackMove);
 
         when(checkRule.check(boardAfterBlackMove, Black)).thenReturn(false);
         when(checkRule.check(boardAfterWhiteMove, White)).thenReturn(false);
         when(checkRule.check(boardAfterWhiteThenBlackMove, Black)).thenReturn(false);
         when(checkRule.check(boardAfterBlackThenWhiteMove, White)).thenReturn(false);
 
-        when(whiteMove1.getTo()).thenReturn(whitePositionIfMovedFirst);
-//        when(whiteMove2.getTo()).thenReturn(whitePositionIfMovedSecond);
-        when(blackMove1.getTo()).thenReturn(blackPositionIfMovedFirst);
-//        when(blackMove2.getTo()).thenReturn(blackPositionIfMovedSecond);
+        when(whiteMove.getTo()).thenReturn(whitePositionIfMovedFirst);
+        when(blackMove.getTo()).thenReturn(blackPositionIfMovedFirst);
 
-
-        final Map<GameStateKey, GameState> tuple2s = availableMovesRule.computeAvailableMoves(initialState);
-
-        final GameState result = tuple2s.get(NIL.withBlackInput(initialBlackPosition, blackPositionIfMovedFirst).withWhiteInput(initialWhitePosition, whitePositionIfMovedFirst)).get();
-
-        assertThat(result.getBoard()).isEqualTo(HashMap.of(whitePositionIfMovedFirst, whitePiece, blackPositionIfMovedFirst, blackPiece));
+        assertThat(availableMovesRule.computeAvailableMoves(initialState)).isEmpty();
     }
-*/
+
     @AfterEach
     void tearDown() {
-        verifyNoMoreInteractions(whitePiece, blackPiece, whiteMove1, whiteMove2, blackMove1, blackMove2, checkRule);
+        verifyNoMoreInteractions(whitePiece, blackPiece, whiteMove, blackMove, checkRule);
     }
 }
