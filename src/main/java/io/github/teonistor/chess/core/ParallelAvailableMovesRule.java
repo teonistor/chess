@@ -1,5 +1,8 @@
 package io.github.teonistor.chess.core;
 
+import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.piece.King;
+import io.github.teonistor.chess.piece.Piece;
 import io.vavr.Tuple2;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
@@ -37,7 +40,20 @@ public class ParallelAvailableMovesRule extends AvailableMovesRule {
     }
 
     private boolean equivalentStates(final GameState a, final GameState b) {
-        return a.getBoard().equals(b.getBoard()) &&
-               a.getCapturedPieces().equals(b.getCapturedPieces());
+        return a.getBoard().equals(b.getBoard())
+            && a.getCapturedPieces().equals(b.getCapturedPieces());
+    }
+
+    @Override
+    protected boolean validateBoardwideRules(Player player, Map<Position, Piece> board) {
+        return board.exists(positionAndPiece -> {
+            final Piece piece = positionAndPiece._2;
+            return isPlayersKing(piece, player);
+        })
+            && super.validateBoardwideRules(player, board);
+    }
+
+    private boolean isPlayersKing(Piece piece, Player player) {
+        return piece instanceof King && piece.getPlayer() == player;
     }
 }
