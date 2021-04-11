@@ -8,6 +8,8 @@ import io.github.teonistor.chess.save.SaveLoad;
 import io.vavr.Tuple2;
 import lombok.RequiredArgsConstructor;
 
+import java.util.function.Consumer;
+
 import static io.github.teonistor.chess.factory.Factory.GameType.STANDARD;
 
 @RequiredArgsConstructor
@@ -20,11 +22,11 @@ public class ControlLoop {
     // The only allowed mutable state
     private Game game;
 
+    @Deprecated
     public void onInput(final InputAction action) {
         if (game != null && action.gameInput().isPresent()) {
             final Tuple2<Position, Position> fromTo = action.gameInput().get();
-            game = game.processInput(fromTo._1, fromTo._2);
-            game.triggerView(view);
+            setAndTrigger(game.processInput(fromTo._1, fromTo._2));
         }
 
         // TODO Feature: Decouple from file persistence to allow downloading over
@@ -36,8 +38,34 @@ public class ControlLoop {
 
         if (action.gameStateProvider().isPresent()) {
             System.err.println("[DEBUG] Game state provider provided - launching");
-            game = gameFactory.createGame(STANDARD, action.gameStateProvider().get().createState());
-            game.triggerView(view);
+            setAndTrigger(gameFactory.createGame(STANDARD, action.gameStateProvider().get().createState()));
         }
+    }
+
+    public void gameInput(final GameInput input) {
+        if (game != null) {
+            setAndTrigger(input.execute(game));
+        }
+    }
+
+    public void newStandardGame() {
+        setAndTrigger(gameFactory.createNewStandardGame());
+    }
+
+    public void newParallelGame() {
+        setAndTrigger(gameFactory.createNewParallelGame());
+    }
+
+    public void loadGame(final byte[] data) {
+
+    }
+
+    public void saveGame(final Consumer<byte[]> dataSink) {
+
+    }
+
+    private void setAndTrigger(final Game game) {
+        this.game = game;
+        game.triggerView(view);
     }
 }
