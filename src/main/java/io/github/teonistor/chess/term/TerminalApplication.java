@@ -24,7 +24,7 @@ public class TerminalApplication implements Runnable {
     }
 
     private TerminalApplication(final Factory factory) {
-        this(new TerminalInput(factory.getInputActionProvider()),
+        this(new TerminalInput(),
              factory.createControlLoop(new TerminalView()),
              newScheduledThreadPool(1));
     }

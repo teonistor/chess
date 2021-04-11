@@ -1,8 +1,6 @@
 package io.github.teonistor.chess.term;
 
 import io.github.teonistor.chess.board.Position;
-import io.github.teonistor.chess.ctrl.InputAction;
-import io.github.teonistor.chess.ctrl.InputActionProvider;
 import io.github.teonistor.chess.ctrl.NewParallelGameInput;
 import io.github.teonistor.chess.ctrl.NewStandardGameInput;
 import io.github.teonistor.chess.ctrl.NormalGameInput;
@@ -18,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -30,9 +27,6 @@ class TerminalInputTest {
 
     @Mock private OutputStream outputStream;
     @Mock private BufferedReader reader;
-    @Mock private InputActionProvider inputActionProvider;
-    @Mock private Consumer<InputAction> inputActionConsumer;
-    @Mock private InputAction action;
 
     @InjectMocks
     private TerminalInput terminalInput;
@@ -132,6 +126,6 @@ class TerminalInputTest {
     void tearDown() throws IOException {
 //        verify(outputStream).write(TerminalInput.gamePrompt);
 
-        verifyNoMoreInteractions(/*outputStream,*/ reader, inputActionProvider, inputActionConsumer, action);
+        verifyNoMoreInteractions(/*outputStream,*/ reader);
     }
 }

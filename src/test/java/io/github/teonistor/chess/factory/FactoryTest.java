@@ -32,7 +32,6 @@ class FactoryTest {
         final Object initialStateProvider = getField(FACTORY, "initialStateProvider");
         final Object pieceSerialiser = getField(FACTORY, "pieceSerialiser");
         final Object saveLoad = getField(FACTORY, "saveLoad");
-        final Object inputActionProvider = getField(FACTORY, "inputActionProvider");
         final Object standardAvailableMovesRule = getField(FACTORY, "standardAvailableMovesRule");
         final Object parallelAvailableMovesRule = getField(FACTORY, "parallelAvailableMovesRule");
         final Object positionPairExtractor = getField(FACTORY, "positionPairExtractor");
@@ -52,8 +51,6 @@ class FactoryTest {
 //        soft.assertThat(pieceSerialiser).hasFieldOrPropertyWithValue("pieceBox", pieceBox);
         soft.assertThat(pieceSerialiser).isNotNull();
 //        soft.assertThat(saveLoad).hasFieldOrPropertyWithValue("pieceSerialiser", pieceSerialiser);
-        soft.assertThat(inputActionProvider).hasFieldOrPropertyWithValue("initialStateProvider", initialStateProvider);
-        soft.assertThat(inputActionProvider).hasFieldOrPropertyWithValue("saveLoad", saveLoad);
         soft.assertThat(standardAvailableMovesRule).hasFieldOrPropertyWithValue("rule", checkRule);
         soft.assertThat(parallelAvailableMovesRule).hasFieldOrPropertyWithValue("rule", checkRule);
         soft.assertThat(positionPairExtractor).isNotNull();

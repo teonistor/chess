@@ -12,7 +12,6 @@ import io.github.teonistor.chess.core.PieceSerialiser;
 import io.github.teonistor.chess.core.StandardAvailableMovesRule;
 import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.ctrl.ControlLoop;
-import io.github.teonistor.chess.ctrl.InputActionProvider;
 import io.github.teonistor.chess.inter.MultipleViewWrapper;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.PieceBox;
@@ -30,7 +29,6 @@ public class Factory implements ControlLoopFactory, GameFactory {
     private final InitialStateProvider initialStateProvider;
     private final @Getter PieceSerialiser pieceSerialiser;
     private final SaveLoad saveLoad;
-    private final @Getter InputActionProvider inputActionProvider;
     private final AvailableMovesRule standardAvailableMovesRule;
     private final AvailableMovesRule parallelAvailableMovesRule;
     private final PositionPairExtractor positionPairExtractor;
@@ -44,7 +42,6 @@ public class Factory implements ControlLoopFactory, GameFactory {
         initialStateProvider = new InitialStateProvider(initialBoardProvider);
         pieceSerialiser = new PieceSerialiser(pieceBox);
         saveLoad = new SaveLoad(pieceSerialiser);
-        inputActionProvider = new InputActionProvider(initialStateProvider, saveLoad);
         standardAvailableMovesRule = new StandardAvailableMovesRule(checkRule);
         parallelAvailableMovesRule = new ParallelAvailableMovesRule(checkRule);
         positionPairExtractor = new PositionPairExtractor();

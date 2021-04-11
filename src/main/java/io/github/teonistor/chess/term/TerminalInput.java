@@ -3,7 +3,6 @@ package io.github.teonistor.chess.term;
 import com.google.common.annotations.VisibleForTesting;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.ctrl.Input;
-import io.github.teonistor.chess.ctrl.InputActionProvider;
 import io.github.teonistor.chess.ctrl.NewParallelGameInput;
 import io.github.teonistor.chess.ctrl.NewStandardGameInput;
 import io.github.teonistor.chess.ctrl.NormalGameInput;
@@ -17,22 +16,19 @@ import java.util.regex.Pattern;
 
 public class TerminalInput {
     static final byte[] gamePrompt = " > ".getBytes();
-    static final byte[] provisionPrompt = "new/load > ".getBytes();
     static final Pattern global = Pattern.compile("\\s*((NEW(?: STANDARD| PARALLEL)?|LOAD|SAVE|EXIT)(.*)|([A-H][0-9])[\\s-]*([A-H][0-9]))\\s*", Pattern.CASE_INSENSITIVE);
 
     private final OutputStream outputStream;
     private final BufferedReader reader;
-    private final InputActionProvider inputActionProvider;
 
-    public TerminalInput(final InputActionProvider inputActionProvider) {
-        this(System.out, new BufferedReader(new InputStreamReader(System.in)), inputActionProvider);
+    public TerminalInput() {
+        this(System.out, new BufferedReader(new InputStreamReader(System.in)));
     }
 
     @VisibleForTesting
-    TerminalInput(final OutputStream outputStream, final BufferedReader reader, final InputActionProvider inputActionProvider) {
+    TerminalInput(final OutputStream outputStream, final BufferedReader reader) {
         this.outputStream = outputStream;
         this.reader = reader;
-        this.inputActionProvider = inputActionProvider;
     }
 
     public Option<Input> simpleInput() {
