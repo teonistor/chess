@@ -2,7 +2,6 @@ package io.github.teonistor.chess.spring;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.ctrl.ControlLoop;
-import io.github.teonistor.chess.ctrl.InputActionProvider;
 import io.github.teonistor.chess.ctrl.NormalGameInput;
 import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
 import io.vavr.Tuple2;
@@ -25,7 +24,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 class ChessCtrlTest implements RandomPositionsTestMixin {
 
     private @Mock SimpMessagingTemplate ws;
-    private @Mock InputActionProvider inputActionProvider;
     private @Mock ControlLoop controlLoop;
 
     private @InjectMocks ChessCtrl ctrl;
@@ -84,6 +82,6 @@ class ChessCtrlTest implements RandomPositionsTestMixin {
 
     @AfterEach
     void tearDown() {
-        verifyNoMoreInteractions(ws, inputActionProvider, controlLoop);
+        verifyNoMoreInteractions(ws, controlLoop);
     }
 }

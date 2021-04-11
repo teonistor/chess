@@ -3,7 +3,6 @@ package io.github.teonistor.chess.spring;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.ctrl.ControlLoop;
-import io.github.teonistor.chess.ctrl.InputActionProvider;
 import io.github.teonistor.chess.ctrl.NormalGameInput;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChessCtrl implements View {
 
     private final SimpMessagingTemplate ws;
-    private final InputActionProvider inputActionProvider;
     private final ControlLoop controlLoop;
 
     // Intermediate UI caches. This feels like it's violating some principle, I'm really unsure. TODO Use Observable (?) to optimise messages sent
