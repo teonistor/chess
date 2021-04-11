@@ -4,6 +4,7 @@ import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.InputActionProvider;
+import io.github.teonistor.chess.ctrl.NormalGameInput;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.Tuple2;
@@ -21,10 +22,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.view.RedirectView;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("chess-api")
@@ -43,7 +40,7 @@ public class ChessCtrl implements View {
     private Traversable<?> lastPossibleMovesAll = List.empty();
 
     @Override
-    public void refresh(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, Traversable<Tuple2<Position, Position>> possibleMovesWhite) {
+    public void refresh(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, final Traversable<Tuple2<Position, Position>> possibleMovesWhite) {
         lastBoard = board;
         lastCapturedPieces = capturedPieces;
         lastPossibleMovesBlack = possibleMovesBlack;
@@ -59,27 +56,7 @@ public class ChessCtrl implements View {
 
     @Override
     public void announce(final String message) {
-        ws.convertAndSend("/chess-ws/announcements");
-    }
-
-    @RequestMapping("assign-hotseat")
-    RedirectView assignHotseat(final HttpServletResponse response) {
-        return assignPlayer(response, "Hotseat");
-    }
-
-    @RequestMapping("assign-black")
-    RedirectView assignBlack(final HttpServletResponse response) {
-        return assignPlayer(response, Player.Black);
-    }
-
-    @RequestMapping("assign-white")
-    RedirectView assignWhite(final HttpServletResponse response) {
-        return assignPlayer(response, Player.White);
-    }
-
-    private RedirectView assignPlayer(final HttpServletResponse response, final Object player) {
-        response.addCookie(new Cookie("player", player.toString()));
-        return new RedirectView("/chess/game.html");
+        ws.convertAndSend("/chess-ws/announcements", message);
     }
 
     @SubscribeMapping("/board")
@@ -109,7 +86,7 @@ public class ChessCtrl implements View {
 
     @RequestMapping("/move")
     void onMove(final @CookieValue("player") String player, final @RequestBody Tuple2<Position, Position> move) {
-        controlLoop.onInput(inputActionProvider.gameInput(move._1, move._2));
+        controlLoop.gameInput(new NormalGameInput(move._1, move._2));
     }
 
     @RequestMapping("/moves-channel")
@@ -123,8 +100,13 @@ public class ChessCtrl implements View {
     }
 
     @RequestMapping("/new/standard")
-    void newGame() {
-        controlLoop.onInput(inputActionProvider.newGame());
+    void newStandardGame() {
+        controlLoop.newStandardGame();
+    }
+
+    @RequestMapping("/new/standard")
+    void newParallelGame() {
+        controlLoop.newParallelGame();
     }
 
     @ExceptionHandler
