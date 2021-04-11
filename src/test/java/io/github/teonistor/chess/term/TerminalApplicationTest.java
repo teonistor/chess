@@ -1,8 +1,8 @@
 package io.github.teonistor.chess.term;
 
 import io.github.teonistor.chess.ctrl.ControlLoop;
-import io.github.teonistor.chess.ctrl.InputAction;
-import io.github.teonistor.chess.factory.Factory;
+import io.github.teonistor.chess.ctrl.Input;
+import io.vavr.control.Option;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -20,8 +20,8 @@ import static org.springframework.test.util.ReflectionTestUtils.getField;
 @MockitoSettings
 class TerminalApplicationTest {
 
-    private @Mock Factory factory;
-    private @Mock TerminalInput input;
+    private @Mock TerminalInput terminalInput;
+    private @Mock Input input;
     private @Mock ControlLoop controlLoop;
     private @Mock ScheduledExecutorService executorService;
 
@@ -35,7 +35,7 @@ class TerminalApplicationTest {
 
     @Test
     void start() {
-        final TerminalApplication loop = new TerminalApplication(input, controlLoop, executorService);
+        final TerminalApplication loop = new TerminalApplication(terminalInput, controlLoop, executorService);
 
         loop.start();
 
@@ -44,25 +44,18 @@ class TerminalApplicationTest {
 
     @Test
     void run() {
-        final TerminalApplication loop = new TerminalApplication(input, controlLoop, executorService);
-        final InputAction action = new InputAction() {};
-        when(input.simpleInput()).thenReturn(action);
+        final TerminalApplication loop = new TerminalApplication(terminalInput, controlLoop, executorService);
+        when(terminalInput.simpleInput()).thenReturn(Option.some(input));
 
         loop.run();
 
-        verify(controlLoop).onInput(action);
+        verify(input).execute(controlLoop);
     }
 
     @Test
     void exit() {
-        final TerminalApplication loop = new TerminalApplication(input, controlLoop, executorService);
-        final InputAction action = new InputAction() {
-            @Override
-            public boolean isExit() {
-                return true;
-            }
-        };
-        when(input.simpleInput()).thenReturn(action);
+        final TerminalApplication loop = new TerminalApplication(terminalInput, controlLoop, executorService);
+        when(terminalInput.simpleInput()).thenReturn(Option.none());
 
         loop.run();
 
@@ -71,7 +64,7 @@ class TerminalApplicationTest {
 
     @Test
     void stop() {
-        final TerminalApplication loop = new TerminalApplication(input, controlLoop, executorService);
+        final TerminalApplication loop = new TerminalApplication(terminalInput, controlLoop, executorService);
 
         loop.stop();
 
@@ -80,6 +73,6 @@ class TerminalApplicationTest {
 
     @AfterEach
     void tearDown() {
-        verifyNoMoreInteractions(factory, input, controlLoop, executorService);
+        verifyNoMoreInteractions(terminalInput, controlLoop, executorService);
     }
 }
