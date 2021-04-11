@@ -1,4 +1,4 @@
-package io.github.teonistor.chess.inter;
+package io.github.teonistor.chess.term;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.github.teonistor.chess.board.Position;
@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TerminalInput implements DefinitelyInput {
+public class TerminalInput {
     static final byte[] gamePrompt = " > ".getBytes();
     static final byte[] provisionPrompt = "new/load > ".getBytes();
     static final Pattern global = Pattern.compile("\\s*((NEW|LOAD|SAVE|EXIT)(.*)|([A-H][0-9])[\\s-]*([A-H][0-9]))\\s*", Pattern.CASE_INSENSITIVE);
@@ -31,7 +31,6 @@ public class TerminalInput implements DefinitelyInput {
         this.inputActionProvider = inputActionProvider;
     }
 
-    @Override
     public InputAction simpleInput() {
         try {
             outputStream.write(gamePrompt);
@@ -63,7 +62,6 @@ public class TerminalInput implements DefinitelyInput {
         return simpleInput();
     }
 
-    @Override
     public String specialInput(final String... options) {
         throw new UnsupportedOperationException("When we have this we'll drink champagne");
     }

@@ -1,13 +1,12 @@
 package io.github.teonistor.chess.inter;
 
 import io.github.teonistor.chess.board.Position;
-import io.github.teonistor.chess.core.Player;
+import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -16,7 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-class MultipleViewWrapperTest {
+class MultipleViewWrapperTest implements RandomPositionsTestMixin {
 
     private final View aView = mock(View.class);
     private final View anotherView = mock(View.class);
@@ -36,19 +35,19 @@ class MultipleViewWrapperTest {
         assertThat(MultipleViewWrapper.wrapIfNeeded(aView)).isEqualTo(aView);
     }
 
-    @ParameterizedTest
-    @EnumSource(Player.class)
-    void wrapManyAndRefresh(Player player) {
+    @RepeatedTest(3)
+    void wrapManyAndRefresh() {
+        final HashMap<Position, Position> possibleMovesBlack = HashMap.of(randomPositions.next(), randomPositions.next());
+        final HashMap<Position, Position> possibleMovesWhite = HashMap.of(randomPositions.next(), randomPositions.next());
         final View view = MultipleViewWrapper.wrapIfNeeded(aView, anotherView);
-        view.refresh(HashMap.empty(), player, List.empty(), HashMap.of(Position.C2, Position.E5));
+        view.refresh(HashMap.empty(), List.empty(), possibleMovesBlack, possibleMovesWhite);
 
-        verify(aView).refresh(HashMap.empty(), player, List.empty(), HashMap.of(Position.C2, Position.E5));
-        verify(anotherView).refresh(HashMap.empty(), player, List.empty(), HashMap.of(Position.C2, Position.E5));
+        verify(aView).refresh(HashMap.empty(), List.empty(), possibleMovesBlack, possibleMovesWhite);
+        verify(anotherView).refresh(HashMap.empty(), List.empty(), possibleMovesBlack, possibleMovesWhite);
     }
 
-    @ParameterizedTest
-    @EnumSource(Player.class)
-    void wrapManyAndAnnounce(Player player) {
+    @Test
+    void wrapManyAndAnnounce() {
         final View view = MultipleViewWrapper.wrapIfNeeded(aView, anotherView);
         view.announce("Very important message");
 
