@@ -73,7 +73,12 @@ class TerminalInputTest {
     @Test
     void exit() throws IOException {
         when(reader.readLine()).thenReturn("exIT");
+        assertThat(terminalInput.simpleInput()).isEmpty();
+    }
 
+    @Test
+    void exitOnEOF() throws IOException {
+        when(reader.readLine()).thenReturn(null);
         assertThat(terminalInput.simpleInput()).isEmpty();
     }
 

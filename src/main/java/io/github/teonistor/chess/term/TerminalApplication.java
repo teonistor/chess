@@ -21,12 +21,8 @@ public class TerminalApplication implements Runnable {
     private final ScheduledExecutorService executorService;
 
     public TerminalApplication() {
-        this(new Factory());
-    }
-
-    private TerminalApplication(final Factory factory) {
         this(new TerminalInput(),
-             factory.createControlLoop(new TerminalView()),
+             new Factory().createControlLoop(new TerminalView()),
              newScheduledThreadPool(1));
     }
 

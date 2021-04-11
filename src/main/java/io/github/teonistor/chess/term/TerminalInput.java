@@ -60,6 +60,7 @@ public class TerminalInput {
             }
         } catch (final Exception e) {
             e.printStackTrace();
+            return Option.none();
         }
         // Try again...
         return simpleInput();
