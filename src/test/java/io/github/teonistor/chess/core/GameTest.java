@@ -64,31 +64,18 @@ class GameTest implements RandomPositionsTestMixin {
     }
 
     @Test
-    void triggerViewOnContinueBlack(final @Mock Set<Tuple2<Position, Position>> possibleMoves, final @Mock Piece piece1, final @Mock Piece piece2) {
+    void triggerViewOnContinue(final @Mock Set<Tuple2<Position, Position>> possibleMovesBlack, final @Mock Set<Tuple2<Position, Position>> possibleMovesWhite, final @Mock Piece piece1, final @Mock Piece piece2) {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(Black);
         when(state.getCapturedPieces()).thenReturn(List.of(piece1, piece2));
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(checker.check(board, Black, availableMoves)).thenReturn(Continue);
-        when(extractor.extractBlack(availableMoves)).thenReturn(possibleMoves);
+        when(extractor.extractBlack(availableMoves)).thenReturn(possibleMovesBlack);
+        when(extractor.extractWhite(availableMoves)).thenReturn(possibleMovesWhite);
 
         new Game(rule, checker, extractor, state).triggerView(view);
 
-        verify(view).refresh(board, List.of(piece1, piece2), possibleMoves, List.empty());
-    }
-
-    @Test
-    void triggerViewOnContinueWhite(final @Mock Set<Tuple2<Position, Position>> possibleMoves, final @Mock Piece piece1, final @Mock Piece piece2) {
-        when(state.getBoard()).thenReturn(board);
-        when(state.getPlayer()).thenReturn(White);
-        when(state.getCapturedPieces()).thenReturn(List.of(piece1, piece2));
-        when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
-        when(checker.check(board, White, availableMoves)).thenReturn(Continue);
-        when(extractor.extractWhite(availableMoves)).thenReturn(possibleMoves);
-
-        new Game(rule, checker, extractor, state).triggerView(view);
-
-        verify(view).refresh(board, List.of(piece1, piece2), List.empty(), possibleMoves);
+        verify(view).refresh(board, List.of(piece1, piece2), possibleMovesBlack, possibleMovesWhite);
     }
 
     @Test
