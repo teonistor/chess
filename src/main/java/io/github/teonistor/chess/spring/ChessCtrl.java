@@ -102,7 +102,7 @@ public class ChessCtrl implements View {
         controlLoop.newStandardGame();
     }
 
-    @RequestMapping("/new/standard")
+    @RequestMapping("/new/parallel")
     void newParallelGame() {
         controlLoop.newParallelGame();
     }

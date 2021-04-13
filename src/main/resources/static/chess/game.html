@@ -7,7 +7,7 @@
 
 <body>
 
-<div id="app">
+<div id="app" data-app>
 
     <h2>Basic But Not So Basic Chess</h2>
     <v-container>
@@ -50,34 +50,38 @@
           </v-btn>
         </div>
 
-        <v-btn elevation="7" x-large dark
-               disabled >
-          Save
-        </v-btn>
+        <div v-else>
+          <v-btn elevation="7" x-large dark
+                 disabled >
+            Save
+          </v-btn>
 
-        <v-btn elevation="7" x-large dark
-               disabled >
-          Load
-        </v-btn>
+          <v-btn elevation="7" x-large dark
+                 disabled >
+            Load
+          </v-btn>
 
-        <v-btn elevation="7" x-large dark
-               :disabled="!!restCallsGoing"
-               @click="newStandardGame()">
-          New (Standard)
-        </v-btn>
-
-        <v-btn elevation="7" x-large dark
-               disabled >
-          New (Turnless)
-        </v-btn>
+          <v-menu top offset-y close-on-click close-on-content-click
+                  transition="slide-y-transition" >
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn elevation="7" x-large dark
+                     :disabled="!!restCallsGoing"
+                     v-bind="attrs"
+                     v-on="on" >
+                  New Game
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item
+                      v-for="option in newGameOptions"
+                      :key="option"
+                      @click="newGame(option)" >
+                <v-list-item-title>{{ option }}</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </div>
       </div>
-
-<!-- TODO I'd like this instead of 2 buttons above but there seems to be a bug with v-select when running in client only mode (or who knows) -->
-<!--      <v-select elevation="7" dense solo x-large-->
-<!--                label="New game"-->
-<!--                v-model="newGameSelection"-->
-<!--                :items="newGameOptions"-->
-<!--      ></v-select>-->
 
     </v-container>
 

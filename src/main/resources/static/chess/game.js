@@ -41,9 +41,7 @@ new Vue({
         targets: [],
 
         alerts: [],
-// TODO See the TODO in game.html
-//        newGameOptions: ['Standard', 'Turnless'],
-//        newGameSelection: null,
+        newGameOptions: ['Standard', 'Parallel'],
 
         whiteOnTop: false,
         outlandishPieces: false
@@ -119,8 +117,8 @@ new Vue({
             this.targets = [];
         },
 
-        newStandardGame () {
-            this.axiosHelper('calling for new game', () => axios.post('/chess-api/new/standard', {}));
+        newGame(option) {
+            this.axiosHelper('calling for new game', () => axios.post('/chess-api/new/' + option.toLowerCase(), {}));
         },
 
         axiosHelper(flowDescription, promiseProducer, dataConsumer) {
