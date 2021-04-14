@@ -120,6 +120,14 @@ new Vue({
             ev.preventDefault();
         },
 
+        dragOrDrop(ev, position) {
+          if (this.dragStart) {
+            this.drop(ev, position);
+          } else {
+            this.drag(position);
+          }
+        },
+
         drag(position) {
             this.dragStart = position;
             this.targets = this.possibleMoves.filter(move => move[0] === position).map(move => move[1]);

@@ -29,6 +29,7 @@
               <span v-for="(position,j) in row"
                     :key="j"
                     :class="{cell: true, dark: !!((i + j) % 2), light: !((i + j) % 2), target: targets.indexOf(position) > -1}"
+                    @click="dragOrDrop($event, position)"
                     @drop="drop($event, position)"
                     @dragover="allowDrop($event)">
 
@@ -36,6 +37,7 @@
                      :src="pieceBox[outlandishPieces][board[position]]"
                      :class="{provisional: provisional === position}"
                      :draggable="!dragStart"
+                     @click.stop="dragOrDrop($event, position)"
                      @dragstart="drag(position)">
 
                   <span v-else class="img-placeholder"></span>
