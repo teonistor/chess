@@ -2,6 +2,7 @@
 <head>
     <title>Basic Chess</title>
     <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width,initial-scale=.7">
     <link rel="stylesheet" href="main.css" />
 </head>
 
@@ -23,7 +24,7 @@
       </div>
 
       <div class="play-area-inner">
-          <div v-for="(row,i) in positions"
+          <div v-for="(row,i) in positions[whiteOnTop]"
                :key="i">
               <span v-for="(position,j) in row"
                     :key="j"
@@ -32,7 +33,7 @@
                     @dragover="allowDrop($event)">
 
                 <img v-if="board.hasOwnProperty(position)"
-                     :src="pieceBox[board[position]]"
+                     :src="pieceBox[outlandishPieces][board[position]]"
                      :class="{provisional: provisional === position}"
                      :draggable="!dragStart"
                      @dragstart="drag(position)">
@@ -41,6 +42,21 @@
               </span>
           </div>
       </div>
+
+      <!-- I spent 2 days figuring out why the switches weren't trippin' and it was because .v-application--is-ltr is missing somewhere above -->
+      <v-row id="bottom-switches" class="v-application--is-ltr">
+        <v-col cols="12" md="6">
+          Black on top
+          <v-switch v-model="whiteOnTop" dark></v-switch>
+          White on top
+        </v-col>
+
+        <v-col cols="12" md="6">
+          Normal pieces
+          <v-switch v-model="outlandishPieces" dark></v-switch>
+          Outlandish pieces
+        </v-col>
+      </v-row>
 
       <div id="bottom-buttons">
         <div v-if="!stompClient">
@@ -71,7 +87,7 @@
                   New Game
               </v-btn>
             </template>
-            <v-list>
+            <v-list dark>
               <v-list-item
                       v-for="option in newGameOptions"
                       :key="option"
@@ -84,19 +100,6 @@
       </div>
 
     </v-container>
-
-<!--    <div>-->
-<!--        Black on top-->
-<!--        <v-switch v-model="whiteOnTop" style="display: inline-block; vertical-align: middle"></v-switch>-->
-<!--        White on top-->
-<!--    </div>-->
-
-<!--    <div>-->
-<!--        Normal pieces-->
-<!--        <v-switch v-model="outlandishPieces" style="display: inline-block; vertical-align: middle"></v-switch>-->
-<!--        Outlandish pieces-->
-<!--    </div>-->
-
 
 </div>
 
