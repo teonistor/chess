@@ -79,7 +79,7 @@ class GameTest implements RandomPositionsTestMixin {
     }
 
     @Test
-    void triggerViewOnContinueAndPartialMoveDone(final @Mock Set<Tuple2<Position, Position>> possibleMovesBlack, final @Mock Set<Tuple2<Position, Position>> possibleMovesWhite, final @Mock Piece piece1, final @Mock Piece piece2) {
+    void triggerViewOnContinueAndPartialMoveDone() {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(Black);
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
@@ -175,7 +175,9 @@ class GameTest implements RandomPositionsTestMixin {
         when(checker.check(board, player, availableMoves)).thenReturn(Continue);
 
         final Game game = new Game(rule, checker, extractor, state);
-        assertThat(game.processInput(from, randomPositions.next())).isEqualTo(game);
+        // TODO We ought to distinguish contextually bad input from maliciously bad input
+        assertThat(game.processInput(from, randomPositions.next())).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "positionPairExtractor", "state")
+                .extracting("key").isEqualTo(GameStateKey.NIL);
     }
 
     @ParameterizedTest(name="{0} {1}")

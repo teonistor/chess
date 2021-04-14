@@ -62,7 +62,7 @@ public class Game {
                  . map(this::withState)
                  . orElse(Option.some(key).filter(this::partialMatchesExist)
                  . map(this::withKey)))
-                 . getOrElse(this);
+                 . getOrElse(() -> this.withKey(GameStateKey.NIL));
 
         } else {
             return this;
