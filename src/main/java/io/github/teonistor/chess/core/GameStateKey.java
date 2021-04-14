@@ -50,4 +50,8 @@ public class GameStateKey {
         return new GameStateKey(whiteFrom, whiteTo, whitePromotion, from, to, blackPromotion);
     }
 
+    public boolean noPositionsDefined() {
+        // They come in pairs so not only is it unnecessary to check both to & from, it would actually be impossible to test all branches
+        return whiteFrom == null && blackFrom == null;
+    }
 }

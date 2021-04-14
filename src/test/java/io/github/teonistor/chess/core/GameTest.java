@@ -79,6 +79,18 @@ class GameTest implements RandomPositionsTestMixin {
     }
 
     @Test
+    void triggerViewOnContinueAndPartialMoveDone(final @Mock Set<Tuple2<Position, Position>> possibleMovesBlack, final @Mock Set<Tuple2<Position, Position>> possibleMovesWhite, final @Mock Piece piece1, final @Mock Piece piece2) {
+        when(state.getBoard()).thenReturn(board);
+        when(state.getPlayer()).thenReturn(Black);
+        when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
+        when(checker.check(board, Black, availableMoves)).thenReturn(Continue);
+
+        // 2 in 1 tests. The test here is that view::refresh is not called
+        new Game(rule, checker, extractor, state, GameStateKey.NIL.withWhiteInput(randomPositions.next(), randomPositions.next())).triggerView(view);
+        new Game(rule, checker, extractor, state, GameStateKey.NIL.withBlackInput(randomPositions.next(), randomPositions.next())).triggerView(view);
+    }
+
+    @Test
     void triggerViewOnWhiteWins() {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(Black);

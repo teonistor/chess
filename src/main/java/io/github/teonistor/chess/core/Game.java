@@ -36,8 +36,9 @@ public class Game {
     public void triggerView(final View view) {
         switch (getCondition()) {
             case Continue:
-                 view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()));
-                 break;
+                if (key.noPositionsDefined())
+                    view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()));
+                break;
 
             case WhiteWins:
                 view.announce("White wins!");
