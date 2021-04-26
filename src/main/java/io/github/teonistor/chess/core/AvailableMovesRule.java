@@ -3,24 +3,29 @@ package io.github.teonistor.chess.core;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.Tuple2;
-import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class AvailableMovesRule {
-
+public abstract class AvailableMovesRule {
     private final CheckRule rule;
 
-    public Map<Position, Map<Position, GameState>> computeAvailableMoves(final GameState state) {
-        final Map<Position, Piece> board = state.getBoard();
+    public abstract Map<GameStateKey, GameState> computeAvailableMoves(GameState state);
+
+    protected Map<GameStateKey, GameState> computeAvailableMoves(final GameStateKey key, final GameState state) {
         final Player player = state.getPlayer();
 
-        return board.filterValues(piece -> piece.getPlayer() == player)
-              .map((from, piece) -> new Tuple2<>(from, piece.computePossibleMoves(from)
-              .filter(move -> move.validate(state))
-              .map(move -> new Tuple2<>(move.getTo(), move.execute(state)))
-              .filter(targetAndState -> !rule.check(targetAndState._2.getBoard(), player))
-              .collect(HashMap.collector())));
+        return state.getBoard()
+             . filterValues(piece -> piece.getPlayer() == player)
+            // TODO Iterator workaround here due to Piece::computePossibleMoves returning the wrong (Java) Stream
+             . flatMap((from, piece) -> () -> piece.computePossibleMoves(from)
+             . filter(move -> move.validate(state))
+             . map(move -> new Tuple2<>(key.withInput(player, from, move.getTo()), move.execute(state)))
+             . filter(targetAndState -> validateBoardwideRules(player, targetAndState._2.getBoard()))
+             . iterator());
+    }
+
+    protected boolean validateBoardwideRules(Player player, Map<Position, Piece> board) {
+        return !rule.check(board, player);
     }
 }

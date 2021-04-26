@@ -7,7 +7,9 @@ import io.github.teonistor.chess.core.Game;
 import io.github.teonistor.chess.core.GameOverChecker;
 import io.github.teonistor.chess.core.GameState;
 import io.github.teonistor.chess.core.InitialStateProvider;
+import io.github.teonistor.chess.core.ParallelAvailableMovesRule;
 import io.github.teonistor.chess.core.PieceSerialiser;
+import io.github.teonistor.chess.core.StandardAvailableMovesRule;
 import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.InputActionProvider;
@@ -15,7 +17,7 @@ import io.github.teonistor.chess.inter.MultipleViewWrapper;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.PieceBox;
 import io.github.teonistor.chess.save.SaveLoad;
-import io.github.teonistor.chess.util.NestedMapKeyExtractor;
+import io.github.teonistor.chess.util.PositionPairExtractor;
 import lombok.Getter;
 
 public class Factory implements ControlLoopFactory, GameFactory {
@@ -29,8 +31,9 @@ public class Factory implements ControlLoopFactory, GameFactory {
     private final @Getter PieceSerialiser pieceSerialiser;
     private final SaveLoad saveLoad;
     private final @Getter InputActionProvider inputActionProvider;
-    private final AvailableMovesRule availableMovesRule;
-    private final NestedMapKeyExtractor nestedMapKeyExtractor;
+    private final AvailableMovesRule standardAvailableMovesRule;
+    private final AvailableMovesRule parallelAvailableMovesRule;
+    private final PositionPairExtractor positionPairExtractor;
 
     public Factory() {
         underAttackRule = new UnderAttackRule();
@@ -42,19 +45,43 @@ public class Factory implements ControlLoopFactory, GameFactory {
         pieceSerialiser = new PieceSerialiser(pieceBox);
         saveLoad = new SaveLoad(pieceSerialiser);
         inputActionProvider = new InputActionProvider(initialStateProvider, saveLoad);
-        availableMovesRule = new AvailableMovesRule(checkRule);
-        nestedMapKeyExtractor = new NestedMapKeyExtractor();
+        standardAvailableMovesRule = new StandardAvailableMovesRule(checkRule);
+        parallelAvailableMovesRule = new ParallelAvailableMovesRule(checkRule);
+        positionPairExtractor = new PositionPairExtractor();
     }
 
     public ControlLoop createControlLoop(final View... views) {
         return new ControlLoop(saveLoad, this, MultipleViewWrapper.wrapIfNeeded(views));
     }
 
-    public Game createNewGame() {
-        return new Game(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, initialStateProvider.createState());
+    public Game createNewStandardGame() {
+        return createGame(GameType.STANDARD, initialStateProvider.createState());
     }
 
-    public Game createGame(final GameState state) {
-        return new Game(availableMovesRule, gameOverChecker, nestedMapKeyExtractor, state);
+    public Game createNewParallelGame() {
+        return createGame(GameType.PARALLEL, initialStateProvider.createState());
+    }
+
+    public Game createGame(final GameType type, final GameState state) {
+        return new Game(type.availableMovesRule(this), gameOverChecker, positionPairExtractor, state);
+    }
+
+
+    private interface GameTypeProvider {
+        AvailableMovesRule availableMovesRule(Factory f);
+    }
+
+    public enum GameType implements GameTypeProvider {
+        STANDARD {
+            public AvailableMovesRule availableMovesRule(Factory f) {
+                return f.standardAvailableMovesRule;
+            }
+        },
+
+        PARALLEL {
+            public AvailableMovesRule availableMovesRule(Factory f) {
+                return f.parallelAvailableMovesRule;
+            }
+        }
     }
 }
