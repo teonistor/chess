@@ -3,10 +3,15 @@ package io.github.teonistor.chess.spring;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.NormalGameInput;
+import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
 import io.vavr.Tuple2;
+import io.vavr.collection.Map;
+import io.vavr.collection.Stream;
+import io.vavr.collection.Traversable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -28,15 +33,49 @@ class ChessCtrlTest implements RandomPositionsTestMixin {
 
     private @InjectMocks ChessCtrl ctrl;
 
-    @BeforeEach
-    void setUp() {
+    @Nested
+    class CachedFields {
 
-    }
+        private @Mock Map<Position, Piece> lastBoard;
+        private @Mock Traversable<Piece> lastCapturedPieces;
+        private final Tuple2<Position, Position> possibleMoveWhite = new Tuple2<>(randomPositions.next(), randomPositions.next());
+        private final Tuple2<Position, Position> possibleMoveBlack = new Tuple2<>(randomPositions.next(), randomPositions.next());
 
+        @BeforeEach
+        void refresh() {
+            ctrl.refresh(lastBoard, lastCapturedPieces, Stream.of(possibleMoveBlack), Stream.of(possibleMoveWhite));
 
-    @Test
-    void refresh() {
+            verify(ws).convertAndSend("/chess-ws/board", lastBoard);
+            verify(ws).convertAndSend("/chess-ws/captured-pieces", lastCapturedPieces);
+            verify(ws).convertAndSend("/chess-ws/moves-white", Stream.of(possibleMoveWhite));
+            verify(ws).convertAndSend("/chess-ws/moves-black", Stream.of(possibleMoveBlack));
+            verify(ws).convertAndSend("/chess-ws/moves-all", Stream.of(possibleMoveBlack, possibleMoveWhite));
+        }
 
+        @Test
+        void onSubscribeBoard() {
+            assertThat(ctrl.onSubscribeBoard()).isEqualTo(lastBoard);
+        }
+
+        @Test
+        void onSubscribeCapturedPieces() {
+            assertThat(ctrl.onSubscribeCapturedPieces()).isEqualTo(lastCapturedPieces);
+        }
+
+        @Test
+        void onSubscribeMovesBlack() {
+            assertThat(ctrl.onSubscribeMovesBlack()).isEqualTo(Stream.of(possibleMoveBlack));
+        }
+
+        @Test
+        void onSubscribeMovesWhite() {
+            assertThat(ctrl.onSubscribeMovesWhite()).isEqualTo(Stream.of(possibleMoveWhite));
+        }
+
+        @Test
+        void onSubscribeMovesAll() {
+            assertThat(ctrl.onSubscribeMovesAll()).isEqualTo(Stream.of(possibleMoveBlack, possibleMoveWhite));
+        }
     }
 
     @Test
@@ -45,10 +84,6 @@ class ChessCtrlTest implements RandomPositionsTestMixin {
         ctrl.announce(payload);
 
         verify(ws).convertAndSend("/chess-ws/announcements", payload);
-    }
-
-    @Test
-    void onSubscribeBoard() {
     }
 
     @Test
