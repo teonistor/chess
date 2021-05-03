@@ -37,8 +37,7 @@ public class EnPassant extends SingleOutcomeMove {
     }
 
     @Override
-    public GameState executeSingleOutcome(final GameState state) {
-        final Piece piece = state.getBoard().get(from).get();
-        return state.advance(state.getBoard().remove(from).remove(victimNow).put(to, piece), state.getBoard().get(victimNow).get());
+    protected GameState executeSingleOutcome(final GameState state, final Piece pieceToPlace) {
+        return state.advance(state.getBoard().remove(from).remove(victimNow).put(to, pieceToPlace), state.getBoard().get(victimNow).get());
     }
 }

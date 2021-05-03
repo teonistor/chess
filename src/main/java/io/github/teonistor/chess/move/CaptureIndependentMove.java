@@ -29,14 +29,13 @@ public class CaptureIndependentMove extends SingleOutcomeMove {
     }
 
     @Override
-    public GameState executeSingleOutcome(final GameState state) {
+    protected GameState executeSingleOutcome(final GameState state, final Piece pieceToPlace) {
         final Map<Position, Piece> board = state.getBoard();
-        final Piece fromPiece = board.get(from).get();
-        final Option<Piece> toPiece = board.get(to);
-        if (toPiece.isDefined()) {
-            return state.advance(board.remove(from).put(to, fromPiece), toPiece.get());
+        final Option<Piece> pieceAtTarget = board.get(to);
+        if (pieceAtTarget.isDefined()) {
+            return state.advance(board.remove(from).put(to, pieceToPlace), pieceAtTarget.get());
         } else {
-            return state.advance(board.remove(from).put(to, fromPiece));
+            return state.advance(board.remove(from).put(to, pieceToPlace));
         }
     }
 }

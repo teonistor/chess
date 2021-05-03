@@ -30,10 +30,9 @@ public class CapturingMove extends SingleOutcomeMove {
     }
 
     @Override
-    public GameState executeSingleOutcome(final GameState state) {
+    protected GameState executeSingleOutcome(final GameState state, final Piece pieceToPlace) {
         final Map<Position, Piece> board = state.getBoard();
-        final Piece fromPiece = board.get(from).get();
-        final Piece toPiece = board.get(to).get();
-        return state.advance(board.remove(from).put(to, fromPiece), toPiece);
+        final Piece pieceAtTarget = board.get(to).get();
+        return state.advance(board.remove(from).put(to, pieceToPlace), pieceAtTarget);
     }
 }

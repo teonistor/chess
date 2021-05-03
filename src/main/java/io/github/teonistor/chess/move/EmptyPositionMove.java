@@ -2,6 +2,7 @@ package io.github.teonistor.chess.move;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.GameState;
+import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.List;
 import io.vavr.control.Option;
 import lombok.Getter;
@@ -32,7 +33,7 @@ public class EmptyPositionMove extends SingleOutcomeMove {
     }
 
     @Override
-    public GameState executeSingleOutcome(final GameState state) {
-        return state.advance(state.getBoard().remove(from).put(to, state.getBoard().get(from).get()));
+    protected GameState executeSingleOutcome(final GameState state, final Piece pieceToPlace) {
+        return state.advance(state.getBoard().remove(from).put(to, pieceToPlace));
     }
 }

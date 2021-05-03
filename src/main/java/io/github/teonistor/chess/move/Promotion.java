@@ -11,24 +11,30 @@ import io.github.teonistor.chess.piece.Queen;
 import io.github.teonistor.chess.piece.Rook;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
-import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-@Getter
 @RequiredArgsConstructor
 public class Promotion implements Move {
     static final List<Function<Player, Piece>> promotables = List.of(Rook::new, Bishop::new, Knight::new, Queen::new);
 
-    private final @NonNull Position from;
-    private final @NonNull Position to;
+    private final SingleOutcomeMove delegate;
+
+    @Override
+    public Position getFrom() {
+        return delegate.getFrom();
+    }
+
+    @Override
+    public Position getTo() {
+        return delegate.getTo();
+    }
 
     @Override
     public boolean validate(final GameState state) {
-        return state.getBoard().get(to).isEmpty();
+        return delegate.validate(state);
     }
 
     @Override
@@ -36,6 +42,6 @@ public class Promotion implements Move {
         return promotables
              . map(cons -> cons.apply(state.getPlayer()))
              . toMap(piece -> key -> key.withPromotion(piece),
-                     piece -> state.advance(state.getBoard().remove(from).put(to, piece)));
+                     piece -> delegate.executeSingleOutcome(state, piece));
     }
 }

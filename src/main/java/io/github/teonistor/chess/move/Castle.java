@@ -52,13 +52,13 @@ public class Castle extends SingleOutcomeMove {
     }
 
     @Override
-    public GameState executeSingleOutcome(final GameState state) {
+    protected GameState executeSingleOutcome(final GameState state, final Piece pieceToPlace) {
         final Map<Position, Piece> board = state.getBoard();
         final Position rookFrom = rookPositionsByTarget.get(to).get();
         final Position rookTo = rookTargetsByTarget.get(to).get();
 
         return state.advance(board.remove(from).remove(rookFrom)
-              .put(to, board.get(from).get())
+              .put(to, pieceToPlace)
               .put(rookTo, board.get(rookFrom).get()));
     }
 
