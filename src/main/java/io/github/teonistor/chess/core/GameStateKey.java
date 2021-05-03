@@ -11,16 +11,18 @@ import lombok.ToString;
 import lombok.With;
 
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor(access = PRIVATE)
-@EqualsAndHashCode(exclude="withInput")
+@EqualsAndHashCode(exclude= {"withInput", "withPromotion"})
 @Getter
 public class GameStateKey {
     public static final GameStateKey NIL = new GameStateKey(null, null, null, null, null, null);
 
     private final Map<Player, BiFunction<Position,Position,GameStateKey>> withInput = HashMap.of(Player.White, this::withWhiteInput, Player.Black, this::withBlackInput);
+    private final Map<Player, Function<Piece,GameStateKey>> withPromotion = HashMap.of(Player.White, this::withWhitePromotion, Player.Black, this::withBlackPromotion);
 
     private final Position whiteFrom;
     private final Position whiteTo;
@@ -48,6 +50,10 @@ public class GameStateKey {
 
     public GameStateKey withBlackInput(final Position from, final Position to) {
         return new GameStateKey(whiteFrom, whiteTo, whitePromotion, from, to, blackPromotion);
+    }
+
+    public GameStateKey withPromotion(final Piece piece){
+        return withPromotion.get(piece.getPlayer()).get().apply(piece);
     }
 
     public boolean noPositionsDefined() {

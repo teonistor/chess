@@ -2,6 +2,7 @@ package io.github.teonistor.chess.core;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.move.Move;
+import io.github.teonistor.chess.move.SingleOutcomeMove;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
@@ -22,6 +23,7 @@ import static io.github.teonistor.chess.board.Position.E5;
 import static io.github.teonistor.chess.board.Position.H6;
 import static io.github.teonistor.chess.core.GameStateKey.NIL;
 import static io.github.teonistor.chess.core.Player.White;
+import static java.util.function.UnaryOperator.identity;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -43,7 +45,7 @@ class StandardAvailableMovesRuleTest {
 
     @BeforeEach
     void setUp() {
-        HashMap<Position, Piece> board = HashMap.of(A1, a1Piece, B4, b4Piece, D8, d8Piece, H6, h6Piece);
+        final HashMap<Position, Piece> board = HashMap.of(A1, a1Piece, B4, b4Piece, D8, d8Piece, H6, h6Piece);
         state = spy(new GameState(board, White, List.empty(), null));
         availableMovesRule = new StandardAvailableMovesRule(checkRule);
     }
@@ -71,13 +73,14 @@ class StandardAvailableMovesRuleTest {
         when(d8Piece.computePossibleMoves(D8)).thenReturn(Stream.of(selfFilteredMove, ruleFilteredMove));
         when(move.getTo()).thenReturn(A3);
         when(ruleFilteredMove.getTo()).thenReturn(E5);
-        when(move.execute(state)).thenReturn(outputState);
-        when(ruleFilteredMove.execute(state)).thenReturn(ruleFilteredState);
+        when(move.execute(state)).thenReturn(HashMap.of(identity(), outputState));
+        when(ruleFilteredMove.execute(state)).thenReturn(HashMap.of(identity(), ruleFilteredState, (GameStateKey key) -> key.withPromotion(a1Piece), outputState));
         when(checkRule.check(outputBoard, currentPlayer)).thenReturn(false);
         when(checkRule.check(ruleFilteredBoard, currentPlayer)).thenReturn(true);
 
-        // n.b. We are including pieces of the current user which have nowhere to move
-        assertThat(availableMovesRule.computeAvailableMoves(state)).isEqualTo(HashMap.of(NIL.withInput(currentPlayer, A1, A3), outputState));
+        assertThat(availableMovesRule.computeAvailableMoves(state)).isEqualTo(HashMap.of(
+                NIL.withInput(currentPlayer, A1, A3), outputState,
+                NIL.withInput(currentPlayer, D8, E5).withPromotion(a1Piece), outputState));
     }
 
     @AfterEach

@@ -2,7 +2,10 @@ package io.github.teonistor.chess.move;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.GameState;
+import io.github.teonistor.chess.core.GameStateKey;
+import io.vavr.collection.Map;
 
+import java.util.function.UnaryOperator;
 
 public interface Move {
 
@@ -28,7 +31,7 @@ public interface Move {
      * Change the mappings of positions, and other game state attributes, as needed to reflect this move taking place.
      * The validity of the move is not checked during this call.
      * @param state The current game state
-     * @return What the chosen callback returns
+     * @return One or more states after this move, keyed on operators possibly adding additional input to a key
      */
-    GameState execute(GameState state);
+    Map<UnaryOperator<GameStateKey>, GameState> execute(GameState state);
 }

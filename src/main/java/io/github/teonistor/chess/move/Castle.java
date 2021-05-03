@@ -18,7 +18,7 @@ import static io.github.teonistor.chess.board.Position.*;
 
 
 @AllArgsConstructor
-public class Castle implements Move {
+public class Castle extends SingleOutcomeMove {
     public static final HashMap<Position,HashSet<Position>> mustNotBeUnderAttackByTarget = HashMap.of(
             G1, HashSet.of(E1, F1), C1, HashSet.of(D1, E1),
             G8, HashSet.of(E8, F8), C8, HashSet.of(D8, E8));
@@ -37,7 +37,7 @@ public class Castle implements Move {
     private final @NonNull UnderAttackRule underAttackRule;
 
     @Override
-    public boolean validate(GameState state) {
+    public boolean validate(final GameState state) {
         final Map<Position, Piece> board = state.getBoard();
         final Player player = state.getPlayer();
 
@@ -52,7 +52,7 @@ public class Castle implements Move {
     }
 
     @Override
-    public GameState execute(GameState state) {
+    public GameState executeSingleOutcome(final GameState state) {
         final Map<Position, Piece> board = state.getBoard();
         final Position rookFrom = rookPositionsByTarget.get(to).get();
         final Position rookTo = rookTargetsByTarget.get(to).get();
@@ -62,7 +62,7 @@ public class Castle implements Move {
               .put(rookTo, board.get(rookFrom).get()));
     }
 
-    private boolean neverMoved(GameState state, Position position, Piece piece) {
+    private boolean neverMoved(final GameState state, final Position position, final Piece piece) {
         if (state == null) {
             return true;
 

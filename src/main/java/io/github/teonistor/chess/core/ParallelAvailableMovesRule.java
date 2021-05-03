@@ -39,13 +39,18 @@ public class ParallelAvailableMovesRule extends AvailableMovesRule {
              . flatMap(Option::of);
     }
 
+    /**
+     * @param a a game state
+     * @param b another game state
+     * @return true if by looking at boards set up in these states with your eyes you couldn't tell the difference (i.e. they are equivalent); false otherwise
+     */
     private boolean equivalentStates(final GameState a, final GameState b) {
         return a.getBoard().equals(b.getBoard())
             && a.getCapturedPieces().equals(b.getCapturedPieces());
     }
 
     @Override
-    protected boolean validateBoardwideRules(Player player, Map<Position, Piece> board) {
+    protected boolean validateBoardwideRules(final Player player, final Map<Position, Piece> board) {
         return board.exists(positionAndPiece -> {
             final Piece piece = positionAndPiece._2;
             return isPlayersKing(piece, player);
@@ -53,7 +58,7 @@ public class ParallelAvailableMovesRule extends AvailableMovesRule {
             && super.validateBoardwideRules(player, board);
     }
 
-    private boolean isPlayersKing(Piece piece, Player player) {
+    private boolean isPlayersKing(final Piece piece, final Player player) {
         return piece instanceof King && piece.getPlayer() == player;
     }
 }

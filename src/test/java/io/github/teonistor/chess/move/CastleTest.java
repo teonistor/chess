@@ -41,8 +41,8 @@ class CastleTest extends MoveTest{
                 "E8,C8,Black,A8,E8",
                 "E8,C8,Black,A8,D8",
                 "E8,C8,Black,A8,C8"})
-    void validateInvalidBecauseUnderAttack(Position from, Position to, Player player, Position rookPos, Position underAttack) {
-        HashMap<Position, Piece> board = HashMap.of(rookPos, new Rook(player));
+    void validateInvalidBecauseUnderAttack(final Position from, final Position to, final Player player, final Position rookPos, final Position underAttack) {
+        final HashMap<Position, Piece> board = HashMap.of(rookPos, new Rook(player));
         when(rule.checkAttack(board, underAttack, player)).thenReturn(true);
 
         assertThat(new Castle(from, to, rule).validate(stateWith(board))).isFalse();
@@ -52,8 +52,8 @@ class CastleTest extends MoveTest{
     @ParameterizedTest
     @CsvSource({"E1,G1,White", "E1,C1,White",
                 "E8,G8,Black", "E8,C8,Black"})
-    void validateInvalidBecauseNoRook(Position from, Position to, Player player) {
-        HashMap<Position, Piece> board = HashMap.empty();
+    void validateInvalidBecauseNoRook(final Position from, final Position to, final Player player) {
+        final HashMap<Position, Piece> board = HashMap.empty();
 
         assertThat(new Castle(from, to, rule).validate(stateWith(board))).isFalse();
         verify(rule, atMost(2)).checkAttack(eq(board), any(), eq(player));
@@ -62,8 +62,8 @@ class CastleTest extends MoveTest{
     @ParameterizedTest
     @CsvSource({"E1,G1,White,H1", "E1,C1,White,A1",
                 "E8,G8,Black,H8", "E8,C8,Black,A8"})
-    void validateInvalidBecauseRookHadMoved(Position from, Position to, Player player, Position rookPos) {
-        HashMap<Position, Piece> board = HashMap.of(rookPos, new Rook(player));
+    void validateInvalidBecauseRookHadMoved(final Position from, final Position to, final Player player, final Position rookPos) {
+        final HashMap<Position, Piece> board = HashMap.of(rookPos, new Rook(player));
         final GameState state = new GameState(board, player, List.empty(), stateWith(HashMap.empty(), player.next()));
 
         assertThat(new Castle(from, to, rule).validate(state)).isFalse();
@@ -81,8 +81,8 @@ class CastleTest extends MoveTest{
                 "E8,C8,Black,A8,D8",
                 "E8,C8,Black,A8,C8",
                 "E8,C8,Black,A8,B8"})
-    void validateInvalidBecauseOccupied(Position from, Position to, Player player, Position rookPos, Position occupied) {
-        HashMap<Position, Piece> board = HashMap.of(rookPos, new Rook(player), occupied, new Knight(player));
+    void validateInvalidBecauseOccupied(final Position from, final Position to, final Player player, final Position rookPos, final Position occupied) {
+        final HashMap<Position, Piece> board = HashMap.of(rookPos, new Rook(player), occupied, new Knight(player));
 
         assertThat(new Castle(from, to, rule).validate(stateWith(board))).isFalse();
         verify(rule, atMost(2)).checkAttack(eq(board), any(), eq(player));
@@ -91,8 +91,8 @@ class CastleTest extends MoveTest{
     @ParameterizedTest
     @CsvSource({"E1,G1,White,H1", "E1,C1,White,A1",
                 "E8,G8,Black,H8", "E8,C8,Black,A8"})
-    void validateValid(Position from, Position to, Player player, Position rookPos) {
-        HashMap<Position, Piece> board = HashMap.of(from, new King(player, rule), rookPos, new Rook(player));
+    void validateValid(final Position from, final Position to, final Player player, final Position rookPos) {
+        final HashMap<Position, Piece> board = HashMap.of(from, new King(player, rule), rookPos, new Rook(player));
 
         assertThat(new Castle(from, to, rule).validate(stateWith(board, player))).isTrue();
         verify(rule, times(2)).checkAttack(eq(board), any(), eq(player));
@@ -101,12 +101,12 @@ class CastleTest extends MoveTest{
     @ParameterizedTest
     @CsvSource({"E1,G1,White,H1,F1", "E1,C1,White,A1,D1",
                 "E8,G8,Black,H8,F8", "E8,C8,Black,A8,D8"})
-    void execute(Position from, Position to, Player player, Position rookFrom, Position rookTo) {
+    void execute(final Position from, final Position to, final Player player, final Position rookFrom, final Position rookTo) {
         final King king = new King(player, rule);
         final Rook rook = new Rook(player);
-        HashMap<Position, Piece> board = HashMap.of(from, king, rookFrom, rook);
+        final HashMap<Position, Piece> board = HashMap.of(from, king, rookFrom, rook);
 
-        Map<Position,Piece> output = new Castle(from, to, rule).execute(stateWith(board)).getBoard();
+        final Map<Position,Piece> output = new Castle(from, to, rule).executeSingleOutcome(stateWith(board)).getBoard();
 
         assertThat(output.get(to)).containsExactly(king);
         assertThat(output.get(rookTo)).containsExactly(rook);
