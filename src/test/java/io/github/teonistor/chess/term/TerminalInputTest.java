@@ -17,8 +17,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import static io.github.teonistor.chess.term.TerminalInput.gamePrompt;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +39,7 @@ class TerminalInputTest {
     void newStandardGame(final String s) throws IOException {
         when(reader.readLine()).thenReturn(s);
         assertThat(terminalInput.simpleInput().get()).isInstanceOf(NewStandardGameInput.class);
+        verify(outputStream).write(gamePrompt);
     }
 
     @ParameterizedTest
@@ -43,6 +47,7 @@ class TerminalInputTest {
     void newParallelGame(final String s) throws IOException {
         when(reader.readLine()).thenReturn(s);
         assertThat(terminalInput.simpleInput().get()).isInstanceOf(NewParallelGameInput.class);
+        verify(outputStream).write(gamePrompt);
     }
 
     @ParameterizedTest(name="{0}")
@@ -74,12 +79,14 @@ class TerminalInputTest {
     void exit() throws IOException {
         when(reader.readLine()).thenReturn("exIT");
         assertThat(terminalInput.simpleInput()).isEmpty();
+        verify(outputStream).write(gamePrompt);
     }
 
     @Test
     void exitOnEOF() throws IOException {
         when(reader.readLine()).thenReturn(null);
         assertThat(terminalInput.simpleInput()).isEmpty();
+        verify(outputStream).write(gamePrompt);
     }
 
     @ParameterizedTest(name="{2}")
@@ -117,20 +124,20 @@ class TerminalInputTest {
         when(reader.readLine()).thenReturn(s);
 
         assertThat(terminalInput.simpleInput()).containsExactly(new NormalGameInput(p1, p2));
+        verify(outputStream).write(gamePrompt);
     }
-// TODO Reinstate
-//    @ParameterizedTest(name="{index}")
-//    @ValueSource(strings={"", " ", "\t", "I9a3", "what"})
-//    void garbage(final String garbage) throws IOException {
-//        when(reader.readLine()).thenReturn(garbage).thenReturn(garbage).thenReturn(garbage);
-//
-//        assertThat(terminalInput.simpleInput()).isEqualTo(action);
-//    }
+
+    @ParameterizedTest(name="{index}")
+    @ValueSource(strings={"", " ", "\t", "I9a3", "what"})
+    void garbageThenExit(final String garbage) throws IOException {
+        when(reader.readLine()).thenReturn(garbage).thenReturn(garbage).thenReturn("exit");
+
+        assertThat(terminalInput.simpleInput()).isEmpty();
+        verify(outputStream, times(3)).write(gamePrompt);
+    }
 
     @AfterEach
-    void tearDown() throws IOException {
-//        verify(outputStream).write(TerminalInput.gamePrompt);
-
-        verifyNoMoreInteractions(/*outputStream,*/ reader);
+    void tearDown() {
+        verifyNoMoreInteractions(outputStream, reader);
     }
 }
