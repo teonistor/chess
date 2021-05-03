@@ -34,14 +34,9 @@ public class CaptureIndependentMove extends SingleOutcomeMove {
         final Piece fromPiece = board.get(from).get();
         final Option<Piece> toPiece = board.get(to);
         if (toPiece.isDefined()) {
-            return state.advance(tinker(board.remove(from).put(to, fromPiece)), toPiece.get());
+            return state.advance(board.remove(from).put(to, fromPiece), toPiece.get());
         } else {
-            return state.advance(tinker(board.remove(from).put(to, fromPiece)));
+            return state.advance(board.remove(from).put(to, fromPiece));
         }
-    }
-
-    // Easing implementation of KingsFirstMove. To be likely removed in future
-    protected Map<Position,Piece> tinker(final Map<Position,Piece> board) {
-        return board;
     }
 }
