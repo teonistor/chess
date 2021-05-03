@@ -4,7 +4,7 @@ import io.github.teonistor.chess.core.Player;
 import io.vavr.collection.List;
 
 public class Bishop extends LineMovingPiece {
-    public Bishop(Player player) {
+    public Bishop(final Player player) {
         super(player, List.of(
                 position -> position.up().left(),
                 position -> position.up().right(),

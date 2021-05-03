@@ -17,12 +17,10 @@ public abstract class AvailableMovesRule {
 
         return state.getBoard()
              . filterValues(piece -> piece.getPlayer() == player)
-            // TODO Iterator workaround here due to Piece::computePossibleMoves returning the wrong (Java) Stream
-             . flatMap((from, piece) -> () -> piece.computePossibleMoves(from)
+             . flatMap((from, piece) -> piece.computePossibleMoves(from)
              . filter(move -> move.validate(state))
              . map(move -> new Tuple2<>(key.withInput(player, from, move.getTo()), move.execute(state)))
-             . filter(targetAndState -> validateBoardwideRules(player, targetAndState._2.getBoard()))
-             . iterator());
+             . filter(targetAndState -> validateBoardwideRules(player, targetAndState._2.getBoard())));
     }
 
     protected boolean validateBoardwideRules(Player player, Map<Position, Piece> board) {
