@@ -15,9 +15,9 @@
     <form v-for="player in players"
           :key="player"
           :action="'/chess-api/assign-' + player.toLowerCase()"
+          @submit="clicked=player"
           method="post">
         <v-btn type="submit" elevation="7" x-large dark
-               @click="clicked=player"
                :loading="clicked===player"
                :disabled="!!clicked"
                v-html="player"></v-btn>
