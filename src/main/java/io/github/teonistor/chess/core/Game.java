@@ -2,10 +2,10 @@ package io.github.teonistor.chess.core;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.inter.View;
+import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.util.PositionPairExtractor;
 import io.vavr.Lazy;
 import io.vavr.collection.Map;
-import io.vavr.control.Option;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.With;
@@ -55,18 +55,33 @@ public class Game {
     }
 
     public Game processInput(final Position from, final Position to) {
-        if (Continue.equals(getCondition())) {
-            return state.getBoard().get(from)
-                 . map(piece -> key.withInput(piece.getPlayer(), from, to))
-                 . flatMap(key -> getAvailableMoves().get(key)
-                 . map(this::withState)
-                 . orElse(Option.some(key).filter(this::partialMatchesExist)
-                 . map(this::withKey)))
-                 . getOrElse(() -> this.withKey(GameStateKey.NIL));
+        return state.getBoard().get(from)
+             . map(piece -> key.withInput(piece.getPlayer(), from, to))
+             . map(this::processInput)
+             . getOrElse(this);
+    }
 
-        } else {
+    public Game processInput(final Piece promotionPiece) {
+        return processInput(key.withPromotion(promotionPiece));
+    }
+
+    private Game processInput(GameStateKey newKey) {
+        if (!Continue.equals(getCondition()))
             return this;
-        }
+
+        if (matchExists(newKey))
+            return this.withState(getAvailableMoves().get(newKey).get());
+
+        if (partialMatchesExist(newKey))
+            return this.withKey(newKey);
+
+        // TODO Announce the fact that the move was cancelled
+        // TODO Ban the cancelled move until a successful move is made
+        return this.withKey(GameStateKey.NIL);
+    }
+
+    private boolean matchExists(GameStateKey newKey) {
+        return getAvailableMoves().containsKey(newKey);
     }
 
     private boolean partialMatchesExist(final GameStateKey key) {
@@ -86,6 +101,6 @@ public class Game {
     }
 
     private Game withState(final GameState state) {
-        return this.state == state ? this : new Game(this.availableMovesRule, this.gameOverChecker, this.positionPairExtractor, state);
+        return new Game(this.availableMovesRule, this.gameOverChecker, this.positionPairExtractor, state);
     }
 }

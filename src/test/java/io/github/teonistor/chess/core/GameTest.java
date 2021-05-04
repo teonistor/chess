@@ -3,6 +3,7 @@ package io.github.teonistor.chess.core;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
+import io.github.teonistor.chess.piece.Rook;
 import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
 import io.github.teonistor.chess.util.PositionPairExtractor;
 import io.vavr.Tuple2;
@@ -163,36 +164,32 @@ class GameTest implements RandomPositionsTestMixin {
                 .extracting("key").isEqualTo(GameStateKey.NIL.withInput(player, from, to));
     }
 
-    @ParameterizedTest(name="{0}")
-    @EnumSource(Player.class)
-    void processBadInputWhenGameOn(final Player player, final @Mock GameStateKey key) {
+    @Test
+    void processBadInputWhenGameOn() {
         final Position from = randomPositions.next();
-        final Map<GameStateKey,GameState> availableMoves = HashMap.of(key, state2, key, state3);
         when(state.getBoard()).thenReturn(board);
-        when(state.getPlayer()).thenReturn(player);
         when(board.get(from)).thenReturn(Option.none());
-        when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
-        when(checker.check(board, player, availableMoves)).thenReturn(Continue);
 
         final Game game = new Game(rule, checker, extractor, state);
-        // TODO We ought to distinguish contextually bad input from maliciously bad input
         assertThat(game.processInput(from, randomPositions.next())).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "positionPairExtractor", "state")
                 .extracting("key").isEqualTo(GameStateKey.NIL);
     }
 
-    @ParameterizedTest(name="{0} {1}")
-    @CsvSource({"White,BlackWins",
-                "Black,WhiteWins",
-                "Black,Stalemate",
-                "White,Stalemate"})
-    void processInputWhenGameOver(final Player player, final GameCondition condition) {
+    @ParameterizedTest(name="{0}")
+    @EnumSource(Player.class)
+    void processPromotionInput(final Player player) {
+        final Position from = randomPositions.next();
+        final Position to = randomPositions.next();
+        final GameStateKey key = GameStateKey.NIL.withInput(player, from, to);
+        final Map<GameStateKey, GameState> availableMoves = HashMap.of(key.withPromotion(new Rook(player)), state2);
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(player);
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
-        when(checker.check(board, player, availableMoves)).thenReturn(condition);
+        when(checker.check(board, player, availableMoves)).thenReturn(Continue);
 
-        final Game game = new Game(rule, checker, extractor, state);
-        assertThat(game.processInput(randomPositions.next(), randomPositions.next())).isEqualTo(game);
+        final Game game = new Game(rule, checker, extractor, state, key);
+        assertThat(game.processInput(new Rook(player))).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "positionPairExtractor")
+                .extracting("state", "key").containsExactly(state2, GameStateKey.NIL);
     }
 
     @AfterEach
