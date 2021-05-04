@@ -57,6 +57,10 @@ new Vue({
         board: {},
         capturedPieces: [],
         possibleMoves: [],
+        promotionRequired: {
+            W: false,
+            B: false
+        },
 
         dragStart: null,
         provisional: null,
@@ -64,6 +68,7 @@ new Vue({
 
         alerts: [],
         newGameOptions: ['Standard', 'Parallel'],
+        promotablePieces: 'NBRQ',
 
         whiteOnTop: false,
         outlandishPieces: false
@@ -149,6 +154,11 @@ new Vue({
 
         newGame(option) {
             this.axiosHelper('calling for new game', () => axios.post('/chess-api/new/' + option.toLowerCase(), {}));
+        },
+
+        promote(color, piece) {
+            // Manually setting content type because a single string isn't JSON enough to be recognised
+            this.axiosHelper('sending promotion choice', () => axios.post('/chess-api/promote', '"' + color + piece + '"', {headers: {'Content-Type': 'application/json'}}));
         },
 
         axiosHelper(flowDescription, promiseProducer, dataConsumer) {
