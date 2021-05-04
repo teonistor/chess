@@ -112,8 +112,8 @@ new Vue({
             this.targets = [];
         },
 
-        receiveAnnouncement (text) {
-            this.alerts.push({type: 'info', text});
+        receiveAnnouncement (message) {
+            this.alerts.push({type: 'info', text: message.body});
         },
 
         allowDrop(ev) {
