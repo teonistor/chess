@@ -4,6 +4,7 @@ import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.NormalGameInput;
+import io.github.teonistor.chess.ctrl.PromotionGameInput;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.Tuple2;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import static io.github.teonistor.chess.spring.ChessFrontpageCtrl.Hotseat;
 
 @RestController
 @RequestMapping("chess-api")
@@ -85,6 +88,15 @@ public class ChessCtrl implements View {
     @RequestMapping("/move")
     void onMove(final @CookieValue("player") String player, final @RequestBody Tuple2<Position, Position> move) {
         controlLoop.gameInput(new NormalGameInput(move._1, move._2));
+    }
+
+    @RequestMapping("/promote")
+    void onPromote(final @CookieValue("player") String player, final @RequestBody Piece piece) {
+        // TODO Why is this business rule here?
+        if (Hotseat.equals(player) || piece.getPlayer().name().equals(player))
+            controlLoop.gameInput(new PromotionGameInput(piece));
+        else
+            throw new IllegalArgumentException("Invalid piece to promote");
     }
 
     @RequestMapping("/moves-channel")

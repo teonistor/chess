@@ -11,10 +11,11 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @RequestMapping("chess-api")
 public class ChessFrontpageCtrl {
+    public static final String Hotseat = "Hotseat";
 
     @RequestMapping("assign-hotseat")
     RedirectView assignHotseat(final HttpServletResponse response) {
-        return assignPlayer(response, "Hotseat");
+        return assignPlayer(response, Hotseat);
     }
 
     @RequestMapping("assign-black")
