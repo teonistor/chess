@@ -40,15 +40,21 @@ public class Game {
                     view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()));
                 break;
 
+            // TODO It is impossible to checkmate in the parallel game under the standard rules because there always exists the move where the player who checkmated removes the checkmate
+            // TODO This refresh duplication
+
             case WhiteWins:
+                view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()));
                 view.announce("White wins!");
                 break;
 
             case BlackWins:
+                view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()));
                 view.announce("Black wins!");
                 break;
 
             case Stalemate:
+                view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()));
                 view.announce("Stalemate!");
                 break;
         }
