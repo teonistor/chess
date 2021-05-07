@@ -80,13 +80,11 @@ new Vue({
             let socket = new SockJS('/chess-subscribe');
 
             // This may seem very contrived considering the player is in a plain text cookie; but it leaves the possibility open to use something less forgeable in the future
-            this.axiosHelper('fetching moves channel', () => axios.get('/chess-api/moves-channel'), possibleMovesChannel => {
+            this.axiosHelper('fetching state channel', () => axios.get('/chess-api/state-channel'), stateChannel => {
 
               this.stompClient = Stomp.over(socket);
               this.stompClient.connect({}, frame => {
-                this.stompClient.subscribe('/chess-ws/board', this.receiveBoard);
-                this.stompClient.subscribe('/chess-ws/captured-pieces', this.receiveCapturedPieces);
-                this.stompClient.subscribe('/chess-ws/' + possibleMovesChannel, this.receivePossibleMoves);
+                this.stompClient.subscribe('/chess-ws/' + stateChannel, this.receiveState);
                 this.stompClient.subscribe('/chess-ws/announcements', this.receiveAnnouncement);
               });
 
@@ -102,16 +100,16 @@ new Vue({
             });
         },
 
-        receiveBoard (message) {
-            this.board = JSON.parse(message.body);
-        },
+        receiveState (message) {
+            let state = JSON.parse(message.body);
 
-        receiveCapturedPieces (message) {
-            this.capturedPieces = JSON.parse(message.body);
-        },
+            this.board = state.board;
+            this.capturedPieces = state.capturedPieces;
+            this.possibleMoves = state.possibleMoves;
+//            this.provisional = state.provisional;
+            this.promotionRequired.W = state.promotionRequiredW;
+            this.promotionRequired.B = state.promotionRequiredB;
 
-        receivePossibleMoves (message) {
-            this.possibleMoves = JSON.parse(message.body);
             this.dragStart = null;
             this.provisional = null;
             this.targets = [];

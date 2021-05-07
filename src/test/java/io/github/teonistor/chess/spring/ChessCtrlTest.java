@@ -8,6 +8,7 @@ import io.github.teonistor.chess.ctrl.PromotionGameInput;
 import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
 import io.vavr.Tuple2;
+import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
 import io.vavr.collection.Traversable;
@@ -24,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
+import static org.apache.commons.lang3.RandomUtils.nextBoolean;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.verify;
@@ -41,45 +43,43 @@ class ChessCtrlTest implements RandomPositionsTestMixin {
     @Nested
     class CachedFields {
 
-        private @Mock Map<Position, Piece> lastBoard;
-        private @Mock Traversable<Piece> lastCapturedPieces;
-        private final Tuple2<Position, Position> possibleMoveWhite = new Tuple2<>(randomPositions.next(), randomPositions.next());
+        private @Mock Map<Position, Piece> board;
+        private @Mock Traversable<Piece> capturedPieces;
         private final Tuple2<Position, Position> possibleMoveBlack = new Tuple2<>(randomPositions.next(), randomPositions.next());
+        private final Tuple2<Position, Position> possibleMoveWhite = new Tuple2<>(randomPositions.next(), randomPositions.next());
+        private final boolean promotionRequiredBlack = nextBoolean();
+        private final boolean promotionRequiredWhite = nextBoolean();
+
+        private ExternalGameState externalStateBlack;
+        private ExternalGameState externalStateWhite;
+        private ExternalGameState externalStateAll;
 
         @BeforeEach
         void refresh() {
-            ctrl.refresh(lastBoard, lastCapturedPieces, Stream.of(possibleMoveBlack), Stream.of(possibleMoveWhite));
+            externalStateBlack = new ExternalGameState(board, capturedPieces, Stream.of(possibleMoveBlack), HashMap.empty(), false, promotionRequiredBlack);
+            externalStateWhite = new ExternalGameState(board, capturedPieces, Stream.of(possibleMoveWhite), HashMap.empty(), promotionRequiredWhite, false);
+            externalStateAll = externalStateWhite.combine(externalStateBlack);
 
-            verify(ws).convertAndSend("/chess-ws/board", lastBoard);
-            verify(ws).convertAndSend("/chess-ws/captured-pieces", lastCapturedPieces);
-            verify(ws).convertAndSend("/chess-ws/moves-white", Stream.of(possibleMoveWhite));
-            verify(ws).convertAndSend("/chess-ws/moves-black", Stream.of(possibleMoveBlack));
-            verify(ws).convertAndSend("/chess-ws/moves-all", Stream.of(possibleMoveBlack, possibleMoveWhite));
+            ctrl.refresh(board, capturedPieces, Stream.of(possibleMoveBlack), Stream.of(possibleMoveWhite), promotionRequiredBlack, promotionRequiredWhite);
+
+            verify(ws).convertAndSend("/chess-ws/state-black", externalStateBlack);
+            verify(ws).convertAndSend("/chess-ws/state-white", externalStateWhite);
+            verify(ws).convertAndSend("/chess-ws/state-all", externalStateAll);
         }
 
         @Test
-        void onSubscribeBoard() {
-            assertThat(ctrl.onSubscribeBoard()).isEqualTo(lastBoard);
+        void onSubscribeStateBlack() {
+            assertThat(ctrl.onSubscribeStateBlack()).isEqualTo(externalStateBlack);
         }
 
         @Test
-        void onSubscribeCapturedPieces() {
-            assertThat(ctrl.onSubscribeCapturedPieces()).isEqualTo(lastCapturedPieces);
+        void onSubscribeStateWhite() {
+            assertThat(ctrl.onSubscribeStateWhite()).isEqualTo(externalStateWhite);
         }
 
         @Test
-        void onSubscribeMovesBlack() {
-            assertThat(ctrl.onSubscribeMovesBlack()).isEqualTo(Stream.of(possibleMoveBlack));
-        }
-
-        @Test
-        void onSubscribeMovesWhite() {
-            assertThat(ctrl.onSubscribeMovesWhite()).isEqualTo(Stream.of(possibleMoveWhite));
-        }
-
-        @Test
-        void onSubscribeMovesAll() {
-            assertThat(ctrl.onSubscribeMovesAll()).isEqualTo(Stream.of(possibleMoveBlack, possibleMoveWhite));
+        void onSubscribeStateAll() {
+            assertThat(ctrl.onSubscribeStateAll()).isEqualTo(externalStateAll);
         }
     }
 
@@ -120,12 +120,12 @@ class ChessCtrlTest implements RandomPositionsTestMixin {
     }
 
     @ParameterizedTest
-    @CsvSource({"White,moves-white",
-                "Black,moves-black",
-                "any,moves-all",
-                "thing,moves-all"})
-    void movesChannel(String player, String channel) {
-        assertThat(ctrl.movesChannel(player)).isEqualTo(channel);
+    @CsvSource({"White,state-white",
+                "Black,state-black",
+                "any,state-all",
+                "thing,state-all"})
+    void movesChannel(final String player, final String channel) {
+        assertThat(ctrl.stateChannel(player)).isEqualTo(channel);
     }
 
     @Test
