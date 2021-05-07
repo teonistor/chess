@@ -4,6 +4,7 @@ import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.util.PositionPairExtractor;
+import io.github.teonistor.chess.util.PromotionRequirementExtractor;
 import io.vavr.Lazy;
 import io.vavr.collection.Map;
 import lombok.Getter;
@@ -18,6 +19,7 @@ public class Game {
     private final AvailableMovesRule availableMovesRule;
     private final GameOverChecker gameOverChecker;
     private final PositionPairExtractor positionPairExtractor;
+    private final PromotionRequirementExtractor promotionRequirementExtractor;
 
     private final @Getter GameState state;
     private final @With GameStateKey key;
@@ -25,8 +27,8 @@ public class Game {
     private final Lazy<Map<GameStateKey,GameState>> availableMoves = Lazy.of(this::computeAvailableMoves);
     private final Lazy<GameCondition> condition = Lazy.of(this::computeCondition);
 
-    public Game(final AvailableMovesRule availableMovesRule, final GameOverChecker gameOverChecker, final PositionPairExtractor positionPairExtractor, final GameState state) {
-        this(availableMovesRule, gameOverChecker, positionPairExtractor, state, GameStateKey.NIL);
+    public Game(final AvailableMovesRule availableMovesRule, final GameOverChecker gameOverChecker, final PositionPairExtractor positionPairExtractor, final PromotionRequirementExtractor promotionRequirementExtractor, final GameState state) {
+        this(availableMovesRule, gameOverChecker, positionPairExtractor, promotionRequirementExtractor, state, GameStateKey.NIL);
     }
 
     public GameCondition getCondition() {
@@ -34,27 +36,20 @@ public class Game {
     }
 
     public void triggerView(final View view) {
-        switch (getCondition()) {
-            case Continue:
-                if (key.noPositionsDefined())
-                    view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()));
-                break;
+        view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()), promotionRequirementExtractor.extractBlack(key, getAvailableMoves()), promotionRequirementExtractor.extractWhite(key, getAvailableMoves()));
 
+        switch (getCondition()) {
             // TODO It is impossible to checkmate in the parallel game under the standard rules because there always exists the move where the player who checkmated removes the checkmate
-            // TODO This refresh duplication
 
             case WhiteWins:
-                view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()));
                 view.announce("White wins!");
                 break;
 
             case BlackWins:
-                view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()));
                 view.announce("Black wins!");
                 break;
 
             case Stalemate:
-                view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()));
                 view.announce("Stalemate!");
                 break;
         }
@@ -71,7 +66,7 @@ public class Game {
         return processInput(key.withPromotion(promotionPiece));
     }
 
-    private Game processInput(GameStateKey newKey) {
+    private Game processInput(final GameStateKey newKey) {
         if (!Continue.equals(getCondition()))
             return this;
 
@@ -86,7 +81,7 @@ public class Game {
         return this.withKey(GameStateKey.NIL);
     }
 
-    private boolean matchExists(GameStateKey newKey) {
+    private boolean matchExists(final GameStateKey newKey) {
         return getAvailableMoves().containsKey(newKey);
     }
 
@@ -107,6 +102,6 @@ public class Game {
     }
 
     private Game withState(final GameState state) {
-        return new Game(this.availableMovesRule, this.gameOverChecker, this.positionPairExtractor, state);
+        return new Game(this.availableMovesRule, this.gameOverChecker, this.positionPairExtractor, new PromotionRequirementExtractor(), state);
     }
 }
