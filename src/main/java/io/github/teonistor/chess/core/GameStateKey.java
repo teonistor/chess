@@ -56,6 +56,10 @@ public class GameStateKey {
         return withPromotion.get(piece.getPlayer()).get().apply(piece);
     }
 
+    public GameStateKey withoutPromotion() {
+        return new GameStateKey(whiteFrom, whiteTo, null, blackFrom, blackTo, null);
+    }
+
     public boolean noPositionsDefined() {
         // They come in pairs so not only is it unnecessary to check both to & from, it would actually be impossible to test all branches
         return whiteFrom == null && blackFrom == null;
