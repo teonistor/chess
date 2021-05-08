@@ -1,6 +1,7 @@
 package io.github.teonistor.chess.core;
 
 import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.factory.Factory.GameType;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.util.PositionPairExtractor;
@@ -21,14 +22,15 @@ public class Game {
     private final PositionPairExtractor positionPairExtractor;
     private final PromotionRequirementExtractor promotionRequirementExtractor;
 
+    private final @Getter GameType type;
     private final @Getter GameState state;
     private final @With GameStateKey key;
 
     private final Lazy<Map<GameStateKey,GameState>> availableMoves = Lazy.of(this::computeAvailableMoves);
     private final Lazy<GameCondition> condition = Lazy.of(this::computeCondition);
 
-    public Game(final AvailableMovesRule availableMovesRule, final GameOverChecker gameOverChecker, final PositionPairExtractor positionPairExtractor, final PromotionRequirementExtractor promotionRequirementExtractor, final GameState state) {
-        this(availableMovesRule, gameOverChecker, positionPairExtractor, promotionRequirementExtractor, state, GameStateKey.NIL);
+    public Game(final AvailableMovesRule availableMovesRule, final GameOverChecker gameOverChecker, final PositionPairExtractor positionPairExtractor, final PromotionRequirementExtractor promotionRequirementExtractor, final GameType type, final GameState state) {
+        this(availableMovesRule, gameOverChecker, positionPairExtractor, promotionRequirementExtractor, type, state, GameStateKey.NIL);
     }
 
     public GameCondition getCondition() {
@@ -102,6 +104,6 @@ public class Game {
     }
 
     private Game withState(final GameState state) {
-        return new Game(this.availableMovesRule, this.gameOverChecker, this.positionPairExtractor, new PromotionRequirementExtractor(), state);
+        return new Game(availableMovesRule, gameOverChecker, positionPairExtractor, promotionRequirementExtractor, type, state);
     }
 }

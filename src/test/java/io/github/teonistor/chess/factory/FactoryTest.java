@@ -2,6 +2,7 @@ package io.github.teonistor.chess.factory;
 
 import io.github.teonistor.chess.core.Game;
 import io.github.teonistor.chess.core.GameState;
+import io.github.teonistor.chess.core.GameStateKey;
 import io.github.teonistor.chess.core.InitialStateProvider;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.inter.View;
@@ -10,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
+import static io.github.teonistor.chess.factory.Factory.GameType.PARALLEL;
+import static io.github.teonistor.chess.factory.Factory.GameType.STANDARD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
@@ -77,12 +80,14 @@ class FactoryTest {
 
         final Game game = factory.createNewStandardGame();
 
-        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "promotionRequirementExtractor", "state").containsExactly(
+        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "promotionRequirementExtractor", "type", "state", "key").containsExactly(
                 getField(factory, "standardAvailableMovesRule"),
                 getField(factory, "gameOverChecker"),
                 getField(factory, "positionPairExtractor"),
                 getField(factory, "promotionRequirementExtractor"),
-                state);
+                STANDARD,
+                state,
+                GameStateKey.NIL);
     }
 
     @Test
@@ -93,24 +98,28 @@ class FactoryTest {
 
         final Game game = factory.createNewParallelGame();
 
-        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "promotionRequirementExtractor", "state").containsExactly(
+        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "promotionRequirementExtractor", "type", "state", "key").containsExactly(
                 getField(factory, "parallelAvailableMovesRule"),
                 getField(factory, "gameOverChecker"),
                 getField(factory, "positionPairExtractor"),
                 getField(factory, "promotionRequirementExtractor"),
-                state);
+                PARALLEL,
+                state,
+                GameStateKey.NIL);
     }
 
     @Test
     void createGame(final @Mock GameState state) {
-        final Game game = FACTORY.createGame(Factory.GameType.STANDARD, state);
+        final Game game = FACTORY.createGame(STANDARD, state);
 
-        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "promotionRequirementExtractor", "state").containsExactly(
+        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "promotionRequirementExtractor", "type", "state", "key").containsExactly(
                 getField(FACTORY, "standardAvailableMovesRule"),
                 getField(FACTORY, "gameOverChecker"),
                 getField(FACTORY, "positionPairExtractor"),
                 getField(FACTORY, "promotionRequirementExtractor"),
-                state);
+                STANDARD,
+                state,
+                GameStateKey.NIL);
     }
 
     // TODO Looks like a mixin opportunity

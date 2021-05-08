@@ -63,7 +63,7 @@ public class Factory implements ControlLoopFactory, GameFactory {
     }
 
     public Game createGame(final GameType type, final GameState state) {
-        return new Game(type.availableMovesRule(this), gameOverChecker, positionPairExtractor, promotionRequirementExtractor, state);
+        return new Game(type.availableMovesRule(this), gameOverChecker, positionPairExtractor, promotionRequirementExtractor, type, state);
     }
 
 
