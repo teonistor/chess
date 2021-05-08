@@ -110,19 +110,22 @@
               :key="color"
               style="width:auto"
               persistent dark >
-        <v-card>
-          <v-card-title class="headline">
-              Choose piece to promote to:
-          </v-card-title>
-          <v-card-actions>
-            <span class="cell"
-                  v-for="piece in promotablePieces"
-                  :key="piece" >
-              <img :src="pieceBox[outlandishPieces][color + piece]"
-                   @click="promote(color, piece)" >
+      <v-card>
+        <v-card-title class="headline">
+            Choose piece to promote to:
+        </v-card-title>
+        <v-card-actions>
+          <v-btn elevation="7" height="auto"
+                 v-for="piece in promotablePieces"
+                 @click="promote(color, piece)"
+                 :key="piece"
+                 :disabled="!!restCallsGoing" >
+            <span class="cell">
+              <img :src="pieceBox[outlandishPieces][color + piece]">
             </span>
-          </v-card-actions>
-        </v-card>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
     </v-dialog>
 
 </div>
