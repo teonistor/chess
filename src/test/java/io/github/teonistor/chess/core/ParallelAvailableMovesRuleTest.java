@@ -8,6 +8,7 @@ import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
+import io.vavr.collection.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,9 +16,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
-
-import java.util.stream.Stream;
-
 import static io.github.teonistor.chess.core.GameStateKey.NIL;
 import static io.github.teonistor.chess.core.Player.Black;
 import static io.github.teonistor.chess.core.Player.White;

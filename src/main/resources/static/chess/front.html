@@ -2,6 +2,7 @@
 <head>
     <title>Basic Chess Frontpage</title>
     <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="main.css" />
 </head>
 
@@ -14,9 +15,9 @@
     <form v-for="player in players"
           :key="player"
           :action="'/chess-api/assign-' + player.toLowerCase()"
+          @submit="clicked=player"
           method="post">
         <v-btn type="submit" elevation="7" x-large dark
-               @click="clicked=player"
                :loading="clicked===player"
                :disabled="!!clicked"
                v-html="player"></v-btn>

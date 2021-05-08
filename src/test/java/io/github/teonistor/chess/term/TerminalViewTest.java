@@ -10,7 +10,24 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import org.junit.jupiter.api.Test;
 
-import static io.github.teonistor.chess.board.Position.*;
+import static io.github.teonistor.chess.board.Position.A1;
+import static io.github.teonistor.chess.board.Position.A2;
+import static io.github.teonistor.chess.board.Position.B5;
+import static io.github.teonistor.chess.board.Position.B7;
+import static io.github.teonistor.chess.board.Position.C1;
+import static io.github.teonistor.chess.board.Position.C7;
+import static io.github.teonistor.chess.board.Position.D5;
+import static io.github.teonistor.chess.board.Position.D6;
+import static io.github.teonistor.chess.board.Position.D8;
+import static io.github.teonistor.chess.board.Position.E1;
+import static io.github.teonistor.chess.board.Position.E2;
+import static io.github.teonistor.chess.board.Position.E3;
+import static io.github.teonistor.chess.board.Position.E5;
+import static io.github.teonistor.chess.board.Position.F2;
+import static io.github.teonistor.chess.board.Position.F4;
+import static io.github.teonistor.chess.board.Position.F8;
+import static io.github.teonistor.chess.board.Position.G4;
+import static io.github.teonistor.chess.board.Position.G7;
 import static io.github.teonistor.chess.core.Player.Black;
 import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,7 +71,7 @@ class TerminalViewTest {
             " 1 │WP│  │  │  │  │  │  │  │ 1\n" +
             "   ╰──┴──┴──┴──┴──┴──┴──┴──╯\n" +
             "    A  B  C  D  E  F  G  H\n" +
-            "Black possible moves: F4-E5 F4-D6 F4-C7 E2-E1 E2-F2" +
+            "Black possible moves: F4-E5 F4-D6 F4-C7 E2-E1 E2-F2\n" +
             "White possible moves: G4-D5 G4-E3 G4-C1 A2-E3 A2-F8");
     }
 }

@@ -36,8 +36,9 @@ public class Game {
     public void triggerView(final View view) {
         switch (getCondition()) {
             case Continue:
-                 view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()));
-                 break;
+                if (key.noPositionsDefined())
+                    view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()));
+                break;
 
             case WhiteWins:
                 view.announce("White wins!");
@@ -61,7 +62,7 @@ public class Game {
                  . map(this::withState)
                  . orElse(Option.some(key).filter(this::partialMatchesExist)
                  . map(this::withKey)))
-                 . getOrElse(this);
+                 . getOrElse(() -> this.withKey(GameStateKey.NIL));
 
         } else {
             return this;

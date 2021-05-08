@@ -4,7 +4,7 @@ import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.move.CaptureIndependentMove;
 import io.github.teonistor.chess.move.Move;
-import java.util.stream.Stream;
+import io.vavr.collection.Stream;
 
 
 public class Knight extends Piece {

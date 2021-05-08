@@ -5,7 +5,7 @@ import io.github.teonistor.chess.board.Position;
 import io.vavr.collection.List;
 
 public class Rook extends LineMovingPiece {
-    public Rook(Player player) {
+    public Rook(final Player player) {
         super(player, List.of(
                 Position::up,
                 Position::left,

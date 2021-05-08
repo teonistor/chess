@@ -2,8 +2,9 @@ package io.github.teonistor.chess.term;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.github.teonistor.chess.ctrl.ControlLoop;
-import io.github.teonistor.chess.ctrl.InputAction;
+import io.github.teonistor.chess.ctrl.Input;
 import io.github.teonistor.chess.factory.Factory;
+import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -20,12 +21,8 @@ public class TerminalApplication implements Runnable {
     private final ScheduledExecutorService executorService;
 
     public TerminalApplication() {
-        this(new Factory());
-    }
-
-    private TerminalApplication(final Factory factory) {
-        this(new TerminalInput(factory.getInputActionProvider()),
-             factory.createControlLoop(new TerminalView()),
+        this(new TerminalInput(),
+             new Factory().createControlLoop(new TerminalView()),
              newScheduledThreadPool(1));
     }
 
@@ -40,11 +37,11 @@ public class TerminalApplication implements Runnable {
      * Run one iteration. You probably don't want to call this manually
      */
     public void run() {
-        final InputAction action = input.simpleInput();
-        if (action.isExit())
+        final Option<Input> action = input.simpleInput();
+        if (action.isEmpty())
             stop();
         else
-            controlLoop.onInput(action);
+            action.get().execute(controlLoop);
     }
 
     /**

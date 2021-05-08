@@ -44,7 +44,7 @@ public class TerminalView implements View {
         " 1 │A1│B1│C1│D1│E1│F1│G1│H1│ 1\n" +
         "   ╰──┴──┴──┴──┴──┴──┴──┴──╯\n" +
         "    A  B  C  D  E  F  G  H\n" +
-        "Black possible moves: %s" +
+        "Black possible moves: %s\n" +
         "White possible moves: %s";
 
     private static final Map<Class<? extends Piece>, String> pieceLetters = HashMap.of(Pawn.class, "P", Knight.class, "N", Rook.class, "R", Bishop.class, "B", Queen.class, "Q", King.class, "K");

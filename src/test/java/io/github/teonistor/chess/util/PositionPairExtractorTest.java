@@ -7,6 +7,8 @@ import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import org.junit.jupiter.api.Test;
 
+import java.util.function.Consumer;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -25,16 +27,8 @@ class PositionPairExtractorTest implements RandomPositionsTestMixin {
     @Test
     void extractBlack() {
         final PositionPairExtractor extractor = new PositionPairExtractor();
-        final Object value = new Object();
 
-        assertThat(extractor.extractBlack(HashMap.of(
-                mockKeyBlack(p1, p2), value,
-                mockKeyBlack(p1, p3), value,
-                mockKeyBlack(p4, p3), value,
-                mockKeyBlack(p5, p6), value,
-                mockKeyBlack(p5, p7), value,
-                mockKeyBlack(p5, p8), value)))
-            .containsExactlyInAnyOrder(
+        assertThat(extractor.extractBlack(bigMap())).containsExactlyInAnyOrder(
                 new Tuple2<>(p1, p2),
                 new Tuple2<>(p1, p3),
                 new Tuple2<>(p4, p3),
@@ -46,16 +40,8 @@ class PositionPairExtractorTest implements RandomPositionsTestMixin {
     @Test
     void extractWhite() {
         final PositionPairExtractor extractor = new PositionPairExtractor();
-        final Object value = new Object();
 
-        assertThat(extractor.extractWhite(HashMap.of(
-                mockKeyWhite(p1, p2), value,
-                mockKeyWhite(p4, p5), value,
-                mockKeyWhite(p4, p3), value,
-                mockKeyWhite(p6, p5), value,
-                mockKeyWhite(p7, p5), value,
-                mockKeyWhite(p8, p5), value)))
-            .containsExactlyInAnyOrder(
+        assertThat(extractor.extractWhite(bigMap())).containsExactlyInAnyOrder(
                 new Tuple2<>(p1, p2),
                 new Tuple2<>(p4, p3),
                 new Tuple2<>(p4, p5),
@@ -64,17 +50,39 @@ class PositionPairExtractorTest implements RandomPositionsTestMixin {
                 new Tuple2<>(p8, p5));
     }
 
-    private GameStateKey mockKeyBlack(Position from, Position to) {
-        final GameStateKey key = mock(GameStateKey.class);
-        when(key.getBlackFrom()).thenReturn(from);
-        when(key.getBlackTo()).thenReturn(to);
-        return key;
+    private HashMap<GameStateKey,?> bigMap() {
+        return HashMap.ofEntries(
+                mockKey(white(p1, p2)),
+                mockKey(white(p4, p5)),
+                mockKey(white(p4, p3)),
+                mockKey(white(p6, p5)),
+                mockKey(white(p7, p5)),
+                mockKey(white(p8, p5)),
+                mockKey(black(p1, p2)),
+                mockKey(black(p1, p3)),
+                mockKey(black(p4, p3)),
+                mockKey(black(p5, p6)),
+                mockKey(black(p5, p7)),
+                mockKey(black(p5, p8)));
     }
 
-    private GameStateKey mockKeyWhite(Position from, Position to) {
+    private Tuple2<GameStateKey, ?> mockKey(final Consumer<GameStateKey> stubs) {
         final GameStateKey key = mock(GameStateKey.class);
-        when(key.getWhiteFrom()).thenReturn(from);
-        when(key.getWhiteTo()).thenReturn(to);
-        return key;
+        stubs.accept(key);
+        return new Tuple2<>(key, new Object());
+    }
+
+    private Consumer<GameStateKey> black(final Position from, final Position to) {
+        return key -> {
+            when(key.getBlackFrom()).thenReturn(from);
+            when(key.getBlackTo()).thenReturn(to);
+        };
+    }
+
+    private Consumer<GameStateKey> white(final Position from, final Position to) {
+        return key -> {
+            when(key.getWhiteFrom()).thenReturn(from);
+            when(key.getWhiteTo()).thenReturn(to);
+        };
     }
 }

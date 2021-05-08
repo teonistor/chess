@@ -6,8 +6,10 @@ import io.github.teonistor.chess.move.CaptureIndependentMove;
 import io.github.teonistor.chess.move.LineMove;
 import io.github.teonistor.chess.move.Move;
 import io.vavr.collection.List;
+import io.vavr.collection.Stream;
+
 import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
+
 import static java.util.Objects.requireNonNull;
 
 
@@ -15,30 +17,27 @@ public abstract class LineMovingPiece extends Piece {
 
     private final List<UnaryOperator<Position>> steps;
 
-    protected LineMovingPiece(Player player, List<UnaryOperator<Position>> steps) {
+    protected LineMovingPiece(final Player player, final List<UnaryOperator<Position>> steps) {
         super(player);
         this.steps = requireNonNull(steps);
     }
 
     @Override
-    public Stream<Move> computePossibleMoves(Position from) {
-        return steps.toJavaStream().flatMap(step -> {
+    public Stream<Move> computePossibleMoves(final Position from) {
+        return steps.toStream().flatMap(step -> {
 
             final Position to = step.apply(from);
-            if (to == Position.OutOfBoard) {
-                return Stream.empty();
-            }
-
-            return addTilEdge(List.of(new CaptureIndependentMove(from, to)),
+            return to == Position.OutOfBoard
+                 ? Stream.empty()
+                 : addTilEdge(List.of(new CaptureIndependentMove(from, to)),
                     List.of(to),
                     from,
                     step.apply(to),
-                    step)
-                    .toJavaStream();
+                    step);
         });
     }
 
-    private List<Move> addTilEdge(List<Move> moves, List<Position> mustBeEmpty, Position from, Position to, UnaryOperator<Position> step) {
+    private List<Move> addTilEdge(final List<Move> moves, final List<Position> mustBeEmpty, final Position from, final Position to, final UnaryOperator<Position> step) {
         if (to == Position.OutOfBoard){
             return moves;
         }

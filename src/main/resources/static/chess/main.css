@@ -75,11 +75,16 @@ form {
 	position: absolute;
 	top: 50px;
 	right: 50px;
-	width: 768px;
+	max-width: 820px;
 	text-align: justify;
+	padding-left: 50px;
 }
 
 #bottom-buttons .v-btn {
 	margin-top: 10px;
 }
 
+#bottom-switches .v-input--switch {
+  display: inline-block;
+  vertical-align: middle;
+}

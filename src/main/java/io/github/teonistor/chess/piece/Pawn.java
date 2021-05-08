@@ -6,7 +6,7 @@ import io.github.teonistor.chess.move.CapturingMove;
 import io.github.teonistor.chess.move.EmptyPositionMove;
 import io.github.teonistor.chess.move.EnPassant;
 import io.github.teonistor.chess.move.Move;
-import java.util.stream.Stream;
+import io.vavr.collection.Stream;
 
 import static io.github.teonistor.chess.board.Position.OutOfBoard;
 
