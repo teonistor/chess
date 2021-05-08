@@ -33,7 +33,7 @@ public class ControlLoop {
         if (game != null && action.savePath().isPresent()) {
             final String path = action.savePath().get();
             System.err.println("[DEBUG] Saving game to " + path);
-            saveLoad.saveState(game.getState(), path);
+//            saveLoad.saveState(game.getState(), path);
         }
 
         if (action.gameStateProvider().isPresent()) {

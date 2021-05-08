@@ -3,23 +3,22 @@ package io.github.teonistor.chess.save;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.core.GameData;
 import io.github.teonistor.chess.core.GameState;
-import io.github.teonistor.chess.core.GameStateProvider;
-import io.github.teonistor.chess.core.PieceSerialiser;
 import io.github.teonistor.chess.core.Player;
+import io.github.teonistor.chess.factory.Factory.GameType;
 import io.github.teonistor.chess.piece.Piece;
-import io.vavr.Lazy;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
-import io.vavr.jackson.datatype.VavrModule;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -27,49 +26,59 @@ import java.util.zip.GZIPOutputStream;
 import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang3.exception.ExceptionUtils.rethrow;
 
+@RequiredArgsConstructor
 public class SaveLoad {
 
-    private final TypeReference<List<SerializableState>> serializableStateListType;
-    private final Lazy<ObjectMapper> objectMapper;
+    private final TypeReference<List<SerializableState>> serializableStateListType = new TypeReference<>() {};
+    private final ObjectMapper objectMapper;
 
-    public SaveLoad(final PieceSerialiser pieceSerialiser) {
-        serializableStateListType = new TypeReference<>() {};
+//    public void saveState(final GameState state, final String fileName) {
+//        saveState(state, new FileOutputStream(fileName));
+//    }
+//
+//    public GameStateProvider loadState(final String fileName) {
+//        return loadState(new FileInputStream(fileName));
+//    }
 
-        objectMapper = Lazy.of(() -> {
-            final ObjectMapper om = new ObjectMapper();
-            om.registerModule(new VavrModule());
-            om.registerModule(pieceSerialiser);
-            return om;
-        });
-    }
+    public void save(final GameData data, OutputStream outputStream) {
+        final SerializableData serializableData = convert(data);
 
-    public void saveState(final GameState state, final String fileName) {
-        try {
-            final List<SerializableState> serializableStates = Stream.iterate(state, GameState::getPrevious)
-                    .takeUntil(Objects::isNull)
-                    .map(this::deconstructState)
-                    .toList();
-            try (final GZIPOutputStream outputStream = new GZIPOutputStream(new FileOutputStream(fileName))) {
-                objectMapper.get().writeValue(outputStream, serializableStates);
-            }
-        } catch (final Exception e) {
-            e.printStackTrace();
+        try (final GZIPOutputStream gz = new GZIPOutputStream(outputStream)) {
+            objectMapper.writeValue(gz, serializableData);
+
+        } catch (final IOException e) {
+            rethrow(e);
         }
     }
 
-    public GameStateProvider loadState(final String fileName) {
-        return () -> {
-            try (final GZIPInputStream inputStream = new GZIPInputStream(new FileInputStream(fileName))) {
-                return reconstructStatesRecursively(objectMapper.get().readValue(inputStream, serializableStateListType), 0);
-            } catch (final IOException e) {
-                // TODO Nasty
-                return rethrow(e);
-            }
-        };
+    private SerializableData convert(GameData data) {
+        final List<SerializableState> serializableStates = deconstructStates(data.getState());
+        return new SerializableData(data.getType(), serializableStates);
+    }
+
+    private List<SerializableState> deconstructStates(GameState state) {
+        return Stream.iterate(state, GameState::getPrevious)
+                .takeUntil(Objects::isNull)
+                .map(this::deconstructState)
+                .toList();
     }
 
     private SerializableState deconstructState(final GameState state) {
         return new SerializableState(state.getBoard(), state.getPlayer(), state.getCapturedPieces());
+    }
+
+
+    public GameData load(InputStream inputStream) {
+        try (final GZIPInputStream gz = new GZIPInputStream(inputStream)) {
+            return convert(objectMapper.readValue(gz, SerializableData.class));
+
+        } catch (final IOException e) {
+            return rethrow(e);
+        }
+    }
+
+    private GameData convert(SerializableData data) {
+        return new GameData(data.type, reconstructStatesRecursively(data.state, 0));
     }
 
     private GameState reconstructStatesRecursively(final List<SerializableState> ss, final int index) {
@@ -83,6 +92,7 @@ public class SaveLoad {
         return new GameState(serializableState.getBoard(), serializableState.getPlayer(), serializableState.getCapturedPieces(), previousState);
     }
 
+
     @AllArgsConstructor
     @Getter
     @NoArgsConstructor(access=PRIVATE)
@@ -90,5 +100,13 @@ public class SaveLoad {
         Map<Position, Piece> board;
         Player player;
         List<Piece> capturedPieces;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    @NoArgsConstructor(access=PRIVATE)
+    private static class SerializableData {
+        GameType type;
+        List<SerializableState> state;
     }
 }
