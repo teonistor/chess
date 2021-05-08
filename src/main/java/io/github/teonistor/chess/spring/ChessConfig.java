@@ -3,7 +3,6 @@ package io.github.teonistor.chess.spring;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.factory.Factory;
-import io.vavr.jackson.datatype.VavrModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -35,10 +34,7 @@ public class ChessConfig implements WebSocketMessageBrokerConfigurer {
 
     @Bean
     public ObjectMapper objectMapper() {
-        final ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new VavrModule());
-        objectMapper.registerModule(factory().getPieceSerialiser());
-        return objectMapper;
+        return factory().getObjectMapper();
     }
 
     @Bean

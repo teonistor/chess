@@ -1,6 +1,5 @@
 package io.github.teonistor.chess.save;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.GameData;
@@ -28,75 +27,65 @@ import static org.apache.commons.lang3.exception.ExceptionUtils.rethrow;
 
 @RequiredArgsConstructor
 public class SaveLoad {
-
-    private final TypeReference<List<SerializableState>> serializableStateListType = new TypeReference<>() {};
     private final ObjectMapper objectMapper;
 
-//    public void saveState(final GameState state, final String fileName) {
-//        saveState(state, new FileOutputStream(fileName));
-//    }
-//
-//    public GameStateProvider loadState(final String fileName) {
-//        return loadState(new FileInputStream(fileName));
-//    }
-
     public void save(final GameData data, OutputStream outputStream) {
-        final SerializableData serializableData = convert(data);
+        final SerialisableData serialisableData = convert(data);
 
         try (final GZIPOutputStream gz = new GZIPOutputStream(outputStream)) {
-            objectMapper.writeValue(gz, serializableData);
+            objectMapper.writeValue(gz, serialisableData);
 
         } catch (final IOException e) {
             rethrow(e);
         }
     }
 
-    private SerializableData convert(GameData data) {
-        final List<SerializableState> serializableStates = deconstructStates(data.getState());
-        return new SerializableData(data.getType(), serializableStates);
+    private SerialisableData convert(GameData data) {
+        final List<SerialisableState> serializableStates = deconstructStates(data.getState());
+        return new SerialisableData(data.getType(), serializableStates);
     }
 
-    private List<SerializableState> deconstructStates(GameState state) {
+    private List<SerialisableState> deconstructStates(GameState state) {
         return Stream.iterate(state, GameState::getPrevious)
                 .takeUntil(Objects::isNull)
                 .map(this::deconstructState)
                 .toList();
     }
 
-    private SerializableState deconstructState(final GameState state) {
-        return new SerializableState(state.getBoard(), state.getPlayer(), state.getCapturedPieces());
+    private SerialisableState deconstructState(final GameState state) {
+        return new SerialisableState(state.getBoard(), state.getPlayer(), state.getCapturedPieces());
     }
 
 
     public GameData load(InputStream inputStream) {
         try (final GZIPInputStream gz = new GZIPInputStream(inputStream)) {
-            return convert(objectMapper.readValue(gz, SerializableData.class));
+            return convert(objectMapper.readValue(gz, SerialisableData.class));
 
         } catch (final IOException e) {
             return rethrow(e);
         }
     }
 
-    private GameData convert(SerializableData data) {
+    private GameData convert(SerialisableData data) {
         return new GameData(data.type, reconstructStatesRecursively(data.state, 0));
     }
 
-    private GameState reconstructStatesRecursively(final List<SerializableState> ss, final int index) {
+    private GameState reconstructStatesRecursively(final List<SerialisableState> ss, final int index) {
         if (index >= ss.size())
             return null;
 
         return reconstructState(ss.get(index), reconstructStatesRecursively(ss, index + 1));
     }
 
-    private GameState reconstructState(final SerializableState serializableState, final GameState previousState) {
-        return new GameState(serializableState.getBoard(), serializableState.getPlayer(), serializableState.getCapturedPieces(), previousState);
+    private GameState reconstructState(final SerialisableState serialisableState, final GameState previousState) {
+        return new GameState(serialisableState.getBoard(), serialisableState.getPlayer(), serialisableState.getCapturedPieces(), previousState);
     }
 
 
     @AllArgsConstructor
     @Getter
     @NoArgsConstructor(access=PRIVATE)
-    private static class SerializableState {
+    private static class SerialisableState {
         Map<Position, Piece> board;
         Player player;
         List<Piece> capturedPieces;
@@ -105,8 +94,8 @@ public class SaveLoad {
     @AllArgsConstructor
     @Getter
     @NoArgsConstructor(access=PRIVATE)
-    private static class SerializableData {
+    private static class SerialisableData {
         GameType type;
-        List<SerializableState> state;
+        List<SerialisableState> state;
     }
 }

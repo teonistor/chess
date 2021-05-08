@@ -1,5 +1,6 @@
 package io.github.teonistor.chess.factory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.teonistor.chess.board.InitialBoardProvider;
 import io.github.teonistor.chess.core.AvailableMovesRule;
 import io.github.teonistor.chess.core.CheckRule;
@@ -18,6 +19,7 @@ import io.github.teonistor.chess.piece.PieceBox;
 import io.github.teonistor.chess.save.SaveLoad;
 import io.github.teonistor.chess.util.PositionPairExtractor;
 import io.github.teonistor.chess.util.PromotionRequirementExtractor;
+import io.vavr.jackson.datatype.VavrModule;
 import lombok.Getter;
 
 public class Factory implements ControlLoopFactory, GameFactory {
@@ -28,8 +30,8 @@ public class Factory implements ControlLoopFactory, GameFactory {
     private final PieceBox pieceBox;
     private final InitialBoardProvider initialBoardProvider;
     private final InitialStateProvider initialStateProvider;
-    private final @Getter PieceSerialiser pieceSerialiser;
-    private final SaveLoad saveLoad;
+    private final @Getter ObjectMapper objectMapper;
+    private final @Getter SaveLoad saveLoad;
     private final AvailableMovesRule standardAvailableMovesRule;
     private final AvailableMovesRule parallelAvailableMovesRule;
     private final PositionPairExtractor positionPairExtractor;
@@ -42,8 +44,9 @@ public class Factory implements ControlLoopFactory, GameFactory {
         pieceBox = new PieceBox(underAttackRule);
         initialBoardProvider = new InitialBoardProvider(pieceBox);
         initialStateProvider = new InitialStateProvider(initialBoardProvider);
-        pieceSerialiser = new PieceSerialiser(pieceBox);
-        saveLoad = new SaveLoad(pieceSerialiser);
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModules(new VavrModule(), new PieceSerialiser(pieceBox));
+        saveLoad = new SaveLoad(objectMapper);
         standardAvailableMovesRule = new StandardAvailableMovesRule(checkRule);
         parallelAvailableMovesRule = new ParallelAvailableMovesRule(checkRule);
         positionPairExtractor = new PositionPairExtractor();

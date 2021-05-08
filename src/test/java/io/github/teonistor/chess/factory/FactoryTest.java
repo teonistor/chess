@@ -33,7 +33,7 @@ class FactoryTest {
         final Object pieceBox = getField(FACTORY, "pieceBox");
         final Object initialBoardProvider = getField(FACTORY, "initialBoardProvider");
         final Object initialStateProvider = getField(FACTORY, "initialStateProvider");
-        final Object pieceSerialiser = getField(FACTORY, "pieceSerialiser");
+        final Object objectMapper = getField(FACTORY, "objectMapper");
         final Object saveLoad = getField(FACTORY, "saveLoad");
         final Object standardAvailableMovesRule = getField(FACTORY, "standardAvailableMovesRule");
         final Object parallelAvailableMovesRule = getField(FACTORY, "parallelAvailableMovesRule");
@@ -51,10 +51,8 @@ class FactoryTest {
         soft.assertThat(getFieldRec(pieceBox, "whiteKing", "underAttackRule")).isEqualTo(underAttackRule);
         soft.assertThat(getFieldRec(pieceBox, "blackKing", "underAttackRule")).isEqualTo(underAttackRule);
         soft.assertThat(getField(initialStateProvider, "initialBoardProvider")).isEqualTo(initialBoardProvider);
-        // TODO How to test arbitrarily long constructor chains
-//        soft.assertThat(pieceSerialiser).hasFieldOrPropertyWithValue("pieceBox", pieceBox);
-        soft.assertThat(pieceSerialiser).isNotNull();
-//        soft.assertThat(saveLoad).hasFieldOrPropertyWithValue("pieceSerialiser", pieceSerialiser);
+        soft.assertThat(objectMapper).isNotNull();
+        soft.assertThat(saveLoad).hasFieldOrPropertyWithValue("objectMapper", objectMapper);
         soft.assertThat(standardAvailableMovesRule).hasFieldOrPropertyWithValue("rule", checkRule);
         soft.assertThat(parallelAvailableMovesRule).hasFieldOrPropertyWithValue("rule", checkRule);
         soft.assertThat(positionPairExtractor).isNotNull();
