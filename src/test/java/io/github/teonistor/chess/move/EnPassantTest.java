@@ -65,7 +65,7 @@ class EnPassantTest extends MoveTest{
         final HashMap<Position, Piece> board = HashMap.of(B5, moving, A5, victim);
         final HashMap<Position, Piece> before = HashMap.of(B5, moving, A7, victim);
 
-        final GameState state = new EnPassant(B5, A6, A5, A7).execute(new GameState(board, White, List.empty(), stateWith(before, Black)));
+        final GameState state = new EnPassant(B5, A6, A5, A7).executeSingleOutcome(new GameState(board, White, List.empty(), stateWith(before, Black)));
 
         assertThat(state.getBoard()).containsExactly(new Tuple2<>(A6, moving));
         assertThat(state.getPlayer()).isEqualTo(Black);

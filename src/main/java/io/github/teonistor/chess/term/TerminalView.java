@@ -59,12 +59,12 @@ public class TerminalView implements View {
 
 
     @Override
-    public void refresh(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, Traversable<Tuple2<Position, Position>> possibleMovesBlack, Traversable<Tuple2<Position, Position>> possibleMovesWhite) {
+    public void refresh(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, final Traversable<Tuple2<Position, Position>> possibleMovesWhite, final boolean promotionRequiredBlack, final boolean promotionRequiredWhite) {
         outStream.println(makeOutput(board, capturedPieces, possibleMovesBlack, possibleMovesWhite));
     }
 
     @VisibleForTesting
-    String makeOutput(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, Traversable<Tuple2<Position, Position>> possibleMovesWhite) {
+    String makeOutput(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, final Traversable<Tuple2<Position, Position>> possibleMovesWhite) {
         val piecesByPlayer = capturedPieces.groupBy(Piece::getPlayer).mapValues(Traversable::narrow);
 
         return String.format(makeBoardWithPieces(board, boardTemplate),

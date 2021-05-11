@@ -57,6 +57,10 @@ new Vue({
         board: {},
         capturedPieces: [],
         possibleMoves: [],
+        promotionRequired: {
+            W: false,
+            B: false
+        },
 
         dragStart: null,
         provisional: null,
@@ -64,6 +68,7 @@ new Vue({
 
         alerts: [],
         newGameOptions: ['Standard', 'Parallel'],
+        promotablePieces: 'NBRQ',
 
         whiteOnTop: false,
         outlandishPieces: false
@@ -75,13 +80,11 @@ new Vue({
             let socket = new SockJS('/chess-subscribe');
 
             // This may seem very contrived considering the player is in a plain text cookie; but it leaves the possibility open to use something less forgeable in the future
-            this.axiosHelper('fetching moves channel', () => axios.get('/chess-api/moves-channel'), possibleMovesChannel => {
+            this.axiosHelper('fetching state channel', () => axios.get('/chess-api/state-channel'), stateChannel => {
 
               this.stompClient = Stomp.over(socket);
               this.stompClient.connect({}, frame => {
-                this.stompClient.subscribe('/chess-ws/board', this.receiveBoard);
-                this.stompClient.subscribe('/chess-ws/captured-pieces', this.receiveCapturedPieces);
-                this.stompClient.subscribe('/chess-ws/' + possibleMovesChannel, this.receivePossibleMoves);
+                this.stompClient.subscribe('/chess-ws/' + stateChannel, this.receiveState);
                 this.stompClient.subscribe('/chess-ws/announcements', this.receiveAnnouncement);
               });
 
@@ -97,23 +100,23 @@ new Vue({
             });
         },
 
-        receiveBoard (message) {
-            this.board = JSON.parse(message.body);
-        },
+        receiveState (message) {
+            let state = JSON.parse(message.body);
 
-        receiveCapturedPieces (message) {
-            this.capturedPieces = JSON.parse(message.body);
-        },
+            this.board = state.board;
+            this.capturedPieces = state.capturedPieces;
+            this.possibleMoves = state.possibleMoves;
+//            this.provisional = state.provisional;
+            this.promotionRequired.W = state.promotionRequiredW;
+            this.promotionRequired.B = state.promotionRequiredB;
 
-        receivePossibleMoves (message) {
-            this.possibleMoves = JSON.parse(message.body);
             this.dragStart = null;
             this.provisional = null;
             this.targets = [];
         },
 
-        receiveAnnouncement (text) {
-            this.alerts.push({type: 'info', text});
+        receiveAnnouncement (message) {
+            this.alerts.push({type: 'info', text: message.body});
         },
 
         allowDrop(ev) {
@@ -149,6 +152,11 @@ new Vue({
 
         newGame(option) {
             this.axiosHelper('calling for new game', () => axios.post('/chess-api/new/' + option.toLowerCase(), {}));
+        },
+
+        promote(color, piece) {
+            // Manually setting content type because a single string isn't JSON enough to be recognised
+            this.axiosHelper('sending promotion choice', () => axios.post('/chess-api/promote', '"' + color + piece + '"', {headers: {'Content-Type': 'application/json'}}));
         },
 
         axiosHelper(flowDescription, promiseProducer, dataConsumer) {

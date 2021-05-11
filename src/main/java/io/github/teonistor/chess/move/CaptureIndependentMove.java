@@ -15,13 +15,13 @@ import lombok.NonNull;
  */
 @AllArgsConstructor
 @Getter
-public class CaptureIndependentMove implements Move {
+public class CaptureIndependentMove extends SingleOutcomeMove {
 
     private final @NonNull Position from;
     private final @NonNull Position to;
 
     @Override
-    public boolean validate(GameState state) {
+    public boolean validate(final GameState state) {
         return !state.getBoard().get(to)
                 .map(Piece::getPlayer)
                 .filter(state.getPlayer()::equals)
@@ -29,19 +29,13 @@ public class CaptureIndependentMove implements Move {
     }
 
     @Override
-    public GameState execute(GameState state) {
-        Map<Position, Piece> board = state.getBoard();
-        Piece fromPiece = board.get(from).get();
-        Option<Piece> toPiece = board.get(to);
-        if (toPiece.isDefined()) {
-            return state.advance(tinker(board.remove(from).put(to, fromPiece)), toPiece.get());
+    protected GameState executeSingleOutcome(final GameState state, final Piece pieceToPlace) {
+        final Map<Position, Piece> board = state.getBoard();
+        final Option<Piece> pieceAtTarget = board.get(to);
+        if (pieceAtTarget.isDefined()) {
+            return state.advance(board.remove(from).put(to, pieceToPlace), pieceAtTarget.get());
         } else {
-            return state.advance(tinker(board.remove(from).put(to, fromPiece)));
+            return state.advance(board.remove(from).put(to, pieceToPlace));
         }
-    }
-
-    // Easing implementation of KingsFirstMove. To be likely removed in future
-    protected Map<Position,Piece> tinker(Map<Position,Piece> board) {
-        return board;
     }
 }

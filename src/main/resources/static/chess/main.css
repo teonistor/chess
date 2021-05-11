@@ -71,6 +71,15 @@ form {
 	background: #10000070;
 }
 
+.v-dialog {
+	width: initial;
+}
+
+.v-card__actions > .v-btn.v-btn {
+    padding: 0;
+    margin: 0 4px;
+}
+
 #alerts-outer {
 	position: absolute;
 	top: 50px;

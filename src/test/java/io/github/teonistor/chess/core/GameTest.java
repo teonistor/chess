@@ -3,15 +3,19 @@ package io.github.teonistor.chess.core;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
+import io.github.teonistor.chess.piece.Rook;
 import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
 import io.github.teonistor.chess.util.PositionPairExtractor;
+import io.github.teonistor.chess.util.PromotionRequirementExtractor;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
+import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 import io.vavr.control.Option;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -34,7 +38,8 @@ import static org.mockito.Mockito.when;
 class GameTest implements RandomPositionsTestMixin {
     private @Mock AvailableMovesRule rule;
     private @Mock GameOverChecker checker;
-    private @Mock PositionPairExtractor extractor;
+    private @Mock PositionPairExtractor pairExtractor;
+    private @Mock PromotionRequirementExtractor promotionExtractor;
     private @Mock View view;
 
     private @Mock GameState state;
@@ -57,7 +62,7 @@ class GameTest implements RandomPositionsTestMixin {
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(checker.check(board, player, availableMoves)).thenReturn(condition);
 
-        final Game game = new Game(rule, checker, extractor, state);
+        final Game game = new Game(rule, checker, pairExtractor, promotionExtractor, state);
 
         assertThat(game.getState()).isEqualTo(state);
         assertThat(game.getCondition()).isEqualTo(condition);
@@ -70,15 +75,18 @@ class GameTest implements RandomPositionsTestMixin {
         when(state.getCapturedPieces()).thenReturn(List.of(piece1, piece2));
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(checker.check(board, Black, availableMoves)).thenReturn(Continue);
-        when(extractor.extractBlack(availableMoves)).thenReturn(possibleMovesBlack);
-        when(extractor.extractWhite(availableMoves)).thenReturn(possibleMovesWhite);
+        when(pairExtractor.extractBlack(availableMoves)).thenReturn(possibleMovesBlack);
+        when(pairExtractor.extractWhite(availableMoves)).thenReturn(possibleMovesWhite);
+        when(promotionExtractor.extractBlack(GameStateKey.NIL, availableMoves)).thenReturn(true);
+        when(promotionExtractor.extractWhite(GameStateKey.NIL, availableMoves)).thenReturn(false);
 
-        new Game(rule, checker, extractor, state).triggerView(view);
+        new Game(rule, checker, pairExtractor, promotionExtractor, state).triggerView(view);
 
-        verify(view).refresh(board, List.of(piece1, piece2), possibleMovesBlack, possibleMovesWhite);
+        verify(view).refresh(board, List.of(piece1, piece2), possibleMovesBlack, possibleMovesWhite, true, false);
     }
 
     @Test
+    @Disabled("We will probably want to always trigger")
     void triggerViewOnContinueAndPartialMoveDone() {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(Black);
@@ -86,19 +94,25 @@ class GameTest implements RandomPositionsTestMixin {
         when(checker.check(board, Black, availableMoves)).thenReturn(Continue);
 
         // 2 in 1 tests. The test here is that view::refresh is not called
-        new Game(rule, checker, extractor, state, GameStateKey.NIL.withWhiteInput(randomPositions.next(), randomPositions.next())).triggerView(view);
-        new Game(rule, checker, extractor, state, GameStateKey.NIL.withBlackInput(randomPositions.next(), randomPositions.next())).triggerView(view);
+        new Game(rule, checker, pairExtractor, promotionExtractor, state, GameStateKey.NIL.withWhiteInput(randomPositions.next(), randomPositions.next())).triggerView(view);
+        new Game(rule, checker, pairExtractor, promotionExtractor, state, GameStateKey.NIL.withBlackInput(randomPositions.next(), randomPositions.next())).triggerView(view);
     }
 
     @Test
     void triggerViewOnWhiteWins() {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(Black);
+        when(state.getCapturedPieces()).thenReturn(List.empty());
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
+        when(pairExtractor.extractBlack(availableMoves)).thenReturn(HashSet.empty());
+        when(pairExtractor.extractWhite(availableMoves)).thenReturn(HashSet.empty());
+        when(promotionExtractor.extractBlack(GameStateKey.NIL, availableMoves)).thenReturn(false);
+        when(promotionExtractor.extractWhite(GameStateKey.NIL, availableMoves)).thenReturn(false);
         when(checker.check(board, Black, availableMoves)).thenReturn(WhiteWins);
 
-        new Game(rule, checker, extractor, state).triggerView(view);
+        new Game(rule, checker, pairExtractor, promotionExtractor, state).triggerView(view);
 
+        verify(view).refresh(board, List.empty(), HashSet.empty(), HashSet.empty(), false, false);
         verify(view).announce("White wins!");
     }
 
@@ -106,12 +120,18 @@ class GameTest implements RandomPositionsTestMixin {
     void triggerViewOnBlackWins() {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(White);
+        when(state.getCapturedPieces()).thenReturn(List.empty());
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
+        when(pairExtractor.extractBlack(availableMoves)).thenReturn(HashSet.empty());
+        when(pairExtractor.extractWhite(availableMoves)).thenReturn(HashSet.empty());
+        when(promotionExtractor.extractBlack(GameStateKey.NIL, availableMoves)).thenReturn(false);
+        when(promotionExtractor.extractWhite(GameStateKey.NIL, availableMoves)).thenReturn(false);
         when(checker.check(board, White, availableMoves)).thenReturn(BlackWins);
 
-        new Game(rule, checker, extractor, state).triggerView(view);
+        new Game(rule, checker, pairExtractor, promotionExtractor, state).triggerView(view);
 
         verify(view).announce("Black wins!");
+        verify(view).refresh(board, List.empty(), HashSet.empty(), HashSet.empty(), false, false);
     }
 
     @ParameterizedTest(name="{0}")
@@ -119,12 +139,18 @@ class GameTest implements RandomPositionsTestMixin {
     void triggerViewOnStalemate(final Player player) {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(player);
+        when(state.getCapturedPieces()).thenReturn(List.empty());
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
+        when(pairExtractor.extractBlack(availableMoves)).thenReturn(HashSet.empty());
+        when(pairExtractor.extractWhite(availableMoves)).thenReturn(HashSet.empty());
+        when(promotionExtractor.extractBlack(GameStateKey.NIL, availableMoves)).thenReturn(false);
+        when(promotionExtractor.extractWhite(GameStateKey.NIL, availableMoves)).thenReturn(false);
         when(checker.check(board, player, availableMoves)).thenReturn(Stalemate);
 
-        new Game(rule, checker, extractor, state).triggerView(view);
+        new Game(rule, checker, pairExtractor, promotionExtractor, state).triggerView(view);
 
         verify(view).announce("Stalemate!");
+        verify(view).refresh(board, List.empty(), HashSet.empty(), HashSet.empty(), false, false);
     }
 
     @ParameterizedTest(name="{0}")
@@ -140,7 +166,7 @@ class GameTest implements RandomPositionsTestMixin {
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(checker.check(board, player, availableMoves)).thenReturn(Continue);
 
-        final Game game = new Game(rule, checker, extractor, state);
+        final Game game = new Game(rule, checker, pairExtractor, promotionExtractor, state);
         assertThat(game.processInput(from, to)).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "positionPairExtractor", "key")
                 .extracting(Game::getState).isEqualTo(state2);
     }
@@ -158,45 +184,41 @@ class GameTest implements RandomPositionsTestMixin {
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(checker.check(board, player, availableMoves)).thenReturn(Continue);
 
-        final Game game = new Game(rule, checker, extractor, state);
+        final Game game = new Game(rule, checker, pairExtractor, promotionExtractor, state);
         assertThat(game.processInput(from, to)).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "positionPairExtractor", "state")
                 .extracting("key").isEqualTo(GameStateKey.NIL.withInput(player, from, to));
     }
 
-    @ParameterizedTest(name="{0}")
-    @EnumSource(Player.class)
-    void processBadInputWhenGameOn(final Player player, final @Mock GameStateKey key) {
+    @Test
+    void processBadInputWhenGameOn() {
         final Position from = randomPositions.next();
-        final Map<GameStateKey,GameState> availableMoves = HashMap.of(key, state2, key, state3);
         when(state.getBoard()).thenReturn(board);
-        when(state.getPlayer()).thenReturn(player);
         when(board.get(from)).thenReturn(Option.none());
-        when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
-        when(checker.check(board, player, availableMoves)).thenReturn(Continue);
 
-        final Game game = new Game(rule, checker, extractor, state);
-        // TODO We ought to distinguish contextually bad input from maliciously bad input
+        final Game game = new Game(rule, checker, pairExtractor, promotionExtractor, state);
         assertThat(game.processInput(from, randomPositions.next())).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "positionPairExtractor", "state")
                 .extracting("key").isEqualTo(GameStateKey.NIL);
     }
 
-    @ParameterizedTest(name="{0} {1}")
-    @CsvSource({"White,BlackWins",
-                "Black,WhiteWins",
-                "Black,Stalemate",
-                "White,Stalemate"})
-    void processInputWhenGameOver(final Player player, final GameCondition condition) {
+    @ParameterizedTest(name="{0}")
+    @EnumSource(Player.class)
+    void processPromotionInput(final Player player) {
+        final Position from = randomPositions.next();
+        final Position to = randomPositions.next();
+        final GameStateKey key = GameStateKey.NIL.withInput(player, from, to);
+        final Map<GameStateKey, GameState> availableMoves = HashMap.of(key.withPromotion(new Rook(player)), state2);
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(player);
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
-        when(checker.check(board, player, availableMoves)).thenReturn(condition);
+        when(checker.check(board, player, availableMoves)).thenReturn(Continue);
 
-        final Game game = new Game(rule, checker, extractor, state);
-        assertThat(game.processInput(randomPositions.next(), randomPositions.next())).isEqualTo(game);
+        final Game game = new Game(rule, checker, pairExtractor, promotionExtractor, state, key);
+        assertThat(game.processInput(new Rook(player))).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "positionPairExtractor")
+                .extracting("state", "key").containsExactly(state2, GameStateKey.NIL);
     }
 
     @AfterEach
     void tearDown() {
-        verifyNoMoreInteractions(rule, checker, extractor, view, state, state2, state3, board, availableMoves);
+        verifyNoMoreInteractions(rule, checker, pairExtractor, promotionExtractor, view, state, state2, state3, board, availableMoves);
     }
 }

@@ -40,10 +40,10 @@ class MultipleViewWrapperTest implements RandomPositionsTestMixin {
         final HashMap<Position, Position> possibleMovesBlack = HashMap.of(randomPositions.next(), randomPositions.next());
         final HashMap<Position, Position> possibleMovesWhite = HashMap.of(randomPositions.next(), randomPositions.next());
         final View view = MultipleViewWrapper.wrapIfNeeded(aView, anotherView);
-        view.refresh(HashMap.empty(), List.empty(), possibleMovesBlack, possibleMovesWhite);
+        view.refresh(HashMap.empty(), List.empty(), possibleMovesBlack, possibleMovesWhite, true, false);
 
-        verify(aView).refresh(HashMap.empty(), List.empty(), possibleMovesBlack, possibleMovesWhite);
-        verify(anotherView).refresh(HashMap.empty(), List.empty(), possibleMovesBlack, possibleMovesWhite);
+        verify(aView).refresh(HashMap.empty(), List.empty(), possibleMovesBlack, possibleMovesWhite, true, false);
+        verify(anotherView).refresh(HashMap.empty(), List.empty(), possibleMovesBlack, possibleMovesWhite, true, false);
     }
 
     @Test

@@ -16,13 +16,13 @@ import static io.vavr.Predicates.not;
  */
 @AllArgsConstructor
 @Getter
-public class CapturingMove implements Move {
+public class CapturingMove extends SingleOutcomeMove {
 
     private final @NonNull Position from;
     private final @NonNull Position to;
 
     @Override
-    public boolean validate(GameState state) {
+    public boolean validate(final GameState state) {
         return state.getBoard().get(to)
                 .map(Piece::getPlayer)
                 .filter(not(state.getPlayer()::equals))
@@ -30,10 +30,9 @@ public class CapturingMove implements Move {
     }
 
     @Override
-    public GameState execute(GameState state) {
-        Map<Position, Piece> board = state.getBoard();
-        Piece fromPiece = board.get(from).get();
-        Piece toPiece = board.get(to).get();
-        return state.advance(board.remove(from).put(to, fromPiece), toPiece);
+    protected GameState executeSingleOutcome(final GameState state, final Piece pieceToPlace) {
+        final Map<Position, Piece> board = state.getBoard();
+        final Piece pieceAtTarget = board.get(to).get();
+        return state.advance(board.remove(from).put(to, pieceToPlace), pieceAtTarget);
     }
 }

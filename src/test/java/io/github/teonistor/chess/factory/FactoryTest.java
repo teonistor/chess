@@ -35,6 +35,7 @@ class FactoryTest {
         final Object standardAvailableMovesRule = getField(FACTORY, "standardAvailableMovesRule");
         final Object parallelAvailableMovesRule = getField(FACTORY, "parallelAvailableMovesRule");
         final Object positionPairExtractor = getField(FACTORY, "positionPairExtractor");
+        final Object promotionRequirementExtractor = getField(FACTORY, "promotionRequirementExtractor");
 
         soft.assertThat(underAttackRule).isNotNull();
         soft.assertThat(checkRule).isNotNull();
@@ -54,6 +55,7 @@ class FactoryTest {
         soft.assertThat(standardAvailableMovesRule).hasFieldOrPropertyWithValue("rule", checkRule);
         soft.assertThat(parallelAvailableMovesRule).hasFieldOrPropertyWithValue("rule", checkRule);
         soft.assertThat(positionPairExtractor).isNotNull();
+        soft.assertThat(promotionRequirementExtractor).isNotNull();
 
         soft.assertAll();
     }
@@ -75,10 +77,11 @@ class FactoryTest {
 
         final Game game = factory.createNewStandardGame();
 
-        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "state").containsExactly(
+        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "promotionRequirementExtractor", "state").containsExactly(
                 getField(factory, "standardAvailableMovesRule"),
                 getField(factory, "gameOverChecker"),
                 getField(factory, "positionPairExtractor"),
+                getField(factory, "promotionRequirementExtractor"),
                 state);
     }
 
@@ -90,10 +93,11 @@ class FactoryTest {
 
         final Game game = factory.createNewParallelGame();
 
-        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "state").containsExactly(
+        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "promotionRequirementExtractor", "state").containsExactly(
                 getField(factory, "parallelAvailableMovesRule"),
                 getField(factory, "gameOverChecker"),
                 getField(factory, "positionPairExtractor"),
+                getField(factory, "promotionRequirementExtractor"),
                 state);
     }
 
@@ -101,10 +105,11 @@ class FactoryTest {
     void createGame(final @Mock GameState state) {
         final Game game = FACTORY.createGame(Factory.GameType.STANDARD, state);
 
-        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "state").containsExactly(
+        assertThat(game).extracting("availableMovesRule", "gameOverChecker", "positionPairExtractor", "promotionRequirementExtractor", "state").containsExactly(
                 getField(FACTORY, "standardAvailableMovesRule"),
                 getField(FACTORY, "gameOverChecker"),
                 getField(FACTORY, "positionPairExtractor"),
+                getField(FACTORY, "promotionRequirementExtractor"),
                 state);
     }
 

@@ -4,13 +4,12 @@ import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.ctrl.ControlLoop;
 import io.github.teonistor.chess.ctrl.NormalGameInput;
+import io.github.teonistor.chess.ctrl.PromotionGameInput;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
-import io.vavr.collection.List;
 import io.vavr.collection.Map;
-import io.vavr.collection.Stream;
 import io.vavr.collection.Traversable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static io.github.teonistor.chess.spring.ChessFrontpageCtrl.Hotseat;
+
 @RestController
 @RequestMapping("chess-api")
 @RequiredArgsConstructor
@@ -30,26 +31,20 @@ public class ChessCtrl implements View {
     private final SimpMessagingTemplate ws;
     private final ControlLoop controlLoop;
 
-    // Intermediate UI caches. This feels like it's violating some principle, I'm really unsure. TODO Use Observable (?) to optimise messages sent
-    private Map<?,?> lastBoard = HashMap.empty();
-    private Traversable<?> lastCapturedPieces = List.empty();
-    private Traversable<?> lastPossibleMovesWhite = List.empty();
-    private Traversable<?> lastPossibleMovesBlack = List.empty();
-    private Traversable<?> lastPossibleMovesAll = List.empty();
+    // Intermediate UI caches, so that a client joining midway sees the state right away. This feels like it's violating some principle, I'm really unsure.
+    private ExternalGameState lastStateBlack = ExternalGameState.NIL;
+    private ExternalGameState lastStateWhite = ExternalGameState.NIL;
+    private ExternalGameState lastStateAll = ExternalGameState.NIL;
 
     @Override
-    public void refresh(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, final Traversable<Tuple2<Position, Position>> possibleMovesWhite) {
-        lastBoard = board;
-        lastCapturedPieces = capturedPieces;
-        lastPossibleMovesBlack = possibleMovesBlack;
-        lastPossibleMovesWhite = possibleMovesWhite;
-        lastPossibleMovesAll = Stream.concat(possibleMovesBlack, possibleMovesWhite);
+    public void refresh(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, final Traversable<Tuple2<Position, Position>> possibleMovesWhite, final boolean promotionRequiredBlack, final boolean promotionRequiredWhite) {
+        lastStateBlack = new ExternalGameState(board, capturedPieces, possibleMovesBlack, HashMap.empty(), false, promotionRequiredBlack);
+        lastStateWhite = new ExternalGameState(board, capturedPieces, possibleMovesWhite, HashMap.empty(), promotionRequiredWhite, false);
+        lastStateAll = lastStateWhite.combine(lastStateBlack);
 
-        ws.convertAndSend("/chess-ws/board", lastBoard);
-        ws.convertAndSend("/chess-ws/captured-pieces", lastCapturedPieces);
-        ws.convertAndSend("/chess-ws/moves-white", lastPossibleMovesWhite);
-        ws.convertAndSend("/chess-ws/moves-black", lastPossibleMovesBlack);
-        ws.convertAndSend("/chess-ws/moves-all", lastPossibleMovesAll);
+        ws.convertAndSend("/chess-ws/state-white", lastStateWhite);
+        ws.convertAndSend("/chess-ws/state-black", lastStateBlack);
+        ws.convertAndSend("/chess-ws/state-all", lastStateAll);
     }
 
     @Override
@@ -57,29 +52,19 @@ public class ChessCtrl implements View {
         ws.convertAndSend("/chess-ws/announcements", message);
     }
 
-    @SubscribeMapping("/board")
-    Traversable<?> onSubscribeBoard() {
-        return lastBoard;
+    @SubscribeMapping("/state-black")
+    ExternalGameState onSubscribeStateBlack() {
+        return lastStateBlack;
     }
 
-    @SubscribeMapping("/captured-pieces")
-    Traversable<?> onSubscribeCapturedPieces() {
-        return lastCapturedPieces;
+    @SubscribeMapping("/state-white")
+    ExternalGameState onSubscribeStateWhite() {
+        return lastStateWhite;
     }
 
-    @SubscribeMapping("/moves-black")
-    Traversable<?> onSubscribeMovesBlack() {
-        return lastPossibleMovesBlack;
-    }
-
-    @SubscribeMapping("/moves-white")
-    Traversable<?> onSubscribeMovesWhite() {
-        return lastPossibleMovesWhite;
-    }
-
-    @SubscribeMapping("/moves-all")
-    Traversable<?> onSubscribeMovesAll() {
-        return lastPossibleMovesAll;
+    @SubscribeMapping("/state-all")
+    ExternalGameState onSubscribeStateAll() {
+        return lastStateAll;
     }
 
     @RequestMapping("/move")
@@ -87,13 +72,22 @@ public class ChessCtrl implements View {
         controlLoop.gameInput(new NormalGameInput(move._1, move._2));
     }
 
-    @RequestMapping("/moves-channel")
-    String movesChannel(final @CookieValue("player") String player) {
+    @RequestMapping("/promote")
+    void onPromote(final @CookieValue("player") String player, final @RequestBody Piece piece) {
+        // TODO Why is this business rule here?
+        if (Hotseat.equals(player) || piece.getPlayer().name().equals(player))
+            controlLoop.gameInput(new PromotionGameInput(piece));
+        else
+            throw new IllegalArgumentException("Invalid piece to promote");
+    }
+
+    @RequestMapping("/state-channel")
+    String stateChannel(final @CookieValue("player") String player) {
         try {
             Player.valueOf(player);
-            return "moves-" + player.toLowerCase();
+            return "state-" + player.toLowerCase();
         } catch (final Exception e) {
-            return "moves-all";
+            return "state-all";
         }
     }
 

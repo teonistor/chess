@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import static io.github.teonistor.chess.core.GameStateKey.NIL;
 import static io.github.teonistor.chess.core.Player.Black;
 import static io.github.teonistor.chess.core.Player.White;
+import static java.util.function.UnaryOperator.identity;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -71,10 +72,10 @@ class ParallelAvailableMovesRuleTest implements RandomPositionsTestMixin {
         when(whiteMove.validate(stateAfterBlackMove)).thenReturn(true);
         when(blackMove.validate(stateAfterWhiteMove)).thenReturn(true);
 
-        when(whiteMove.execute(initialState)).thenReturn(stateAfterWhiteMove);
-        when(blackMove.execute(initialState.withPlayer(Black))).thenReturn(stateAfterBlackMove);
-        when(whiteMove.execute(stateAfterBlackMove)).thenReturn(stateAfterBlackThenWhiteMove);
-        when(blackMove.execute(stateAfterWhiteMove)).thenReturn(stateAfterWhiteThenBlackMove);
+        when(whiteMove.execute(initialState)).thenReturn(HashMap.of(identity(), stateAfterWhiteMove));
+        when(blackMove.execute(initialState.withPlayer(Black))).thenReturn(HashMap.of(identity(), stateAfterBlackMove));
+        when(whiteMove.execute(stateAfterBlackMove)).thenReturn(HashMap.of(identity(), stateAfterBlackThenWhiteMove));
+        when(blackMove.execute(stateAfterWhiteMove)).thenReturn(HashMap.of(identity(), stateAfterWhiteThenBlackMove));
 
         when(checkRule.check(boardAfterBlackMove, Black)).thenReturn(false);
         when(checkRule.check(boardAfterWhiteMove, White)).thenReturn(false);
@@ -122,10 +123,10 @@ class ParallelAvailableMovesRuleTest implements RandomPositionsTestMixin {
         when(whiteMove.validate(stateAfterBlackMove)).thenReturn(true);
         when(blackMove.validate(stateAfterWhiteMove)).thenReturn(true);
 
-        when(whiteMove.execute(initialState)).thenReturn(stateAfterWhiteMove);
-        when(blackMove.execute(initialState.withPlayer(Black))).thenReturn(stateAfterBlackMove);
-        when(whiteMove.execute(stateAfterBlackMove)).thenReturn(stateAfterBlackThenWhiteMove);
-        when(blackMove.execute(stateAfterWhiteMove)).thenReturn(stateAfterWhiteThenBlackMove);
+        when(whiteMove.execute(initialState)).thenReturn(HashMap.of(identity(), stateAfterWhiteMove));
+        when(blackMove.execute(initialState.withPlayer(Black))).thenReturn(HashMap.of(identity(), stateAfterBlackMove));
+        when(whiteMove.execute(stateAfterBlackMove)).thenReturn(HashMap.of(identity(), stateAfterBlackThenWhiteMove));
+        when(blackMove.execute(stateAfterWhiteMove)).thenReturn(HashMap.of(identity(), stateAfterWhiteThenBlackMove));
 
         when(checkRule.check(boardAfterBlackMove, Black)).thenReturn(false);
         when(checkRule.check(boardAfterWhiteMove, White)).thenReturn(false);
@@ -140,7 +141,7 @@ class ParallelAvailableMovesRuleTest implements RandomPositionsTestMixin {
 
     @ParameterizedTest
     @EnumSource(Player.class)
-    void kinglessBoardIsBoardwideInvalid(Player player) {
+    void kinglessBoardIsBoardwideInvalid(final Player player) {
         assertThat(availableMovesRule.validateBoardwideRules(player, HashMap.of(randomPositions.next(), new King(player.next(), underAttackRule), randomPositions.next(), new Bishop(player)))).isFalse();
     }
 

@@ -59,7 +59,7 @@ class CaptureIndependentMoveTest extends MoveTest {
     void executeCapture() {
         final Map<Position,Piece> boardIn = HashMap.of(B5, moving, E2, victim);
 
-        GameState stateOut = new CaptureIndependentMove(B5, E2).execute(stateWith(boardIn));
+        final GameState stateOut = new CaptureIndependentMove(B5, E2).executeSingleOutcome(stateWith(boardIn));
 
         assertThat(stateOut.getBoard()).containsExactly(new Tuple2<>(E2, moving));
         assertThat(stateOut.getCapturedPieces()).containsExactly(victim);
@@ -69,7 +69,7 @@ class CaptureIndependentMoveTest extends MoveTest {
     void executeNonCapture() {
         final Map<Position,Piece> boardIn = HashMap.of(B5, moving);
 
-        GameState stateOut = new CaptureIndependentMove(B5, F1).execute(stateWith(boardIn));
+        final GameState stateOut = new CaptureIndependentMove(B5, F1).executeSingleOutcome(stateWith(boardIn));
 
         assertThat(stateOut.getBoard()).containsExactly(new Tuple2<>(F1, moving));
     }

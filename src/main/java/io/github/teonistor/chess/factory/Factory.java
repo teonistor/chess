@@ -17,6 +17,7 @@ import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.PieceBox;
 import io.github.teonistor.chess.save.SaveLoad;
 import io.github.teonistor.chess.util.PositionPairExtractor;
+import io.github.teonistor.chess.util.PromotionRequirementExtractor;
 import lombok.Getter;
 
 public class Factory implements ControlLoopFactory, GameFactory {
@@ -32,6 +33,7 @@ public class Factory implements ControlLoopFactory, GameFactory {
     private final AvailableMovesRule standardAvailableMovesRule;
     private final AvailableMovesRule parallelAvailableMovesRule;
     private final PositionPairExtractor positionPairExtractor;
+    private final PromotionRequirementExtractor promotionRequirementExtractor;
 
     public Factory() {
         underAttackRule = new UnderAttackRule();
@@ -45,6 +47,7 @@ public class Factory implements ControlLoopFactory, GameFactory {
         standardAvailableMovesRule = new StandardAvailableMovesRule(checkRule);
         parallelAvailableMovesRule = new ParallelAvailableMovesRule(checkRule);
         positionPairExtractor = new PositionPairExtractor();
+        promotionRequirementExtractor = new PromotionRequirementExtractor();
     }
 
     public ControlLoop createControlLoop(final View... views) {
@@ -60,7 +63,7 @@ public class Factory implements ControlLoopFactory, GameFactory {
     }
 
     public Game createGame(final GameType type, final GameState state) {
-        return new Game(type.availableMovesRule(this), gameOverChecker, positionPairExtractor, state);
+        return new Game(type.availableMovesRule(this), gameOverChecker, positionPairExtractor, promotionRequirementExtractor, state);
     }
 
 
@@ -70,13 +73,13 @@ public class Factory implements ControlLoopFactory, GameFactory {
 
     public enum GameType implements GameTypeProvider {
         STANDARD {
-            public AvailableMovesRule availableMovesRule(Factory f) {
+            public AvailableMovesRule availableMovesRule(final Factory f) {
                 return f.standardAvailableMovesRule;
             }
         },
 
         PARALLEL {
-            public AvailableMovesRule availableMovesRule(Factory f) {
+            public AvailableMovesRule availableMovesRule(final Factory f) {
                 return f.parallelAvailableMovesRule;
             }
         }
