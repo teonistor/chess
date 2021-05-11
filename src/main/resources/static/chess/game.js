@@ -70,6 +70,10 @@ new Vue({
         newGameOptions: ['Standard', 'Parallel'],
         promotablePieces: 'NBRQ',
 
+        frameSrc: '',
+        loadDialogOn: false,
+        selectedFile: null,
+
         whiteOnTop: false,
         outlandishPieces: false
     }),
@@ -148,6 +152,27 @@ new Vue({
 
             this.dragStart = null;
             this.targets = [];
+        },
+
+        save() {
+            this.restCallsGoing++;
+            // TODO Errors from this call (e.g. no game in progress) don't make it to the UI
+            this.frameSrc = '/chess-api/save';
+            setTimeout(() => {
+               this.frameSrc = '';
+               this.restCallsGoing--;
+            }, 3000);
+        },
+
+        load() {
+            this.loadDialogOn = false;
+            let formData = new FormData();
+            formData.set("file", this.selectedFile);
+
+            this.axiosHelper('loading game data', () => axios.post('/chess-api/load', formData, {
+                 headers: { "Content-Type": "multipart/form-data" }}));
+
+            this.selectedFile = null;
         },
 
         newGame(option) {

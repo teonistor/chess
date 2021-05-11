@@ -1,19 +1,26 @@
 package io.github.teonistor.chess.ctrl;
 
 import io.github.teonistor.chess.core.Game;
+import io.github.teonistor.chess.core.GameData;
 import io.github.teonistor.chess.core.GameState;
+import io.github.teonistor.chess.factory.Factory.GameType;
 import io.github.teonistor.chess.factory.GameFactory;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.save.SaveLoad;
 import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -48,26 +55,22 @@ class ControlLoopTest implements RandomPositionsTestMixin {
         assertThat(loop).hasFieldOrPropertyWithValue("game", null);
     }
 
-    @Test
-    void save(final @Mock GameState state) {
-//        setField(loop, "game", game);
-//        when(action.gameInput()).thenReturn(Optional.empty());
-//        when(action.savePath()).thenReturn(Optional.of("some path"));
-//        when(action.gameStateProvider()).thenReturn(Optional.empty());
-//        when(game.getState()).thenReturn(state);
-//
-//        loop.onInput(action);
-//
-//        verify(saveLoad).saveState(state, "some path");
-        assumeTrue(false, "Dependent on SaveLoad refactor");
+    @ParameterizedTest
+    @EnumSource(GameType.class)
+    void save(final GameType type, final @Mock GameState state, final @Mock OutputStream outputStream) {
+        setField(loop, "game", game);
+        when(game.getType()).thenReturn(type);
+        when(game.getState()).thenReturn(state);
+
+        loop.saveGame(outputStream);
+
+        verify(saveLoad).save(new GameData(type, state), outputStream);
     }
 
     @Test
-    void saveInAbsenceOfGame() {
-//        lenient().when(action.savePath()).thenReturn(Optional.of("some other path"));
-//        when(action.gameStateProvider()).thenReturn(Optional.empty());
-//        loop.onInput(action);
-        assumeTrue(false, "Dependent on SaveLoad refactor");
+    void saveInAbsenceOfGame(final @Mock OutputStream outputStream) {
+        assertThatIllegalStateException().isThrownBy(() -> loop.saveGame(outputStream))
+                .withMessage("No game in progress");
     }
 
     @Test
@@ -90,9 +93,16 @@ class ControlLoopTest implements RandomPositionsTestMixin {
         verify(game).triggerView(view);
     }
 
-    @Test
-    void load() {
-        assumeTrue(false, "Dependent on SaveLoad refactor");
+    @ParameterizedTest
+    @EnumSource(GameType.class)
+    void load(final GameType type, final @Mock GameState state, final @Mock InputStream inputStream) {
+        when(saveLoad.load(inputStream)).thenReturn(new GameData(type, state));
+        when(factory.createGame(type, state)).thenReturn(game);
+
+        loop.loadGame(inputStream);
+
+        assertThat(loop).hasFieldOrPropertyWithValue("game", game);
+        verify(game).triggerView(view);
     }
 
     @AfterEach

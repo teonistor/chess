@@ -19,7 +19,12 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import static io.github.teonistor.chess.spring.ChessFrontpageCtrl.Hotseat;
 
@@ -89,6 +94,21 @@ public class ChessCtrl implements View {
         } catch (final Exception e) {
             return "state-all";
         }
+    }
+
+    @RequestMapping("/save")
+    ResponseEntity<byte[]> saveGame() {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        controlLoop.saveGame(bos);
+        return ResponseEntity.ok()
+             . header("Content-Disposition", "attachment;filename=savegame.json.gz")
+             . header("Content-Type", "application/octet-stream")
+             . body(bos.toByteArray());
+    }
+
+    @RequestMapping("/load")
+    void loadGame(final @RequestParam MultipartFile file) throws IOException {
+        controlLoop.loadGame(file.getInputStream());
     }
 
     @RequestMapping("/new/standard")

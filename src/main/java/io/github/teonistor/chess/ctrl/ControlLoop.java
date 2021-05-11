@@ -36,10 +36,13 @@ public class ControlLoop {
 
     public void loadGame(final InputStream inputStream) {
         final GameData data = saveLoad.load(inputStream);
-
+        setAndTrigger(gameFactory.createGame(data.getType(), data.getState()));
     }
 
     public void saveGame(final OutputStream outputStream) {
+        if (game == null)
+            throw new IllegalStateException("No game in progress");
+
         saveLoad.save(new GameData(game.getType(), game.getState()), outputStream);
     }
 
