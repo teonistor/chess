@@ -77,16 +77,11 @@
             Save
           </v-btn>
 
-          <v-btn id="source-button" elevation="7" x-large dark
-                 style="display:none" >
+          <v-btn elevation="7" x-large dark
+                 :disabled="!!restCallsGoing"
+                 @click="triggerLoad()">
             Load
           </v-btn>
-          <!-- I don't know how to customise the button of v-file-input so I'll copy the classes and content from the above hidden button -->
-          <span id="target-button-span">
-            <v-file-input label="Select file to load game from"
-                          hide-input
-                          v-model="selectedFile" @change="load" />
-          </span>
 
           <v-menu top offset-y close-on-click close-on-content-click
                   transition="slide-y-transition" >
@@ -135,27 +130,15 @@
       </v-card>
     </v-dialog>
 
-    <!-- Hidden frame to help downloading the savegame -->
+    <!-- Hidden frame to help download the savegame when saving -->
     <iframe style="display:none"
             v-if="!!frameSrc"
             :src="frameSrc"></iframe>
 
-<!--    <v-dialog v-model="loadDialogOn" dark-->
-<!--              style="min-width: 300px" >-->
-<!--&lt;!&ndash;        <v-card>&ndash;&gt;-->
-<!--&lt;!&ndash;            <v-card-title class="headline">&ndash;&gt;-->
-<!--&lt;!&ndash;                Choose piece to promote to:&ndash;&gt;-->
-<!--&lt;!&ndash;            </v-card-title>&ndash;&gt;-->
-<!--&lt;!&ndash;            <v-card-actions>&ndash;&gt;-->
-<!--                <v-file-input label="Select file to load game from"-->
-<!--                              hide-input-->
-<!--                              v-model="selectedFile" @change="load">-->
-
-<!--                </v-file-input>-->
-<!--&lt;!&ndash;            </v-card-actions>&ndash;&gt;-->
-<!--&lt;!&ndash;        </v-card>&ndash;&gt;-->
-<!--    </v-dialog>-->
-
+    <!-- Hidden file selector to help upload the savegame when loading -->
+    <input type="file" style="display:none"
+           ref="chessLoadFileInput"
+           @change="load" />
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>

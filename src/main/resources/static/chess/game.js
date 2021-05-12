@@ -71,8 +71,6 @@ new Vue({
         promotablePieces: 'NBRQ',
 
         frameSrc: '',
-        loadDialogOn: false,
-        selectedFile: null,
 
         whiteOnTop: false,
         outlandishPieces: false
@@ -164,15 +162,19 @@ new Vue({
             }, 3000);
         },
 
+        triggerLoad() {
+            this.$refs.chessLoadFileInput.click();
+        },
+
         load() {
-            this.loadDialogOn = false;
-            let formData = new FormData();
-            formData.set("file", this.selectedFile);
+            let selectedFile = this.$refs.chessLoadFileInput.files.length && this.$refs.chessLoadFileInput.files[0];
+            if (selectedFile) {
+                let formData = new FormData();
+                formData.set("file", selectedFile);
 
-            this.axiosHelper('loading game data', () => axios.post('/chess-api/load', formData, {
-                 headers: { "Content-Type": "multipart/form-data" }}));
-
-            this.selectedFile = null;
+                this.axiosHelper('loading game data', () => axios.post('/chess-api/load', formData, {
+                     headers: { "Content-Type": "multipart/form-data" }}));
+            }
         },
 
         newGame(option) {
