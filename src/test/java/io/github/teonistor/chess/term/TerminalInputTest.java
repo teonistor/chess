@@ -1,25 +1,27 @@
 package io.github.teonistor.chess.term;
 
 import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.ctrl.LoadGameInput;
 import io.github.teonistor.chess.ctrl.NewParallelGameInput;
 import io.github.teonistor.chess.ctrl.NewStandardGameInput;
 import io.github.teonistor.chess.ctrl.NormalGameInput;
+import io.github.teonistor.chess.ctrl.SaveGameInput;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 import static io.github.teonistor.chess.term.TerminalInput.gamePrompt;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -30,9 +32,22 @@ class TerminalInputTest {
 
     @Mock private OutputStream outputStream;
     @Mock private BufferedReader reader;
+    @Mock private InputStream fileInputStream;
+    @Mock private OutputStream fileOutputStream;
+    private String expectedPath;
 
-    @InjectMocks
     private TerminalInput terminalInput;
+
+    @BeforeEach
+    void setUp() {
+        terminalInput = new TerminalInput(outputStream, reader, path -> {
+            assertThat(path).isEqualTo(expectedPath);
+            return fileInputStream;
+        }, path -> {
+            assertThat(path).isEqualTo(expectedPath);
+            return fileOutputStream;
+        });
+    }
 
     @ParameterizedTest
     @ValueSource(strings={"new","New","nEw Standard"})
@@ -53,26 +68,21 @@ class TerminalInputTest {
     @ParameterizedTest(name="{0}")
     @CsvSource({"load foo,foo","LOAD   /home/BAR.txt,/home/BAR.txt"})
     void loadGame(final String s, final String arg) throws IOException {
-        assumeTrue(false, "Dependent on SaveLoad refactor");
-//        when(reader.readLine()).thenReturn(s);
-//        when(inputActionProvider.loadGame(arg)).thenReturn(action);
-//
-//        assertThat(terminalInput.simpleInput()).isEqualTo(action);
-//
-//        verify(inputActionProvider).loadGame(arg);
+        when(reader.readLine()).thenReturn(s);
+        expectedPath = arg;
+
+        assertThat(terminalInput.simpleInput()).usingFieldByFieldElementComparator().contains(new LoadGameInput(fileInputStream));
+        verify(outputStream).write(gamePrompt);
     }
 
     @ParameterizedTest(name="{0}")
     @CsvSource({"save  foo.json,foo.json","Save path/to/File.txt,path/to/File.txt"})
     void saveGame(final String s, final String arg) throws IOException {
-        assumeTrue(false, "Dependent on SaveLoad refactor");
+        when(reader.readLine()).thenReturn(s);
+        expectedPath = arg;
 
-//        when(reader.readLine()).thenReturn(s);
-//        when(inputActionProvider.saveGame(arg)).thenReturn(action);
-//
-//        assertThat(terminalInput.simpleInput()).isEqualTo(action);
-//
-//        verify(inputActionProvider).saveGame(arg);
+        assertThat(terminalInput.simpleInput()).usingFieldByFieldElementComparator().contains(new SaveGameInput(fileOutputStream));
+        verify(outputStream).write(gamePrompt);
     }
 
     @Test

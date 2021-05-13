@@ -12,6 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -22,57 +23,66 @@ class TerminalApplicationTest {
 
     private @Mock TerminalInput terminalInput;
     private @Mock Input input;
-    private @Mock ControlLoop controlLoop;
+    private @Mock ControlLoop loop;
     private @Mock ScheduledExecutorService executorService;
 
     @Test
     void constructor() {
-        final TerminalApplication loop = new TerminalApplication();
-        assertThat(getField(loop, "input")).isInstanceOf(TerminalInput.class);
-        assertThat(getField(loop, "controlLoop")).isInstanceOf(ControlLoop.class);
-        assertThat(getField(loop, "executorService")).isInstanceOf(ScheduledExecutorService.class);
+        final TerminalApplication app = new TerminalApplication();
+        assertThat(getField(app, "input")).isInstanceOf(TerminalInput.class);
+        assertThat(getField(app, "controlLoop")).isInstanceOf(ControlLoop.class);
+        assertThat(getField(app, "executorService")).isInstanceOf(ScheduledExecutorService.class);
     }
 
     @Test
     void start() {
-        final TerminalApplication loop = new TerminalApplication(terminalInput, controlLoop, executorService);
+        final TerminalApplication app = new TerminalApplication(terminalInput, loop, executorService);
 
-        loop.start();
+        app.start();
 
-        verify(executorService).scheduleWithFixedDelay(loop, 1, 1, MILLISECONDS);
+        verify(executorService).scheduleWithFixedDelay(app, 1, 1, MILLISECONDS);
     }
 
     @Test
     void run() {
-        final TerminalApplication loop = new TerminalApplication(terminalInput, controlLoop, executorService);
+        final TerminalApplication app = new TerminalApplication(terminalInput, loop, executorService);
         when(terminalInput.simpleInput()).thenReturn(Option.some(input));
 
-        loop.run();
+        app.run();
 
-        verify(input).execute(controlLoop);
+        verify(input).execute(loop);
+    }
+
+    @Test
+    void runEncountersException() {
+        final TerminalApplication app = new TerminalApplication(terminalInput, loop, executorService);
+        when(terminalInput.simpleInput()).thenReturn(Option.some(input));
+        doThrow(RuntimeException.class).when(input).execute(loop);
+
+        app.run();
     }
 
     @Test
     void exit() {
-        final TerminalApplication loop = new TerminalApplication(terminalInput, controlLoop, executorService);
+        final TerminalApplication app = new TerminalApplication(terminalInput, loop, executorService);
         when(terminalInput.simpleInput()).thenReturn(Option.none());
 
-        loop.run();
+        app.run();
 
         verify(executorService).shutdown();
     }
 
     @Test
     void stop() {
-        final TerminalApplication loop = new TerminalApplication(terminalInput, controlLoop, executorService);
+        final TerminalApplication app = new TerminalApplication(terminalInput, loop, executorService);
 
-        loop.stop();
+        app.stop();
 
         verify(executorService).shutdown();
     }
 
     @AfterEach
     void tearDown() {
-        verifyNoMoreInteractions(terminalInput, controlLoop, executorService);
+        verifyNoMoreInteractions(terminalInput, loop, executorService);
     }
 }
