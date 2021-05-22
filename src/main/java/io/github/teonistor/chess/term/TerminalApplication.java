@@ -41,7 +41,17 @@ public class TerminalApplication implements Runnable {
         if (action.isEmpty())
             stop();
         else
-            action.get().execute(controlLoop);
+            executeAction(action.get());
+    }
+
+    private void executeAction(final Input action) {
+        try {
+            action.execute(controlLoop);
+
+        // Protect from e.g. failed game loading, or bugs. We don't really want to stop the process unless Exit is typed
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

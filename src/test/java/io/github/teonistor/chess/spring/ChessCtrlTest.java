@@ -12,6 +12,7 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
 import io.vavr.collection.Traversable;
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -22,12 +23,20 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.apache.commons.lang3.RandomUtils.nextBoolean;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -124,8 +133,31 @@ class ChessCtrlTest implements RandomPositionsTestMixin {
                 "Black,state-black",
                 "any,state-all",
                 "thing,state-all"})
-    void movesChannel(final String player, final String channel) {
+    void stateChannel(final String player, final String channel) {
         assertThat(ctrl.stateChannel(player)).isEqualTo(channel);
+    }
+
+    @Test
+    void saveGame() {
+        final byte[] bytes = RandomUtils.nextBytes(10);
+        doAnswer(invocation -> {
+            invocation.getArgument(0, OutputStream.class).write(bytes);
+            return null;
+        }).when(controlLoop).saveGame(any());
+
+        assertThat(ctrl.saveGame()).isEqualTo(ResponseEntity.ok()
+                .header("Content-Disposition", "attachment;filename=savegame.json.gz")
+                .header("Content-Type", "application/octet-stream")
+                .body(bytes));
+    }
+
+    @Test
+    void loadGame(final @Mock MultipartFile file, final @Mock InputStream inputStream) throws IOException {
+        when(file.getInputStream()).thenReturn(inputStream);
+
+        ctrl.loadGame(file);
+
+        verify(controlLoop).loadGame(inputStream);
     }
 
     @Test

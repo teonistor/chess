@@ -72,12 +72,14 @@
 
         <div v-else>
           <v-btn elevation="7" x-large dark
-                 disabled >
+                 :disabled="!!restCallsGoing"
+                 @click="save()">
             Save
           </v-btn>
 
           <v-btn elevation="7" x-large dark
-                 disabled >
+                 :disabled="!!restCallsGoing"
+                 @click="triggerLoad()">
             Load
           </v-btn>
 
@@ -128,6 +130,15 @@
       </v-card>
     </v-dialog>
 
+    <!-- Hidden frame to help download the savegame when saving -->
+    <iframe style="display:none"
+            v-if="!!frameSrc"
+            :src="frameSrc"></iframe>
+
+    <!-- Hidden file selector to help upload the savegame when loading -->
+    <input type="file" style="display:none"
+           ref="chessLoadFileInput"
+           @change="load" />
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
