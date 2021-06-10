@@ -6,7 +6,6 @@ import java.lang.annotation.Retention;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-@EnableChessCore
-@Import(ChessWsConfig.class)
+@Import({ChessConfig.class, ChessCtrl.class, ChessFrontpageCtrl.class})
 @Retention(RUNTIME)
-public @interface EnableChess {}
+public @interface EnableChessCore {}

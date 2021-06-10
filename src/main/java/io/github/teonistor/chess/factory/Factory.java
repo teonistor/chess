@@ -45,7 +45,7 @@ public class Factory implements ControlLoopFactory, GameFactory {
         initialBoardProvider = new InitialBoardProvider(pieceBox);
         initialStateProvider = new InitialStateProvider(initialBoardProvider);
         objectMapper = new ObjectMapper();
-        objectMapper.registerModules(new VavrModule(), new PieceSerialiser(pieceBox));
+        configureObjectMapper(objectMapper);
         saveLoad = new SaveLoad(objectMapper);
         standardAvailableMovesRule = new StandardAvailableMovesRule(checkRule);
         parallelAvailableMovesRule = new ParallelAvailableMovesRule(checkRule);
@@ -67,6 +67,10 @@ public class Factory implements ControlLoopFactory, GameFactory {
 
     public Game createGame(final GameType type, final GameState state) {
         return new Game(type.availableMovesRule(this), gameOverChecker, positionPairExtractor, promotionRequirementExtractor, type, state);
+    }
+
+    public void configureObjectMapper(final ObjectMapper objectMapper) {
+        objectMapper.registerModules(new VavrModule(), new PieceSerialiser(pieceBox));
     }
 
 
