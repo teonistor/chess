@@ -1,3 +1,4 @@
+<!--suppress HtmlUnknownTag, HtmlUnknownAttribute -->
 <html lang="en">
 <head>
     <title>Basic Chess</title>
@@ -26,25 +27,44 @@
       </div>
 
       <div class="play-area-inner">
-          <div v-for="(row,i) in positions[whiteOnTop]"
+          <span class="cell-boundary-horizontal"
+                v-for="letter in horizontalMarkers[whiteOnTop]">
+              {{ letter }}
+          </span>
+
+          <div v-for="(row,i) in verticalMarkers[whiteOnTop]"
                :key="i">
-              <span v-for="(position,j) in row"
+              <span class="cell-boundary-vertical" >
+                  {{ row }}
+              </span>
+
+              <!-- TODO While this is more logical, we'd highly prefer a component or more so we don't do col + row a dozen times -->
+              <span v-for="(col,j) in horizontalMarkers[whiteOnTop]"
                     :key="j"
-                    :class="{cell: true, dark: !!((i + j) % 2), light: !((i + j) % 2), target: targets.indexOf(position) > -1}"
-                    @click="dragOrDrop($event, position)"
-                    @drop="drop($event, position)"
+                    :class="{cell: true, dark: !!((i + j) % 2), light: !((i + j) % 2), target: targets.indexOf(col + row) > -1}"
+                    @click="dragOrDrop($event, col + row)"
+                    @drop="drop($event, col + row)"
                     @dragover="allowDrop($event)">
 
-                <img v-if="board.hasOwnProperty(position)"
-                     :src="pieceBox[outlandishPieces][board[position]]"
-                     :class="{provisional: provisional === position}"
+                <img v-if="board.hasOwnProperty(col + row)"
+                     :src="pieceBox[outlandishPieces][board[col + row]]"
+                     :class="{provisional: provisional === col + row}"
                      :draggable="!dragStart"
-                     @click.stop="dragOrDrop($event, position)"
-                     @dragstart="drag(position)">
+                     @click.stop="dragOrDrop($event, col + row)"
+                     @dragstart="drag(col + row)">
 
                   <span v-else class="img-placeholder"></span>
               </span>
+
+              <span class="cell-boundary-vertical" >
+                  {{ row }}
+              </span>
+
           </div>
+          <span class="cell-boundary-horizontal"
+                v-for="letter in horizontalMarkers[whiteOnTop]">
+              {{ letter }}
+          </span>
       </div>
 
       <!-- I spent 2 days figuring out why the switches weren't trippin' and it was because .v-application--is-ltr is missing somewhere above -->
