@@ -10,6 +10,7 @@ import io.github.teonistor.chess.piece.Piece;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
+import io.vavr.collection.Set;
 import io.vavr.collection.Traversable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -42,9 +43,9 @@ public class ChessCtrl implements View {
     private ExternalGameState lastStateAll = ExternalGameState.NIL;
 
     @Override
-    public void refresh(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, final Traversable<Tuple2<Position, Position>> possibleMovesWhite, final boolean promotionRequiredBlack, final boolean promotionRequiredWhite) {
-        lastStateBlack = new ExternalGameState(board, capturedPieces, possibleMovesBlack, HashMap.empty(), false, promotionRequiredBlack);
-        lastStateWhite = new ExternalGameState(board, capturedPieces, possibleMovesWhite, HashMap.empty(), promotionRequiredWhite, false);
+    public void refresh(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Set<Position> highlighted, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, final Traversable<Tuple2<Position, Position>> possibleMovesWhite, final boolean promotionRequiredBlack, final boolean promotionRequiredWhite) {
+        lastStateBlack = new ExternalGameState(board, capturedPieces, highlighted, possibleMovesBlack, HashMap.empty(), false, promotionRequiredBlack);
+        lastStateWhite = new ExternalGameState(board, capturedPieces, highlighted, possibleMovesWhite, HashMap.empty(), promotionRequiredWhite, false);
         lastStateAll = lastStateWhite.combine(lastStateBlack);
 
         ws.convertAndSend("/chess-ws/state-white", lastStateWhite);

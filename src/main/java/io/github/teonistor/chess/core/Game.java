@@ -7,15 +7,19 @@ import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.util.PositionPairExtractor;
 import io.github.teonistor.chess.util.PromotionRequirementExtractor;
 import io.vavr.Lazy;
+import io.vavr.collection.HashSet;
 import io.vavr.collection.Map;
+import io.vavr.collection.Set;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.With;
 
 import static io.github.teonistor.chess.core.GameCondition.Continue;
+import static java.util.function.Predicate.not;
 
 @RequiredArgsConstructor
 public class Game {
+    // TODO Possible refactor: Make the data container an inner class of the dependency container
 
     private final AvailableMovesRule availableMovesRule;
     private final GameOverChecker gameOverChecker;
@@ -28,6 +32,7 @@ public class Game {
 
     private final Lazy<Map<GameStateKey,GameState>> availableMoves = Lazy.of(this::computeAvailableMoves);
     private final Lazy<GameCondition> condition = Lazy.of(this::computeCondition);
+    private final Lazy<Set<Position>> highlighted = Lazy.of(this::computeHighlighted);
 
     public Game(final AvailableMovesRule availableMovesRule, final GameOverChecker gameOverChecker, final PositionPairExtractor positionPairExtractor, final PromotionRequirementExtractor promotionRequirementExtractor, final GameType type, final GameState state) {
         this(availableMovesRule, gameOverChecker, positionPairExtractor, promotionRequirementExtractor, type, state, GameStateKey.NIL);
@@ -38,11 +43,13 @@ public class Game {
     }
 
     public void triggerView(final View view) {
-        view.refresh(state.getBoard(), state.getCapturedPieces(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()), promotionRequirementExtractor.extractBlack(key, getAvailableMoves()), promotionRequirementExtractor.extractWhite(key, getAvailableMoves()));
+
+        view.refresh(state.getBoard(), state.getCapturedPieces(), getHighlighted(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()), promotionRequirementExtractor.extractBlack(key, getAvailableMoves()), promotionRequirementExtractor.extractWhite(key, getAvailableMoves()));
 
         switch (getCondition()) {
             // TODO It is impossible to checkmate in the parallel game under the standard rules because there always exists the move where the player who checkmated removes the checkmate
 
+            // TODO Possible refactor: Make these part of the GameCondition enum as Option<String>?
             case WhiteWins:
                 view.announce("White wins!");
                 break;
@@ -55,6 +62,17 @@ public class Game {
                 view.announce("Stalemate!");
                 break;
         }
+    }
+
+    private Set<Position> computeHighlighted() {
+        return state.getPrevious() != null
+             ? antijoin(state.getPrevious().getBoard(), state.getBoard())
+             : HashSet.empty();
+    }
+
+    private Set<Position> antijoin(final Map<Position, Piece> previousBoard, final Map<Position, Piece> currentBoard) {
+        return previousBoard.filter(not(currentBoard::contains)).keySet().addAll(
+               currentBoard.filter(not(previousBoard::contains)).keySet());
     }
 
     public Game processInput(final Position from, final Position to) {
@@ -93,6 +111,10 @@ public class Game {
 
     private Map<GameStateKey,GameState> getAvailableMoves() {
         return availableMoves.get();
+    }
+
+    private Set<Position> getHighlighted() {
+        return highlighted.get();
     }
 
     private Map<GameStateKey,GameState> computeAvailableMoves() {

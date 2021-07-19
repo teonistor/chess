@@ -3,6 +3,7 @@ package io.github.teonistor.chess.inter;
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
 import io.vavr.collection.HashMap;
+import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
@@ -40,10 +41,10 @@ class MultipleViewWrapperTest implements RandomPositionsTestMixin {
         final HashMap<Position, Position> possibleMovesBlack = HashMap.of(randomPositions.next(), randomPositions.next());
         final HashMap<Position, Position> possibleMovesWhite = HashMap.of(randomPositions.next(), randomPositions.next());
         final View view = MultipleViewWrapper.wrapIfNeeded(aView, anotherView);
-        view.refresh(HashMap.empty(), List.empty(), possibleMovesBlack, possibleMovesWhite, true, false);
+        view.refresh(HashMap.empty(), List.empty(), HashSet.empty(), possibleMovesBlack, possibleMovesWhite, true, false);
 
-        verify(aView).refresh(HashMap.empty(), List.empty(), possibleMovesBlack, possibleMovesWhite, true, false);
-        verify(anotherView).refresh(HashMap.empty(), List.empty(), possibleMovesBlack, possibleMovesWhite, true, false);
+        verify(aView).refresh(HashMap.empty(), List.empty(), HashSet.empty(), possibleMovesBlack, possibleMovesWhite, true, false);
+        verify(anotherView).refresh(HashMap.empty(), List.empty(), HashSet.empty(), possibleMovesBlack, possibleMovesWhite, true, false);
     }
 
     @Test

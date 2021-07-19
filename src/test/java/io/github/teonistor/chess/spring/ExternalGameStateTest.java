@@ -6,6 +6,7 @@ import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
+import io.vavr.collection.Set;
 import io.vavr.collection.Stream;
 import io.vavr.collection.Traversable;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,6 +22,7 @@ class ExternalGameStateTest implements RandomPositionsTestMixin {
 
     private @Mock Map<Position, Piece> board;
     private @Mock Traversable<Piece> capturedPieces;
+    private @Mock Set<Position> highlighted;
     private final Tuple2<Position, Position> move1 = new Tuple2<>(randomPositions.next(), randomPositions.next());
     private final Tuple2<Position, Position> move2 = new Tuple2<>(randomPositions.next(), randomPositions.next());
     private final Tuple2<Position, Position> move3 = new Tuple2<>(randomPositions.next(), randomPositions.next());
@@ -34,9 +36,9 @@ class ExternalGameStateTest implements RandomPositionsTestMixin {
                 "true,false,false,true,true,true",
                 "true,false,true,false,true,false"})
     void combine(final boolean bool1, final boolean bool2, final boolean bool3, final boolean bool4, final boolean bool5, final boolean bool6) {
-        final ExternalGameState state1 = new ExternalGameState(board, capturedPieces, Stream.of(move1, move2), HashMap.of(provisional1), bool1, bool2);
-        final ExternalGameState state2 = new ExternalGameState(board, capturedPieces, Stream.of(move3, move4), HashMap.of(provisional2), bool3, bool4);
-        final ExternalGameState state3 = new ExternalGameState(board, capturedPieces, Stream.of(move1, move2, move3, move4), HashMap.ofEntries(provisional1, provisional2), bool5, bool6);
+        final ExternalGameState state1 = new ExternalGameState(board, capturedPieces, highlighted, Stream.of(move1, move2), HashMap.of(provisional1), bool1, bool2);
+        final ExternalGameState state2 = new ExternalGameState(board, capturedPieces, highlighted, Stream.of(move3, move4), HashMap.of(provisional2), bool3, bool4);
+        final ExternalGameState state3 = new ExternalGameState(board, capturedPieces, highlighted, Stream.of(move1, move2, move3, move4), HashMap.ofEntries(provisional1, provisional2), bool5, bool6);
 
         assertThat(state1.combine(state2)).isEqualTo(state3);
     }
