@@ -43,7 +43,7 @@
               <!-- TODO While this is more logical, we'd highly prefer a component or more so we don't do col + row a dozen times -->
               <span v-for="(col,j) in horizontalMarkers[whiteOnTop]"
                     :key="j"
-                    :class="{cell: true, dark: !!((i + j) % 2), light: !((i + j) % 2), target: targets.indexOf(col + row) > -1}"
+                    :class="{cell: true, dark: !!((i + j) % 2), light: !((i + j) % 2), target: targets.includes(col + row), highlight: highlighted.includes(col + row)}"
                     @click="dragOrDrop($event, col + row)"
                     @drop="drop($event, col + row)"
                     @dragover="allowDrop($event)">

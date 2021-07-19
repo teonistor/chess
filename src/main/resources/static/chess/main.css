@@ -59,6 +59,14 @@ form {
 	background: #3e3434;
 }
 
+.cell.highlight img {
+	border: ridge 4px #1a2;
+}
+
+.cell.highlight .img-placeholder {
+	border: dashed 4px #1a2;
+}
+
 .cell.dark.target {
 	background: #2f231e;
 }

@@ -44,6 +44,7 @@ new Vue({
         board: {},
         capturedPieces: [],
         possibleMoves: [],
+        highlighted: [],
         promotionRequired: {
             W: false,
             B: false
@@ -96,6 +97,7 @@ new Vue({
             this.capturedPieces = state.capturedPieces;
             this.possibleMoves = state.possibleMoves;
 //            this.provisional = state.provisional;
+            this.highlighted = state.highlighted;
             this.promotionRequired.W = state.promotionRequiredW;
             this.promotionRequired.B = state.promotionRequiredB;
 
