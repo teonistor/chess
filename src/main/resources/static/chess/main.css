@@ -61,18 +61,20 @@ form {
 
 .cell.highlight img {
 	border: ridge 4px #1a2;
+    /*transition: border 0.3s linear;*/
 }
 
 .cell.highlight .img-placeholder {
 	border: dashed 4px #1a2;
+    /*transition: border 0.3s linear;*/
 }
 
 .cell.dark.target {
-	background: #2f231e;
+	background: #39190c;
 }
 
 .cell.light.target {
-	background: #42332e;
+	background: #5b2616;
 }
 
 .cell.selected {

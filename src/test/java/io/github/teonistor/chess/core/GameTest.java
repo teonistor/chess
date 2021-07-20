@@ -131,7 +131,8 @@ class GameTest implements RandomPositionsTestMixin {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(player);
         when(state.getCapturedPieces()).thenReturn(List.empty());
-        when(state.getPrevious()).thenReturn(state);
+        // TODO (Here + 3) test the case where a previous state exists, or refactor
+        when(state.getPrevious()).thenReturn(null);
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(pairExtractor.extractBlack(availableMoves)).thenReturn(HashSet.empty());
         when(pairExtractor.extractWhite(availableMoves)).thenReturn(HashSet.empty());
