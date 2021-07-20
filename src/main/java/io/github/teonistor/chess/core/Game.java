@@ -43,25 +43,8 @@ public class Game {
     }
 
     public void triggerView(final View view) {
-
         view.refresh(state.getBoard(), state.getCapturedPieces(), getHighlighted(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()), promotionRequirementExtractor.extractBlack(key, getAvailableMoves()), promotionRequirementExtractor.extractWhite(key, getAvailableMoves()));
-
-        switch (getCondition()) {
-            // TODO It is impossible to checkmate in the parallel game under the standard rules because there always exists the move where the player who checkmated removes the checkmate
-
-            // TODO Possible refactor: Make these part of the GameCondition enum as Option<String>?
-            case WhiteWins:
-                view.announce("White wins!");
-                break;
-
-            case BlackWins:
-                view.announce("Black wins!");
-                break;
-
-            case Stalemate:
-                view.announce("Stalemate!");
-                break;
-        }
+        getCondition().getAnnouncement().forEach(view::announce);
     }
 
     private Set<Position> computeHighlighted() {
@@ -122,6 +105,7 @@ public class Game {
     }
 
     private GameCondition computeCondition() {
+        // TODO It is impossible to checkmate in the parallel game under the standard rules because there always exists the move where the player who checkmated removes the checkmate
         return gameOverChecker.check(state.getBoard(), state.getPlayer(), getAvailableMoves());
     }
 
