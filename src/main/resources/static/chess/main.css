@@ -59,16 +59,40 @@ form {
 	background: #3e3434;
 }
 
+.cell.highlight img {
+	border: ridge 4px #1a2;
+    /*transition: border 0.3s linear;*/
+}
+
+.cell.highlight .img-placeholder {
+	border: dashed 4px #1a2;
+    /*transition: border 0.3s linear;*/
+}
+
 .cell.dark.target {
-	background: #2f231e;
+	background: #39190c;
 }
 
 .cell.light.target {
-	background: #42332e;
+	background: #5b2616;
 }
 
 .cell.selected {
 	background: #10000070;
+}
+
+.cell-boundary-horizontal {
+	display: inline-block;
+	width: 54px;
+	margin: 10px;
+}
+
+.cell-boundary-vertical {
+	display: inline-block;
+	height: 10px;
+	margin: 0 10px;
+	transform: translateY(-30px);
+	vertical-align: middle;
 }
 
 .v-dialog {

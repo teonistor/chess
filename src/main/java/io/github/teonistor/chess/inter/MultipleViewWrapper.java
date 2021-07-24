@@ -5,6 +5,7 @@ import io.github.teonistor.chess.piece.Piece;
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import io.vavr.collection.Set;
 import io.vavr.collection.Traversable;
 
 import static java.util.Objects.requireNonNull;
@@ -19,8 +20,8 @@ public class MultipleViewWrapper implements View {
     }
 
     @Override
-    public void refresh(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, final Traversable<Tuple2<Position, Position>> possibleMovesWhite, final boolean promotionRequiredBlack, final boolean promotionRequiredWhite) {
-        views.forEach(v -> v.refresh(board, capturedPieces, possibleMovesBlack, possibleMovesWhite, promotionRequiredBlack, promotionRequiredWhite));
+    public void refresh(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Set<Position> highlighted, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, final Traversable<Tuple2<Position, Position>> possibleMovesWhite, final boolean promotionRequiredBlack, final boolean promotionRequiredWhite) {
+        views.forEach(v -> v.refresh(board, capturedPieces, highlighted, possibleMovesBlack, possibleMovesWhite, promotionRequiredBlack, promotionRequiredWhite));
     }
 
     @Override

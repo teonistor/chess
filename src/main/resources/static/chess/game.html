@@ -1,3 +1,4 @@
+<!--suppress HtmlUnknownTag, HtmlUnknownAttribute -->
 <html lang="en">
 <head>
     <title>Basic Chess</title>
@@ -11,10 +12,9 @@
 <body>
 
 <div id="app" data-app>
-
     <h2>Basic But Not So Basic Chess</h2>
-    <v-container>
 
+    <v-container fluid>
       <div id="alerts-outer">
         <v-alert v-for="(alert, i) in alerts"
                  dismissible elevation="7"
@@ -25,27 +25,61 @@
         </v-alert>
       </div>
 
-      <div class="play-area-inner">
-          <div v-for="(row,i) in positions[whiteOnTop]"
-               :key="i">
-              <span v-for="(position,j) in row"
+      <v-row>
+        <v-col cols="12" md="9">
+
+          <div class="play-area-inner">
+            <span class="cell-boundary-horizontal"
+                  v-for="letter in horizontalMarkers[whiteOnTop]">
+                {{ letter }}
+            </span>
+
+            <div v-for="(row,i) in verticalMarkers[whiteOnTop]"
+                 :key="i">
+                <span class="cell-boundary-vertical">
+                    {{ row }}
+                </span>
+
+              <!-- TODO While this is more logical, we'd highly prefer a component or more so we don't do col + row a dozen times -->
+              <span v-for="(col,j) in horizontalMarkers[whiteOnTop]"
                     :key="j"
-                    :class="{cell: true, dark: !!((i + j) % 2), light: !((i + j) % 2), target: targets.indexOf(position) > -1}"
-                    @click="dragOrDrop($event, position)"
-                    @drop="drop($event, position)"
+                    :class="{cell: true, dark: !!((i + j) % 2), light: !((i + j) % 2), target: targets.includes(col + row), highlight: highlighted.includes(col + row)}"
+                    @click="dragOrDrop($event, col + row)"
+                    @drop="drop($event, col + row)"
                     @dragover="allowDrop($event)">
 
-                <img v-if="board.hasOwnProperty(position)"
-                     :src="pieceBox[outlandishPieces][board[position]]"
-                     :class="{provisional: provisional === position}"
+                <img v-if="board.hasOwnProperty(col + row)"
+                     :src="pieceBox[outlandishPieces][board[col + row]]"
+                     :class="{provisional: provisional === col + row}"
                      :draggable="!dragStart"
-                     @click.stop="dragOrDrop($event, position)"
-                     @dragstart="drag(position)">
+                     @click.stop="dragOrDrop($event, col + row)"
+                     @dragstart="drag(col + row)">
 
                   <span v-else class="img-placeholder"></span>
               </span>
+
+              <span class="cell-boundary-vertical">
+                  {{ row }}
+              </span>
+
+            </div>
+            <span class="cell-boundary-horizontal"
+                  v-for="letter in horizontalMarkers[whiteOnTop]">
+                {{ letter }}
+            </span>
           </div>
-      </div>
+
+        </v-col>
+        <v-col cols="12" md="3">
+
+          <span v-for="(piece,i) in capturedPieces"
+                :key="i"
+                class="cell">
+            <img :src="pieceBox[outlandishPieces][piece]">
+          </span>
+
+        </v-col>
+      </v-row>
 
       <!-- I spent 2 days figuring out why the switches weren't trippin' and it was because .v-application--is-ltr is missing somewhere above -->
       <v-row id="bottom-switches" class="v-application--is-ltr">
@@ -84,44 +118,43 @@
           </v-btn>
 
           <v-menu top offset-y close-on-click close-on-content-click
-                  transition="slide-y-transition" >
+                  transition="slide-y-transition">
             <template v-slot:activator="{ on, attrs }">
               <v-btn elevation="7" x-large dark
                      :disabled="!!restCallsGoing"
                      v-bind="attrs"
-                     v-on="on" >
-                  New Game
+                     v-on="on">
+                New Game
               </v-btn>
             </template>
             <v-list dark>
               <v-list-item
-                      v-for="option in newGameOptions"
-                      :key="option"
-                      @click="newGame(option)" >
+                  v-for="option in newGameOptions"
+                  :key="option"
+                  @click="newGame(option)">
                 <v-list-item-title>{{ option }}</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
         </div>
       </div>
-
     </v-container>
 
     <v-dialog v-for="(active, color) in promotionRequired"
               v-model="promotionRequired[color]"
               :key="color"
               style="width:auto"
-              persistent dark >
+              persistent dark>
       <v-card>
         <v-card-title class="headline">
-            Choose piece to promote to:
+          Choose piece to promote to:
         </v-card-title>
         <v-card-actions>
           <v-btn elevation="7" height="auto"
                  v-for="piece in promotablePieces"
                  @click="promote(color, piece)"
                  :key="piece"
-                 :disabled="!!restCallsGoing" >
+                 :disabled="!!restCallsGoing">
             <span class="cell">
               <img :src="pieceBox[outlandishPieces][color + piece]">
             </span>
@@ -138,7 +171,7 @@
     <!-- Hidden file selector to help upload the savegame when loading -->
     <input type="file" style="display:none"
            ref="chessLoadFileInput"
-           @change="load" />
+           @change="load"/>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>

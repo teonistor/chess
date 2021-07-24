@@ -15,6 +15,7 @@ import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import io.vavr.collection.Set;
 import io.vavr.collection.Traversable;
 import io.vavr.control.Option;
 import lombok.val;
@@ -59,7 +60,7 @@ public class TerminalView implements View {
 
 
     @Override
-    public void refresh(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, final Traversable<Tuple2<Position, Position>> possibleMovesWhite, final boolean promotionRequiredBlack, final boolean promotionRequiredWhite) {
+    public void refresh(final Map<Position, Piece> board, final Traversable<Piece> capturedPieces, final Set<Position> highlighted, final Traversable<Tuple2<Position, Position>> possibleMovesBlack, final Traversable<Tuple2<Position, Position>> possibleMovesWhite, final boolean promotionRequiredBlack, final boolean promotionRequiredWhite) {
         outStream.println(makeOutput(board, capturedPieces, possibleMovesBlack, possibleMovesWhite));
     }
 
