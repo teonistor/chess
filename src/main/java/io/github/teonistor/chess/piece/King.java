@@ -2,10 +2,10 @@ package io.github.teonistor.chess.piece;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
-import io.github.teonistor.chess.core.UnderAttackRule;
-import io.github.teonistor.chess.move.Castle;
 import io.github.teonistor.chess.move.CaptureIndependentMove;
+import io.github.teonistor.chess.move.Castle;
 import io.github.teonistor.chess.move.Move;
+import io.github.teonistor.chess.rule.UnderAttackRule;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.HashSet;
@@ -13,7 +13,13 @@ import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 import io.vavr.collection.Stream;
 
-import static io.github.teonistor.chess.board.Position.*;
+import static io.github.teonistor.chess.board.Position.C1;
+import static io.github.teonistor.chess.board.Position.C8;
+import static io.github.teonistor.chess.board.Position.E1;
+import static io.github.teonistor.chess.board.Position.E8;
+import static io.github.teonistor.chess.board.Position.G1;
+import static io.github.teonistor.chess.board.Position.G8;
+import static io.github.teonistor.chess.board.Position.OutOfBoard;
 import static io.github.teonistor.chess.core.Player.Black;
 import static io.github.teonistor.chess.core.Player.White;
 import static java.util.function.Predicate.not;

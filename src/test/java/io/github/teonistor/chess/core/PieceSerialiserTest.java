@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.piece.PieceBox;
+import io.github.teonistor.chess.rule.UnderAttackRule;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

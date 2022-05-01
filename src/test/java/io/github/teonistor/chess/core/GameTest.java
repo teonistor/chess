@@ -4,6 +4,8 @@ import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.piece.Rook;
+import io.github.teonistor.chess.rule.AvailableMovesRule;
+import io.github.teonistor.chess.rule.GameOverChecker;
 import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
 import io.github.teonistor.chess.util.PositionPairExtractor;
 import io.github.teonistor.chess.util.PromotionRequirementExtractor;
@@ -41,6 +43,9 @@ class GameTest implements RandomPositionsTestMixin {
     private @Mock GameOverChecker checker;
     private @Mock PositionPairExtractor pairExtractor;
     private @Mock PromotionRequirementExtractor promotionExtractor;
+
+    private @Mock StateInferer stateInferer;
+
     private @Mock View view;
 
     private @Mock GameState state;

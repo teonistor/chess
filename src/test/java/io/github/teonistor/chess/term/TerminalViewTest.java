@@ -1,11 +1,11 @@
 package io.github.teonistor.chess.term;
 
-import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.piece.Bishop;
 import io.github.teonistor.chess.piece.Knight;
 import io.github.teonistor.chess.piece.Pawn;
 import io.github.teonistor.chess.piece.PieceBox;
 import io.github.teonistor.chess.piece.Rook;
+import io.github.teonistor.chess.rule.UnderAttackRule;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import org.junit.jupiter.api.Test;

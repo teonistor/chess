@@ -1,7 +1,8 @@
-package io.github.teonistor.chess.core;
+package io.github.teonistor.chess.rule;
 
 import io.github.teonistor.chess.board.Position;
-import io.github.teonistor.chess.piece.*;
+import io.github.teonistor.chess.piece.Piece;
+import io.github.teonistor.chess.piece.PieceBox;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,8 +11,26 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static io.github.teonistor.chess.board.Position.*;
-import static io.github.teonistor.chess.core.Player.*;
+import static io.github.teonistor.chess.board.Position.C3;
+import static io.github.teonistor.chess.board.Position.C4;
+import static io.github.teonistor.chess.board.Position.C5;
+import static io.github.teonistor.chess.board.Position.C6;
+import static io.github.teonistor.chess.board.Position.C7;
+import static io.github.teonistor.chess.board.Position.D1;
+import static io.github.teonistor.chess.board.Position.D4;
+import static io.github.teonistor.chess.board.Position.D5;
+import static io.github.teonistor.chess.board.Position.E4;
+import static io.github.teonistor.chess.board.Position.E5;
+import static io.github.teonistor.chess.board.Position.E6;
+import static io.github.teonistor.chess.board.Position.E7;
+import static io.github.teonistor.chess.board.Position.F3;
+import static io.github.teonistor.chess.board.Position.F5;
+import static io.github.teonistor.chess.board.Position.F7;
+import static io.github.teonistor.chess.board.Position.G2;
+import static io.github.teonistor.chess.board.Position.G5;
+import static io.github.teonistor.chess.board.Position.H5;
+import static io.github.teonistor.chess.core.Player.Black;
+import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
 
 

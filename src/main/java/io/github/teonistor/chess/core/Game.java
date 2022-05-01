@@ -4,6 +4,8 @@ import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.factory.Factory.GameType;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
+import io.github.teonistor.chess.rule.AvailableMovesRule;
+import io.github.teonistor.chess.rule.GameOverChecker;
 import io.github.teonistor.chess.util.PositionPairExtractor;
 import io.github.teonistor.chess.util.PromotionRequirementExtractor;
 import io.vavr.Lazy;
@@ -27,6 +29,8 @@ public class Game {
     private final PromotionRequirementExtractor promotionRequirementExtractor;
 
     private final @Getter GameType type;
+
+
     private final @Getter GameState state;
     private final @With GameStateKey key;
 

@@ -1,5 +1,7 @@
-package io.github.teonistor.chess.core;
+package io.github.teonistor.chess.rule;
 
+import io.github.teonistor.chess.core.GameState;
+import io.github.teonistor.chess.core.GameStateKey;
 import io.vavr.collection.Map;
 
 public class StandardAvailableMovesRule extends AvailableMovesRule {

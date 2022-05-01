@@ -1,10 +1,10 @@
 package io.github.teonistor.chess.piece;
 
-import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.move.CapturingMove;
 import io.github.teonistor.chess.move.EmptyPositionMove;
 import io.github.teonistor.chess.move.EnPassant;
 import io.github.teonistor.chess.move.Promotion;
+import io.github.teonistor.chess.rule.UnderAttackRule;
 import org.junit.jupiter.api.Test;
 
 import static io.github.teonistor.chess.board.Position.A1;

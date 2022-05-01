@@ -1,6 +1,8 @@
-package io.github.teonistor.chess.core;
+package io.github.teonistor.chess.rule;
 
 import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.core.GameState;
+import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.move.Move;
 import io.github.teonistor.chess.piece.Bishop;
 import io.github.teonistor.chess.piece.King;
@@ -16,6 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
+
 import static io.github.teonistor.chess.core.GameStateKey.NIL;
 import static io.github.teonistor.chess.core.Player.Black;
 import static io.github.teonistor.chess.core.Player.White;

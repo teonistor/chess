@@ -1,6 +1,7 @@
-package io.github.teonistor.chess.core;
+package io.github.teonistor.chess.rule;
 
 import io.github.teonistor.chess.board.Position;
+import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.piece.Bishop;
 import io.github.teonistor.chess.piece.King;
 import io.github.teonistor.chess.piece.Knight;
