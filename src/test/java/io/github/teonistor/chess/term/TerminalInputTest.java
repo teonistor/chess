@@ -71,7 +71,7 @@ class TerminalInputTest {
         when(reader.readLine()).thenReturn(s);
         expectedPath = arg;
 
-        assertThat(terminalInput.simpleInput()).usingFieldByFieldElementComparator().contains(new LoadGameInput(fileInputStream));
+        assertThat(terminalInput.simpleInput()).usingRecursiveFieldByFieldElementComparator().contains(new LoadGameInput(fileInputStream));
         verify(outputStream).write(gamePrompt);
     }
 
@@ -81,7 +81,7 @@ class TerminalInputTest {
         when(reader.readLine()).thenReturn(s);
         expectedPath = arg;
 
-        assertThat(terminalInput.simpleInput()).usingFieldByFieldElementComparator().contains(new SaveGameInput(fileOutputStream));
+        assertThat(terminalInput.simpleInput()).usingRecursiveFieldByFieldElementComparator().contains(new SaveGameInput(fileOutputStream));
         verify(outputStream).write(gamePrompt);
     }
 

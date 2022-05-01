@@ -25,6 +25,7 @@ public abstract class PieceTest {
 
         for (Object o : to) {
             if (o instanceof Class) {
+                // noinspection unchecked
                 moveType = (Class<? extends Move>) o;
             } else if (o instanceof Position) {
                 moveTypes.add(new Tuple2<>((Position) o, moveType));

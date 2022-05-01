@@ -31,6 +31,7 @@ import static io.github.teonistor.chess.core.Player.White;
 import static io.github.teonistor.chess.factory.Factory.GameType.PARALLEL;
 import static io.github.teonistor.chess.factory.Factory.GameType.STANDARD;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -156,8 +157,24 @@ class GameTest implements RandomPositionsTestMixin {
         when(state.getPlayer()).thenReturn(player);
         when(board.get(from)).thenReturn(Option.some(piece));
         when(piece.getPlayer()).thenReturn(player);
+        when(rule.computeAvailableMoves(any())).thenReturn(null);
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
+        when(checker.check(any(), any(), any())).thenReturn(null);
         when(checker.check(board, player, availableMoves)).thenReturn(Continue);
+
+        /* We're mildly stuck fixing 4 tests here
+         * - The recursive comparison seems to look at Lazy fields although they're not listed (unless I exclude Lsazy.class)
+         * - Had to split the assertion into 2, but OK.
+         * - Mocks are now strict and we have interactions on at least rule, checker, state, state2...
+         * TODO Revisit after the re-re-(re?)-refactor because it might help with the structure anyway
+         * Current attempt e.g.
+         *     final Game actual = game.processInput(from, to);
+         *     assertThat(actual).extracting(Game::getState).isEqualTo(state2);
+         *     assertThat(actual).usingRecursiveComparison(RecursiveComparisonConfiguration.builder()
+         *              .withIgnoredFieldsOfTypes(Lazy.class)
+         *              .withComparedFields("availableMovesRule", "gameOverChecker", "positionPairExtractor", "promotionRequirementExtractor", "type", "key").build())
+         *        .isEqualTo(game);
+         */
 
         final Game game = new Game(rule, checker, pairExtractor, promotionExtractor, STANDARD, state);
         assertThat(game.processInput(from, to)).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "positionPairExtractor", "promotionRequirementExtractor", "type", "key")

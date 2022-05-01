@@ -6,9 +6,9 @@ import io.github.teonistor.chess.piece.Piece;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 
 import static io.github.teonistor.chess.board.Position.A1;
 import static io.github.teonistor.chess.board.Position.B5;
@@ -19,18 +19,13 @@ import static io.github.teonistor.chess.core.Player.Black;
 import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 
+@MockitoSettings
 class CaptureIndependentMoveTest extends MoveTest {
 
     private @Mock Piece moving;
     private @Mock Piece victim;
-
-    @BeforeEach
-    void setUp() {
-        initMocks(this);
-    }
 
     @Test
     void validateCapture() {

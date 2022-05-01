@@ -8,27 +8,39 @@ import io.github.teonistor.chess.piece.PieceBox;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 
-import static io.github.teonistor.chess.board.Position.*;
+import static io.github.teonistor.chess.board.Position.A5;
+import static io.github.teonistor.chess.board.Position.A6;
+import static io.github.teonistor.chess.board.Position.A7;
+import static io.github.teonistor.chess.board.Position.B5;
+import static io.github.teonistor.chess.board.Position.C5;
+import static io.github.teonistor.chess.board.Position.C6;
+import static io.github.teonistor.chess.board.Position.C7;
+import static io.github.teonistor.chess.board.Position.D2;
+import static io.github.teonistor.chess.board.Position.D3;
+import static io.github.teonistor.chess.board.Position.D4;
+import static io.github.teonistor.chess.board.Position.E4;
+import static io.github.teonistor.chess.board.Position.F2;
+import static io.github.teonistor.chess.board.Position.F3;
+import static io.github.teonistor.chess.board.Position.F4;
+import static io.github.teonistor.chess.board.Position.G4;
+import static io.github.teonistor.chess.board.Position.H2;
+import static io.github.teonistor.chess.board.Position.H3;
+import static io.github.teonistor.chess.board.Position.H4;
 import static io.github.teonistor.chess.core.Player.Black;
 import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@MockitoSettings
 class EnPassantTest extends MoveTest{
     private static final PieceBox box = new PieceBox(mock(UnderAttackRule.class));
 
     private @Mock Piece moving;
     private @Mock Piece victim;
-
-    @BeforeEach
-    void setUp() {
-        initMocks(this);
-    }
 
     @Test
     void validateValid() {

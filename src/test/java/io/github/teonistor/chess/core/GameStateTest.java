@@ -4,26 +4,21 @@ import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 
 import static io.github.teonistor.chess.core.Player.Black;
 import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@MockitoSettings
 class GameStateTest {
 
     private @Mock Map<Position,Piece> initialBoard;
     private @Mock Map<Position,Piece> finalBoard;
     private @Mock Piece aPiece;
     private @Mock Piece anotherPiece;
-
-    @BeforeEach
-    void setUp() {
-        initMocks(this);
-    }
 
     @Test
     void advanceBoardWhite() {
