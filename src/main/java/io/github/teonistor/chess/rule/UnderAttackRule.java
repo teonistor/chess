@@ -24,10 +24,10 @@ public class UnderAttackRule {
 
     public UnderAttackRule() {
         // These are extracted so that we can replace them as keys into the color-specialised maps (different lambdas of the same expression don't compare equal)
-        UnaryOperator<Position> upLeft    = p -> p.up().left();
-        UnaryOperator<Position> upRight   = p -> p.up().right();
-        UnaryOperator<Position> downLeft  = p -> p.down().left();
-        UnaryOperator<Position> downRight = p -> p.down().right();
+        final UnaryOperator<Position> upLeft    = p -> p.up().left();
+        final UnaryOperator<Position> upRight   = p -> p.up().right();
+        final UnaryOperator<Position> downLeft  = p -> p.down().left();
+        final UnaryOperator<Position> downRight = p -> p.down().right();
 
         recursiveSteps = HashMap.of(
             Position::left, HashSet.of(Queen.class, Rook.class),
@@ -39,7 +39,7 @@ public class UnderAttackRule {
             downLeft,       HashSet.of(Queen.class, Bishop.class),
             downRight,      HashSet.of(Queen.class, Bishop.class));
 
-        Map<UnaryOperator<Position>, HashSet<Class<? extends Piece>>> nonRecursiveSteps = HashMap.<UnaryOperator<Position>, HashSet<Class<? extends Piece>>>of(
+        final Map<UnaryOperator<Position>, HashSet<Class<? extends Piece>>> nonRecursiveSteps = HashMap.<UnaryOperator<Position>, HashSet<Class<? extends Piece>>>of(
             p -> p.up().up().left(),       HashSet.of(Knight.class),
             p -> p.up().up().right(),      HashSet.of(Knight.class),
             p -> p.left().left().up(),     HashSet.of(Knight.class),
@@ -67,13 +67,13 @@ public class UnderAttackRule {
     }
 
     /**
-     * Check if on the given board the given player is under attack a the given position
+     * Check if on the given board the given player is under attack at the given position
      * @param board The game board
      * @param position The position to check
      * @param player The player who may be under attack
      * @return true if the player is under attack, false otherwise
      */
-    public boolean checkAttack(Map<Position, Piece> board, Position position, Player player) {
+    public boolean checkAttack(final Map<Position, Piece> board, final Position position, final Player player) {
         switch (player) {
             case White:
                 return checkAttack(board, position, Player.Black, whiteSteps);
@@ -83,7 +83,7 @@ public class UnderAttackRule {
         throw new IllegalArgumentException("What player is " + player);
     }
 
-    private boolean checkAttack(Map<Position, Piece> board, Position position, Player enemy, Map<UnaryOperator<Position>, HashSet<Class<? extends Piece>>> nonRecursiveSteps) {
+    private boolean checkAttack(final Map<Position, Piece> board, final Position position, final Player enemy, final Map<UnaryOperator<Position>, HashSet<Class<? extends Piece>>> nonRecursiveSteps) {
         return nonRecursiveSteps.toStream().map(stepAndTypes -> board.get(stepAndTypes._1.apply(position))
                 .filter(piece -> piece.getPlayer() == enemy)
                 .map(Piece::getClass)
@@ -95,7 +95,7 @@ public class UnderAttackRule {
                 .reduce(Boolean::logicalOr);
     }
 
-    private boolean recurseStep (Map<Position, Piece> board, Position currentPosition, Player enemy, UnaryOperator<Position> step, HashSet<Class<? extends Piece>> types) {
+    private boolean recurseStep (final Map<Position, Piece> board, final Position currentPosition, final Player enemy, final UnaryOperator<Position> step, final HashSet<Class<? extends Piece>> types) {
         return currentPosition != Position.OutOfBoard
             && board.get(currentPosition)
                     .map(piece -> piece.getPlayer() == enemy && types.contains(piece.getClass()))
