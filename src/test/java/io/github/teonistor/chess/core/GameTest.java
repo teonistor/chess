@@ -168,9 +168,9 @@ class GameTest implements RandomPositionsTestMixin {
         when(checker.check(board, player, availableMoves)).thenReturn(Continue);
 
         /* We're mildly stuck fixing 4 tests here
-         * - The recursive comparison seems to look at Lazy fields although they're not listed (unless I exclude Lsazy.class)
+         * - The recursive comparison seems to look at Lazy fields although they're not listed (unless I exclude Lazy.class)
          * - Had to split the assertion into 2, but OK.
-         * - Mocks are now strict and we have interactions on at least rule, checker, state, state2...
+         * - Mocks are now strict and we have unverified interactions on at least rule, checker, state, state2...
          * TODO Revisit after the re-re-(re?)-refactor because it might help with the structure anyway
          * Current attempt e.g.
          *     final Game actual = game.processInput(from, to);
