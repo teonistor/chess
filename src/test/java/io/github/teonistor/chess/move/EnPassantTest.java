@@ -8,9 +8,9 @@ import io.github.teonistor.chess.rule.UnderAttackRule;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 
 import static io.github.teonistor.chess.board.Position.A5;
 import static io.github.teonistor.chess.board.Position.A6;
@@ -34,18 +34,13 @@ import static io.github.teonistor.chess.core.Player.Black;
 import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@MockitoSettings
 class EnPassantTest extends MoveTest{
     private static final PieceBox box = new PieceBox(mock(UnderAttackRule.class));
 
     private @Mock Piece moving;
     private @Mock Piece victim;
-
-    @BeforeEach
-    void setUp() {
-        initMocks(this);
-    }
 
     @Test
     void validateValid() {
