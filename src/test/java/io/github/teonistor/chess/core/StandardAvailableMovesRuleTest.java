@@ -2,7 +2,6 @@ package io.github.teonistor.chess.core;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.move.Move;
-import io.github.teonistor.chess.move.SingleOutcomeMove;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
@@ -13,6 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
+
 import static io.github.teonistor.chess.board.Position.A1;
 import static io.github.teonistor.chess.board.Position.A2;
 import static io.github.teonistor.chess.board.Position.A3;

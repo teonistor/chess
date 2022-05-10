@@ -1,45 +1,41 @@
 package io.github.teonistor.chess.spring;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.teonistor.chess.ctrl.ControlLoop;
+import io.github.teonistor.chess.factory.Factory;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoSettings;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.willReturn;
 
-@Disabled
+@MockitoSettings
 class ChessConfigTest {
 
-    @BeforeEach
-    void setUp() {
-        fail("Untested yet");
-    }
-
-    @AfterEach
-    void tearDown() {
-    }
-
-    @Test
-    void configureMessageBroker() {
-    }
-
-    @Test
-    void registerStompEndpoints() {
-    }
+    @Spy
+    private final ChessConfig chessConfig = new ChessConfig();
 
     @Test
     void factory() {
+        assertThat(chessConfig.factory()).isInstanceOf(Factory.class);
     }
 
     @Test
-    void objectMapper() {
+    void configureObjectMapper(final @Mock Factory factory, final @Mock ObjectMapper objectMapper) {
+        willReturn(factory).given(chessConfig).factory();
+        willDoNothing().given(factory).configureObjectMapper(objectMapper);
+
+        chessConfig.configureObjectMapper(objectMapper);
     }
 
     @Test
-    void inputActionProvider() {
-    }
+    void controlLoop(final @Mock Factory factory, final @Mock ChessCtrl chessCtrl, final @Mock ControlLoop controlLoop) {
+        willReturn(factory).given(chessConfig).factory();
+        willReturn(controlLoop).given(factory).createControlLoop(chessCtrl);
 
-    @Test
-    void controlLoop() {
+        assertThat(chessConfig.controlLoop(chessCtrl)).isSameAs(controlLoop);
     }
 }
