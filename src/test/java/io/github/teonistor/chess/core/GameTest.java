@@ -45,8 +45,6 @@ class GameTest implements RandomPositionsTestMixin {
     private @Mock PositionPairExtractor pairExtractor;
     private @Mock PromotionRequirementExtractor promotionExtractor;
 
-    private @Mock StateInferer stateInferer;
-
     private @Mock View view;
 
     private @Mock GameState state;

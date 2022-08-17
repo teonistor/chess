@@ -101,14 +101,4 @@ public class UnderAttackRule {
                     .map(piece -> piece.getPlayer() == enemy && types.contains(piece.getClass()))
                     .getOrElse(() -> recurseStep(board, step.apply(currentPosition), enemy, step, types));
     }
-
-    /*
-    A set of methods like this may be too complicated?
-
-    isKnight() -> Knight
-    isPawnOrDiagonallyAttacking() -> Pawn,
-    isDiagonallyAttacking()
-    isOrthogonallyAttacking()
-
-     */
 }

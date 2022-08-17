@@ -13,13 +13,7 @@ import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 import io.vavr.collection.Stream;
 
-import static io.github.teonistor.chess.board.Position.C1;
-import static io.github.teonistor.chess.board.Position.C8;
-import static io.github.teonistor.chess.board.Position.E1;
-import static io.github.teonistor.chess.board.Position.E8;
-import static io.github.teonistor.chess.board.Position.G1;
-import static io.github.teonistor.chess.board.Position.G8;
-import static io.github.teonistor.chess.board.Position.OutOfBoard;
+import static io.github.teonistor.chess.board.Position.*;
 import static io.github.teonistor.chess.core.Player.Black;
 import static io.github.teonistor.chess.core.Player.White;
 import static java.util.function.Predicate.not;
