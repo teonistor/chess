@@ -24,11 +24,11 @@ class ChessConfigTest {
     }
 
     @Test
-    void configureObjectMapper(final @Mock Factory factory, final @Mock ObjectMapper objectMapper) {
+    void configureObjectMapper(final @Mock Factory factory, final @Mock ObjectMapper objectMapper) throws Exception {
         willReturn(factory).given(chessConfig).factory();
         willDoNothing().given(factory).configureObjectMapper(objectMapper);
 
-        chessConfig.configureObjectMapper(objectMapper);
+        chessConfig.configureObjectMapper(objectMapper).afterPropertiesSet();
     }
 
     @Test
