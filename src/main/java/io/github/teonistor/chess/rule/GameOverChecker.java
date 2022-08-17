@@ -18,9 +18,9 @@ public class GameOverChecker {
 
     private final @NonNull CheckRule checkRule;
 
-    public GameCondition check(final Map<Position, Piece> board, final Player player, final Map<? ,?> possibleMoves) {
+    public GameCondition check(final Map<Position, Piece> board, final Player player, final Map<?, ?> possibleMoves) {
         if (possibleMoves.size() == 0) {
-            if (checkRule.check(board, player)) {
+            if (checkRule.check(board, player))
                 switch (player) {
                     case White:
                         return BlackWins;
@@ -29,15 +29,12 @@ public class GameOverChecker {
                     default:
                         throw new IllegalArgumentException("Dude wtf is this player: " + player);
                 }
-            } else {
-                return Stalemate;
-            }
-
-        } else if (board.size() > 2) {
-            return Continue;
-        } else {
-//            isTrue(board.size() == 2, "There should never be fewer than 2 pieces left, but found only {}", board.size());
             return Stalemate;
         }
+
+        if (board.size() > 2)
+            return Continue;
+
+        return Stalemate;
     }
 }

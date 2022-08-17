@@ -14,22 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 
-import static io.github.teonistor.chess.board.Position.A1;
-import static io.github.teonistor.chess.board.Position.A8;
-import static io.github.teonistor.chess.board.Position.B1;
-import static io.github.teonistor.chess.board.Position.B8;
-import static io.github.teonistor.chess.board.Position.C1;
-import static io.github.teonistor.chess.board.Position.C8;
-import static io.github.teonistor.chess.board.Position.D1;
-import static io.github.teonistor.chess.board.Position.D8;
-import static io.github.teonistor.chess.board.Position.E1;
-import static io.github.teonistor.chess.board.Position.E8;
-import static io.github.teonistor.chess.board.Position.F1;
-import static io.github.teonistor.chess.board.Position.F8;
-import static io.github.teonistor.chess.board.Position.G1;
-import static io.github.teonistor.chess.board.Position.G8;
-import static io.github.teonistor.chess.board.Position.H1;
-import static io.github.teonistor.chess.board.Position.H8;
+import static io.github.teonistor.chess.board.Position.*;
 
 
 @AllArgsConstructor
