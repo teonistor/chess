@@ -54,10 +54,8 @@ public class ParallelAvailableMovesRule extends AvailableMovesRule {
 
     @Override
     protected boolean validateBoardwideRules(final Player player, final Map<Position, Piece> board) {
-        return board.exists(positionAndPiece -> {
-            final Piece piece = positionAndPiece._2;
-            return isPlayersKing(piece, player);
-        })
+        // Protect CheckRule from a board with a missing king (which is possible when we look more than 1 step ahead)
+        return board.exists(positionAndPiece -> isPlayersKing(positionAndPiece._2, player))
             && super.validateBoardwideRules(player, board);
     }
 
