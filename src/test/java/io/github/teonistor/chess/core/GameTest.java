@@ -56,11 +56,11 @@ class GameTest implements RandomPositionsTestMixin {
 
     @ParameterizedTest(name="{0} {1}")
     @CsvSource({"Black,Continue",
-                "White,BlackWins",
-                "Black,WhiteWins",
-                "White,Continue",
-                "Black,Stalemate",
-                "White,Stalemate"})
+            "White,BlackWins",
+            "Black,WhiteWins",
+            "White,Continue",
+            "Black,Stalemate",
+            "White,Stalemate"})
     void getCondition(final Player player, final GameCondition condition) {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(player);
@@ -74,11 +74,17 @@ class GameTest implements RandomPositionsTestMixin {
     }
 
     @Test
-    void triggerViewOnContinue(final @Mock Set<Tuple2<Position, Position>> possibleMovesBlack, final @Mock Set<Tuple2<Position, Position>> possibleMovesWhite, final @Mock Piece piece1, final @Mock Piece piece2) {
+    void triggerViewOnContinueInStandardGame(final @Mock Set<Tuple2<Position, Position>> possibleMovesBlack, final @Mock Set<Tuple2<Position, Position>> possibleMovesWhite, final @Mock Piece piece1, final @Mock Piece piece2, final @Mock GameState previousState) {
+        final Position pos1 = randomPositions.next();
+        final Position pos2 = randomPositions.next();
+        final Position pos3 = randomPositions.next();
+        final HashMap<Position, Piece> board = HashMap.of(pos1, piece1, pos2, piece2);
+
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(Black);
         when(state.getCapturedPieces()).thenReturn(List.of(piece1, piece2));
-        when(state.getPrevious()).thenReturn(null);
+        when(state.getPrevious()).thenReturn(previousState);
+        when(previousState.getBoard()).thenReturn(HashMap.of(pos1, piece1, pos3, piece2));
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(checker.check(board, Black, availableMoves)).thenReturn(Continue);
         when(pairExtractor.extractBlack(availableMoves)).thenReturn(possibleMovesBlack);
@@ -88,7 +94,33 @@ class GameTest implements RandomPositionsTestMixin {
 
         new Game(rule, checker, pairExtractor, promotionExtractor, STANDARD, state).triggerView(view);
 
-        verify(view).refresh(board, List.of(piece1, piece2), HashSet.empty(), possibleMovesBlack, possibleMovesWhite, true, false);
+        verify(view).refresh(board, List.of(piece1, piece2), HashSet.of(pos2, pos3), possibleMovesBlack, possibleMovesWhite, true, false);
+    }
+
+    @Test
+    void triggerViewOnContinueInParallelGame(final @Mock Set<Tuple2<Position, Position>> possibleMovesBlack, final @Mock Set<Tuple2<Position, Position>> possibleMovesWhite, final @Mock Piece piece1, final @Mock Piece piece2, final @Mock GameState previousState, final @Mock GameState twoStatesAgo) {
+        final Position pos1 = randomPositions.next();
+        final Position pos2 = randomPositions.next();
+        final Position pos3 = randomPositions.next();
+        final Position pos4 = randomPositions.next();
+        final HashMap<Position, Piece> board = HashMap.of(pos1, piece1, pos2, piece2);
+
+        when(state.getBoard()).thenReturn(board);
+        when(state.getPlayer()).thenReturn(Black);
+        when(state.getCapturedPieces()).thenReturn(List.of(piece1, piece2));
+        when(state.getPrevious()).thenReturn(previousState);
+        when(previousState.getPrevious()).thenReturn(twoStatesAgo);
+        when(twoStatesAgo.getBoard()).thenReturn(HashMap.of(pos3, piece1, pos4, piece2));
+        when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
+        when(checker.check(board, Black, availableMoves)).thenReturn(Continue);
+        when(pairExtractor.extractBlack(availableMoves)).thenReturn(possibleMovesBlack);
+        when(pairExtractor.extractWhite(availableMoves)).thenReturn(possibleMovesWhite);
+        when(promotionExtractor.extractBlack(GameStateKey.NIL, availableMoves)).thenReturn(true);
+        when(promotionExtractor.extractWhite(GameStateKey.NIL, availableMoves)).thenReturn(false);
+
+        new Game(rule, checker, pairExtractor, promotionExtractor, PARALLEL, state).triggerView(view);
+
+        verify(view).refresh(board, List.of(piece1, piece2), HashSet.of(pos1,pos2,pos3,pos4), possibleMovesBlack, possibleMovesWhite, true, false);
     }
 
     @Test
@@ -135,7 +167,6 @@ class GameTest implements RandomPositionsTestMixin {
         when(state.getBoard()).thenReturn(board);
         when(state.getPlayer()).thenReturn(player);
         when(state.getCapturedPieces()).thenReturn(List.empty());
-        // TODO (Here + 3) test the case where a previous state exists, or refactor
         when(state.getPrevious()).thenReturn(null);
         when(rule.computeAvailableMoves(state)).thenReturn(availableMoves);
         when(pairExtractor.extractBlack(availableMoves)).thenReturn(HashSet.empty());
@@ -228,25 +259,6 @@ class GameTest implements RandomPositionsTestMixin {
         final Game game = new Game(rule, checker, pairExtractor, promotionExtractor, PARALLEL, state, key);
         assertThat(game.processInput(new Rook(player))).isEqualToComparingOnlyGivenFields(game, "availableMovesRule", "gameOverChecker", "positionPairExtractor", "promotionRequirementExtractor", "type")
                 .extracting("state", "key").containsExactly(state2, GameStateKey.NIL);
-    }
-
-    @Test
-    void antijoin(final @Mock Piece piece1, final @Mock Piece piece2, final @Mock Piece piece3) {
-        final Position pos1 = randomPositions.next();
-        final Position pos2 = randomPositions.next();
-        final Position pos3 = randomPositions.next();
-        final Position pos4 = randomPositions.next();
-
-        final Map<Position, Piece> oldBoard = HashMap.of(pos1, piece1, pos2, piece2, pos4, piece2);
-        final Map<Position, Piece> newBoard = HashMap.of(pos1, piece1, pos3, piece3, pos4, piece3);
-
-        final Map<Position, Piece> removed = oldBoard.filter(element -> !newBoard.contains(element));
-        final Map<Position, Piece> added = newBoard.filter(element -> !oldBoard.contains(element));
-
-        final Set<Position> actual = removed.keySet().addAll(added.keySet());
-        final Set<Position> expected = HashSet.of(pos2, pos3, pos4);
-
-        assertThat(actual).isEqualTo(expected);
     }
 
     @AfterEach

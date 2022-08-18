@@ -9,9 +9,11 @@ import io.github.teonistor.chess.rule.GameOverChecker;
 import io.github.teonistor.chess.util.PositionPairExtractor;
 import io.github.teonistor.chess.util.PromotionRequirementExtractor;
 import io.vavr.Lazy;
+import io.vavr.collection.HashMap;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
+import io.vavr.control.Option;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.With;
@@ -21,6 +23,9 @@ import static java.util.function.Predicate.not;
 
 @RequiredArgsConstructor
 public class Game {
+    private static final Map<GameType, Integer> howDeepToDig = HashMap.of(
+            GameType.STANDARD, 1,
+            GameType.PARALLEL, 2);
     // TODO Possible refactor: Make the data container an inner class of the dependency container
 
     private final AvailableMovesRule availableMovesRule;
@@ -29,7 +34,6 @@ public class Game {
     private final PromotionRequirementExtractor promotionRequirementExtractor;
 
     private final @Getter GameType type;
-
 
     private final @Getter GameState state;
     private final @With GameStateKey key;
@@ -52,9 +56,16 @@ public class Game {
     }
 
     private Set<Position> computeHighlighted() {
-        return state.getPrevious() != null
-             ? antijoin(state.getPrevious().getBoard(), state.getBoard())
-             : HashSet.empty();
+        return howDeepToDig.get(type)
+            .flatMap(howDeep -> dig(Option.some(state), howDeep))
+            .map(s -> antijoin(s.getBoard(), state.getBoard()))
+            .getOrElse(HashSet::empty);
+    }
+
+    private Option<GameState> dig(final Option<GameState> current, final int howDeep) {
+        return howDeep < 1
+             ? current
+             : current.flatMap(s -> dig(Option.of(s.getPrevious()), howDeep - 1));
     }
 
     private Set<Position> antijoin(final Map<Position, Piece> previousBoard, final Map<Position, Piece> currentBoard) {
