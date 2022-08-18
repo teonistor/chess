@@ -58,7 +58,7 @@ public class Game {
     private Set<Position> computeHighlighted() {
         return howDeepToDig.get(type)
             .flatMap(howDeep -> dig(Option.some(state), howDeep))
-            .map(s -> antijoin(s.getBoard(), state.getBoard()))
+            .map(this::antijoin)
             .getOrElse(HashSet::empty);
     }
 
@@ -68,7 +68,9 @@ public class Game {
              : current.flatMap(s -> dig(Option.of(s.getPrevious()), howDeep - 1));
     }
 
-    private Set<Position> antijoin(final Map<Position, Piece> previousBoard, final Map<Position, Piece> currentBoard) {
+    private Set<Position> antijoin(final GameState otherState) {
+        final Map<Position, Piece> currentBoard = state.getBoard();
+        final Map<Position, Piece> previousBoard = otherState.getBoard();
         return previousBoard.filter(not(currentBoard::contains)).keySet().addAll(
                currentBoard.filter(not(previousBoard::contains)).keySet());
     }
