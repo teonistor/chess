@@ -11,6 +11,8 @@ How to play parallel chess:
   * [NOT IMPL] If both moves are direct and consist of two pieces capturing each other, the two pieces are captured and the game proceeds
     * [HARDCORE MOD FUTURE] Variant: The lower-valued piece captures the higher-valued piece
   * [BAN NOT IMPL] Otherwise the two moves (which are direct but cannot be made) are canceled and banned from the next nomination
+3 The game ends when only the kings are left or when a player has no direct moves left
+  * [Challenge: is it possible to double-checkmate?]
   
 Examples
 
