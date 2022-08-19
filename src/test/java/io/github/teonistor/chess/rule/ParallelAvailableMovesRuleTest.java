@@ -107,15 +107,12 @@ class ParallelAvailableMovesRuleTest implements RandomPositionsTestMixin {
         final Position initialWhitePosition = randomPositions.next();
         final Position finalWhitePosition = randomPositions.next();
         final Position initialBlackPosition = randomPositions.next();
-        final Position finalBlackPosition = randomPositions.next();
 
         final HashMap<Position, Piece> initialBoard = HashMap.of(initialWhitePosition, whitePiece, initialBlackPosition, blackPiece);
         final HashMap<Position, Piece> boardAfterOneMove = HashMap.of(finalWhitePosition, whitePiece, initialBlackPosition, blackPiece);
-        final HashMap<Position, Piece> finalBoard = HashMap.of(finalWhitePosition, whitePiece, finalBlackPosition, blackPiece);
 
         final GameState initialState = new GameState(initialBoard, White, List.empty(), null);
         final GameState stateAfterOneMove = new GameState(boardAfterOneMove, White, List.empty(), initialState);
-        final GameState finalState = new GameState(finalBoard, Black, List.empty(), stateAfterOneMove);
 
         when(whitePiece.computePossibleMoves(initialWhitePosition)).thenReturn(Stream.of(whiteMove)).thenReturn(Stream.of(whiteMove));
         when(blackPiece.computePossibleMoves(initialBlackPosition)).thenReturn(Stream.of(blackMove)).thenReturn(Stream.of(blackMove));

@@ -122,7 +122,6 @@ public class Game {
     }
 
     private GameCondition computeCondition() {
-        // TODO It is impossible to checkmate in the parallel game under the standard rules because there always exists the move where the player who checkmated removes the checkmate
         return gameOverChecker.check(state.getBoard(), state.getPlayer(), getAvailableMoves());
     }
 
