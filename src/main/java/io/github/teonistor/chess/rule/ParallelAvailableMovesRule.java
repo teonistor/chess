@@ -7,9 +7,15 @@ import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.piece.King;
 import io.github.teonistor.chess.piece.Piece;
 import io.vavr.Tuple2;
+import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
+import io.vavr.collection.Traversable;
 import io.vavr.control.Option;
+
+import java.util.function.Function;
+
+import static java.util.function.UnaryOperator.identity;
 
 
 public class ParallelAvailableMovesRule extends AvailableMovesRule {
@@ -20,20 +26,30 @@ public class ParallelAvailableMovesRule extends AvailableMovesRule {
 
     @Override
     public Map<GameStateKey, GameState> computeAvailableMoves(final GameState state) {
-        return Stream.of(Player.values())
-             . map(player -> new Tuple2<>(GameStateKey.NIL, state.withPlayer(player)))
+        final Stream<Traversable<Tuple2<GameStateKey, GameState>>> availableMovesAfterOneStepByPlayer = Stream
+            . of(Player.values())
+            . map(player -> new Tuple2<>(GameStateKey.NIL, state.withPlayer(player)))
+            . map(getComputeAvailableMoves());
 
-             . flatMap(this::computeAvailableMoves)
-             . flatMap(this::computeAvailableMoves)
+        return Option.some(availableMovesAfterOneStepByPlayer)
+                .filter(availableMovesAfterOneStepByPlayerr -> availableMovesAfterOneStepByPlayerr.forAll(Traversable::nonEmpty))
+                .map(availableMovesAfterOneStepByPlayerr ->
+
+         availableMovesAfterOneStepByPlayerr
+
+
+             . flatMap(identity())
+             . flatMap(getComputeAvailableMoves())
 
              . groupBy(Tuple2::_1)
              . mapValues(this::atMostOneState)
              . filterValues(Option::isDefined)
-             . mapValues(Option::get);
+             . mapValues(Option::get))
+                .getOrElse(HashMap::empty);
     }
 
-    public Map<GameStateKey, GameState> computeAvailableMoves(final Tuple2<GameStateKey, GameState> keyAndState) {
-        return computeAvailableMoves(keyAndState._1, keyAndState._2);
+    private Function<Tuple2<GameStateKey, GameState>, Traversable<Tuple2<GameStateKey, GameState>>> getComputeAvailableMoves() {
+        return keyAndState -> computeAvailableMoves(keyAndState._1, keyAndState._2);
     }
 
     private Option<GameState> atMostOneState(final Stream<Tuple2<GameStateKey, GameState>> states) {

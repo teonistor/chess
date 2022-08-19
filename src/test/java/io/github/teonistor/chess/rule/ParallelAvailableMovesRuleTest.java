@@ -2,6 +2,7 @@ package io.github.teonistor.chess.rule;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.GameState;
+import io.github.teonistor.chess.core.GameStateKey;
 import io.github.teonistor.chess.core.Player;
 import io.github.teonistor.chess.move.Move;
 import io.github.teonistor.chess.piece.Bishop;
@@ -10,6 +11,7 @@ import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.testmixin.RandomPositionsTestMixin;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
+import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,10 +90,44 @@ class ParallelAvailableMovesRuleTest implements RandomPositionsTestMixin {
         when(whiteMove.getTo()).thenReturn(finalWhitePosition);
         when(blackMove.getTo()).thenReturn(finalBlackPosition);
 
-        final GameState result = availableMovesRule.computeAvailableMoves(initialState).get(
-                NIL.withBlackInput(initialBlackPosition, finalBlackPosition).withWhiteInput(initialWhitePosition, finalWhitePosition)).get();
+        final Map<GameStateKey, GameState> result = availableMovesRule.computeAvailableMoves(initialState);
+        assertThat(result).hasSize(1);
+        assertThat(result.get(NIL
+                .withBlackInput(initialBlackPosition, finalBlackPosition)
+                .withWhiteInput(initialWhitePosition, finalWhitePosition))
+              .get().getBoard())
+            .isEqualTo(HashMap.of(finalWhitePosition, whitePiece, finalBlackPosition, blackPiece));
+    }
 
-        assertThat(result.getBoard()).isEqualTo(HashMap.of(finalWhitePosition, whitePiece, finalBlackPosition, blackPiece));
+    @Test
+    void computeAvailableMovesWhenAPlayerHasNoDirectMove() {
+        when(whitePiece.getPlayer()).thenReturn(White);
+        when(blackPiece.getPlayer()).thenReturn(Black);
+
+        final Position initialWhitePosition = randomPositions.next();
+        final Position finalWhitePosition = randomPositions.next();
+        final Position initialBlackPosition = randomPositions.next();
+        final Position finalBlackPosition = randomPositions.next();
+
+        final HashMap<Position, Piece> initialBoard = HashMap.of(initialWhitePosition, whitePiece, initialBlackPosition, blackPiece);
+        final HashMap<Position, Piece> boardAfterOneMove = HashMap.of(finalWhitePosition, whitePiece, initialBlackPosition, blackPiece);
+        final HashMap<Position, Piece> finalBoard = HashMap.of(finalWhitePosition, whitePiece, finalBlackPosition, blackPiece);
+
+        final GameState initialState = new GameState(initialBoard, White, List.empty(), null);
+        final GameState stateAfterOneMove = new GameState(boardAfterOneMove, White, List.empty(), initialState);
+        final GameState finalState = new GameState(finalBoard, Black, List.empty(), stateAfterOneMove);
+
+        when(whitePiece.computePossibleMoves(initialWhitePosition)).thenReturn(Stream.of(whiteMove)).thenReturn(Stream.of(whiteMove));
+        when(blackPiece.computePossibleMoves(initialBlackPosition)).thenReturn(Stream.of(blackMove)).thenReturn(Stream.of(blackMove));
+
+        when(whiteMove.validate(initialState)).thenReturn(true);
+        when(blackMove.validate(initialState.withPlayer(Black))).thenReturn(false);
+
+        when(whiteMove.execute(initialState)).thenReturn(HashMap.of(identity(), stateAfterOneMove));
+        when(checkRule.check(boardAfterOneMove, White)).thenReturn(false);
+        when(whiteMove.getTo()).thenReturn(finalWhitePosition);
+
+        assertThat(availableMovesRule.computeAvailableMoves(initialState)).isEmpty();
     }
 
     @Test
