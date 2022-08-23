@@ -1,8 +1,8 @@
 package io.github.teonistor.chess.piece;
 
-import io.github.teonistor.chess.core.UnderAttackRule;
-import io.github.teonistor.chess.move.Castle;
 import io.github.teonistor.chess.move.CaptureIndependentMove;
+import io.github.teonistor.chess.move.Castle;
+import io.github.teonistor.chess.rule.UnderAttackRule;
 import org.junit.jupiter.api.Test;
 import static io.github.teonistor.chess.board.Position.*;
 import static io.github.teonistor.chess.core.Player.*;

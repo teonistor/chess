@@ -4,12 +4,16 @@ import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.factory.Factory.GameType;
 import io.github.teonistor.chess.inter.View;
 import io.github.teonistor.chess.piece.Piece;
+import io.github.teonistor.chess.rule.AvailableMovesRule;
+import io.github.teonistor.chess.rule.GameOverChecker;
 import io.github.teonistor.chess.util.PositionPairExtractor;
 import io.github.teonistor.chess.util.PromotionRequirementExtractor;
 import io.vavr.Lazy;
+import io.vavr.collection.HashMap;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
+import io.vavr.control.Option;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.With;
@@ -19,6 +23,9 @@ import static java.util.function.Predicate.not;
 
 @RequiredArgsConstructor
 public class Game {
+    private static final Map<GameType, Integer> howDeepToDig = HashMap.of(
+            GameType.STANDARD, 1,
+            GameType.PARALLEL, 2);
     // TODO Possible refactor: Make the data container an inner class of the dependency container
 
     private final AvailableMovesRule availableMovesRule;
@@ -27,6 +34,7 @@ public class Game {
     private final PromotionRequirementExtractor promotionRequirementExtractor;
 
     private final @Getter GameType type;
+
     private final @Getter GameState state;
     private final @With GameStateKey key;
 
@@ -43,34 +51,26 @@ public class Game {
     }
 
     public void triggerView(final View view) {
-
         view.refresh(state.getBoard(), state.getCapturedPieces(), getHighlighted(), positionPairExtractor.extractBlack(getAvailableMoves()), positionPairExtractor.extractWhite(getAvailableMoves()), promotionRequirementExtractor.extractBlack(key, getAvailableMoves()), promotionRequirementExtractor.extractWhite(key, getAvailableMoves()));
-
-        switch (getCondition()) {
-            // TODO It is impossible to checkmate in the parallel game under the standard rules because there always exists the move where the player who checkmated removes the checkmate
-
-            // TODO Possible refactor: Make these part of the GameCondition enum as Option<String>?
-            case WhiteWins:
-                view.announce("White wins!");
-                break;
-
-            case BlackWins:
-                view.announce("Black wins!");
-                break;
-
-            case Stalemate:
-                view.announce("Stalemate!");
-                break;
-        }
+        getCondition().getAnnouncement().forEach(view::announce);
     }
 
     private Set<Position> computeHighlighted() {
-        return state.getPrevious() != null
-             ? antijoin(state.getPrevious().getBoard(), state.getBoard())
-             : HashSet.empty();
+        return howDeepToDig.get(type)
+            .flatMap(howDeep -> dig(Option.some(state), howDeep))
+            .map(this::antijoin)
+            .getOrElse(HashSet::empty);
     }
 
-    private Set<Position> antijoin(final Map<Position, Piece> previousBoard, final Map<Position, Piece> currentBoard) {
+    private Option<GameState> dig(final Option<GameState> current, final int howDeep) {
+        return howDeep < 1
+             ? current
+             : current.flatMap(s -> dig(Option.of(s.getPrevious()), howDeep - 1));
+    }
+
+    private Set<Position> antijoin(final GameState otherState) {
+        final Map<Position, Piece> currentBoard = state.getBoard();
+        final Map<Position, Piece> previousBoard = otherState.getBoard();
         return previousBoard.filter(not(currentBoard::contains)).keySet().addAll(
                currentBoard.filter(not(previousBoard::contains)).keySet());
     }

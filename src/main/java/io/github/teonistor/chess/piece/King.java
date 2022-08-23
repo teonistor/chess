@@ -2,10 +2,10 @@ package io.github.teonistor.chess.piece;
 
 import io.github.teonistor.chess.board.Position;
 import io.github.teonistor.chess.core.Player;
-import io.github.teonistor.chess.core.UnderAttackRule;
-import io.github.teonistor.chess.move.Castle;
 import io.github.teonistor.chess.move.CaptureIndependentMove;
+import io.github.teonistor.chess.move.Castle;
 import io.github.teonistor.chess.move.Move;
+import io.github.teonistor.chess.rule.UnderAttackRule;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.HashSet;

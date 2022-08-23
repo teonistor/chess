@@ -1,7 +1,9 @@
 package io.github.teonistor.chess.piece;
 
-import io.github.teonistor.chess.core.UnderAttackRule;
-import static io.github.teonistor.chess.core.Player.*;
+import io.github.teonistor.chess.rule.UnderAttackRule;
+
+import static io.github.teonistor.chess.core.Player.Black;
+import static io.github.teonistor.chess.core.Player.White;
 
 // Tested by InitialBoardProviderTest
 public class PieceBox {

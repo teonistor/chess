@@ -12,7 +12,6 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
 
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static io.github.teonistor.chess.board.Position.OutOfBoard;
@@ -36,42 +35,27 @@ public class Pawn extends Piece {
     }
 
     private static Stream<? extends Move> computePossibleMovesWhite(final Position from) {
-        final Stream<SingleOutcomeMove> common = Stream.of(
-                new EmptyPositionMove(from, from.up()),
-                new CapturingMove(from, from.up().right()),
-                new CapturingMove(from, from.up().left()));
-
-        final SingleOutcomeMove startingExtra = new EmptyPositionMove(from, from.up().up(), from.up());
-
-        final Stream<SingleOutcomeMove> enPassantExtra = Stream.of(
-                new EnPassant(from, from.up().right(), from.right(), from.up().up().right()),
-                new EnPassant(from, from.up().left(), from.left(), from.up().up().left()));
-
-        final char line = from.toString().charAt(1);
-
-        if (line == '2') return common.append(startingExtra);
-        if (line == '5') return common.appendAll(enPassantExtra);
-        if (line == '7') return common.map(Promotion::new);
-        return common;
+        return doComputePossibleMoves(from, from.up(), from.up().up(), '2', '5', '7');
     }
 
     private static Stream<? extends Move> computePossibleMovesBlack(final Position from) {
+        return doComputePossibleMoves(from, from.down(), from.down().down(), '7', '4', '2');
+    }
+
+    private static Stream<? extends Move> doComputePossibleMoves(final Position from, final Position ahead, final Position aheadTwice, final char startingLine, final char enPassantLine, final char promotionLine) {
         final Stream<SingleOutcomeMove> common = Stream.of(
-                new EmptyPositionMove(from, from.down()),
-                new CapturingMove(from, from.down().right()),
-                new CapturingMove(from, from.down().left()));
+                new EmptyPositionMove(from, ahead),
+                new CapturingMove(from, ahead.right()),
+                new CapturingMove(from, ahead.left()));
 
-        final char line = from.toString().charAt(1);
+        final char line = from.name().charAt(1);
 
-        BiFunction<Stream<? extends SingleOutcomeMove>, Character, Stream<? extends  Move> > ff;
-
-        if (line == '7') return common.append(new EmptyPositionMove(from, from.down().down(), from.down()));
-        if (line == '4') return common.appendAll(Stream.<SingleOutcomeMove>of(
-                        new EnPassant(from, from.down().right(), from.right(), from.down().down().right()),
-                        new EnPassant(from, from.down().left(), from.left(), from.down().down().left())));
-        if (line == '2') return common.map(Promotion::new);
+        if (line == startingLine) return common.append(new EmptyPositionMove(from, aheadTwice, ahead));
+        if (line == enPassantLine) return common.appendAll(Stream.<SingleOutcomeMove>of(
+                new EnPassant(from, ahead.right(), from.right(), aheadTwice.right()),
+                new EnPassant(from, ahead.left(), from.left(), aheadTwice.left())));
+        if (line == promotionLine) return common.map(Promotion::new);
 
         return common;
     }
-
 }

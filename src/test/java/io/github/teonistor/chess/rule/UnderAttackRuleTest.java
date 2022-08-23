@@ -1,7 +1,8 @@
-package io.github.teonistor.chess.core;
+package io.github.teonistor.chess.rule;
 
 import io.github.teonistor.chess.board.Position;
-import io.github.teonistor.chess.piece.*;
+import io.github.teonistor.chess.piece.Piece;
+import io.github.teonistor.chess.piece.PieceBox;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import org.junit.jupiter.params.ParameterizedTest;

@@ -1,15 +1,17 @@
 package io.github.teonistor.chess.board;
 
 import io.github.teonistor.chess.core.Player;
-import io.github.teonistor.chess.core.UnderAttackRule;
 import io.github.teonistor.chess.piece.Piece;
 import io.github.teonistor.chess.piece.PieceBox;
+import io.github.teonistor.chess.rule.UnderAttackRule;
 import io.vavr.collection.Map;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import static io.github.teonistor.chess.core.Player.Black;
+import static io.github.teonistor.chess.core.Player.White;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static io.github.teonistor.chess.core.Player.*;
 
 // Also covers PieceBox
 // Tests are a sequence
