@@ -10,7 +10,7 @@
 
     <groupId>io.github.teonistor</groupId>
     <artifactId>chess</artifactId>
-    <version>2.0.1</version>
+    <version>2.0.2</version>
     <name>Chess</name>
     <packaging>jar</packaging>
 
@@ -39,7 +39,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>31.1-jre</version>
+            <version>32.0.0-jre</version>
         </dependency>
         <dependency>
             <groupId>io.vavr</groupId>
