@@ -3,16 +3,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.7</version>
+        <groupId>io.github.teonistor</groupId>
+        <artifactId>usual-suspects</artifactId>
+        <version>1.0.3</version>
     </parent>
 
     <groupId>io.github.teonistor</groupId>
     <artifactId>chess</artifactId>
     <version>2.0.2</version>
-    <name>Chess</name>
-    <packaging>jar</packaging>
+    <name>Teo's Chess</name>
 
     <properties>
         <java.version>11</java.version>
@@ -39,17 +38,14 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>32.0.0-jre</version>
         </dependency>
         <dependency>
             <groupId>io.vavr</groupId>
             <artifactId>vavr</artifactId>
-            <version>0.10.4</version>
         </dependency>
         <dependency>
             <groupId>io.vavr</groupId>
             <artifactId>vavr-jackson</artifactId>
-            <version>0.10.3</version>
         </dependency>
 
         <!-- Tests -->
