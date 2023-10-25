@@ -5,10 +5,9 @@
     <parent>
         <groupId>io.github.teonistor</groupId>
         <artifactId>usual-suspects</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.4</version>
     </parent>
 
-    <groupId>io.github.teonistor</groupId>
     <artifactId>chess</artifactId>
     <version>2.0.2</version>
     <name>Teo's Chess</name>
@@ -121,4 +120,11 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/teonistor/misc-libs</url>
+        </repository>
+    </repositories>
 </project>
